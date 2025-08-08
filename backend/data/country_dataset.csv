@@ -1,0 +1,27 @@
+country,living_cost_value,scholarships_value,ug_tuition_fees_value,pg_tuition_fees_value,safety_value,cultural_diversity_value,healthcare_value,public_transport_connectivity_score,pr_value,unemployment_rate,employment_rate_score,avg_income_value,psw_value,startup_support_value
+Australia,45.815,38,null,null,52.7,0.0929,73.4,83.5,2,4.1,95.9,63150,2,5
+Austria,37.26,22,null,null,70.5,0.1068,77.9,95.7,10,7.3,92.7,55030,2,3
+Belgium,34.015,21,null,null,50.6,0.5554,75.9,92.8,5,5.9,94.1,54580,1,1
+Canada,43.645,247,null,null,54.3,0.7124,68.7,72.9,1,6.9,93.1,54040,3,2
+China,19.295,35,null,null,76,0.1538,68.7,55.2,5,5.1,94.9,13390,1,0
+Denmark,41.07,13,null,null,74,0.0819,78.4,93.7,8,2.5,97.5,73340,3,2
+Finland,34.745,13,null,null,73.2,0.1315,77.5,94.2,4,10,90,53230,2,2
+France,36.77,30,null,null,44.6,0.1032,77.7,95.3,5,7.4,92.6,45180,2,4
+Germany,36.33,56,null,null,60.6,0.1682,71.9,93.3,2,6.3,93.7,54800,1.5,3
+Ireland,45.935,18,null,null,52.4,0.1206,51.5,90.2,5,4.1,95.9,78970,2,2
+Italy,32.095,38,null,null,53.1,0.1145,65.1,94.5,5,6,94,37920,1,2
+Japan,25.745,34,null,null,77.1,0.0119,80,56.8,10,2.5,97.5,39350,0,1
+Luxembourg,45.865,6,null,null,65.8,0.5302,75.2,97.4,5,6,94,83980,1,2
+Malaysia,16.555,12,null,null,51.1,0.588,70.3,39.6,5,3.1,96.9,11710,1,0
+Netherlands,41.255,31,null,null,73.1,0.1054,79.3,86.3,5,3.8,96.2,62540,1,1
+New Zealand,39.875,13,null,null,51.8,0.3969,68.4,94.1,2,5.1,94.9,"48,220",3,3
+Norway,43.975,13,null,null,67,0.0586,75.6,90.2,3,4.3,95.7,102910,1,1
+Poland,23.805,13,null,null,71,0.1183,58,92.5,5,5.2,94.8,19900,3,1
+Portugal,29.37,12,null,null,67.9,0.0468,72.2,93,5,6.5,93.5,26150,0.5,2
+Singapore,62.545,14,null,null,77.4,0.3857,71.8,99,0,2.1,97.9,"70,590",1,1
+South Korea,36.015,13,null,null,75.1,0.0392,82.8,69.6,5,2.7,97.3,35490,2,2
+Spain,29.235,29,null,null,63.4,0.4165,77.3,96,5,11.36,88.64,32830,2,3
+Sweden,34.24,18,null,null,52,0.06,68.3,87.1,5,8.9,91.1,60480,1,2
+Switzerland,65.085,21,null,null,73.5,0.5314,71.5,93,5,2.8,97.2,95070,0.5,1
+United Kingdom,39.365,120,null,null,51.7,0.1211,72.7,95.6,5,4.5,95.5,47700,2,2
+United States,49.77,479,null,null,50.8,0.4901,67.8,58.9,5,4.2,95.8,80450,3,5

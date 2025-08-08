@@ -1,0 +1,236 @@
+[
+  {
+    "country": "Australia",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "Australia remains a top destination for STEM and business degrees, with notable expansion in digital health and AI research."
+  },
+  {
+    "country": "Austria",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Arts & Humanities"
+    ],
+    "comments": "Austria focuses on strong engineering programs with increasing emphasis on sustainability and renewable energy studies."
+  },
+  {
+    "country": "Belgium",
+    "top_disciplines": [
+      "Life Sciences & Medicine",
+      "Engineering & Technology",
+      "Business, Economics & Management"
+    ],
+    "comments": "Belgium is rising in biotech and pharma education, backed by increased research investment."
+  },
+  {
+    "country": "Canada",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "Canada's universities lead in health sciences and tech innovation, with growing focus on Indigenous studies and sustainability."
+  },
+  {
+    "country": "China",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Business, Economics & Management",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "China's universities excel in engineering and business, with rapid growth in AI and green technologies education."
+  },
+  {
+    "country": "Denmark",
+    "top_disciplines": [
+      "Life Sciences & Medicine",
+      "Engineering & Technology",
+      "Business, Economics & Management"
+    ],
+    "comments": "Denmark invests heavily in green energy and biomedical research, reflected in academic programs."
+  },
+  {
+    "country": "Finland",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Natural Sciences"
+    ],
+    "comments": "Finnish universities focus on IT, clean tech, and life sciences, with Nordic cooperation enhancing research."
+  },
+  {
+    "country": "France",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Business, Economics & Management",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "France’s Grandes Écoles dominate engineering and business education, with new digital transformation efforts underway."
+  },
+  {
+    "country": "Germany",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Natural Sciences",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Germany is a global leader in STEM research and vocational education, with growing interdisciplinary life sciences programs."
+  },
+  {
+    "country": "Ireland",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "Ireland is expanding its high-quality tech and pharma education sectors, attracting many international students."
+  },
+  {
+    "country": "Italy",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Arts & Humanities",
+      "Business, Economics & Management"
+    ],
+    "comments": "Italy emphasizes arts and fashion education, alongside traditional strong engineering and business schools."
+  },
+  {
+    "country": "Japan",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "Japan offers top research in robotics, IT, and healthcare innovation, supported by strong government incentives."
+  },
+  {
+    "country": "Luxembourg",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Engineering & Technology",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Luxembourg grows in finance and fintech education with increasing STEM offerings."
+  },
+  {
+    "country": "Malaysia",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Business, Economics & Management",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Malaysia is strengthening its manufacturing and IT education, with government efforts to boost biotech sectors."
+  },
+  {
+    "country": "Netherlands",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Engineering & Technology",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "The Netherlands leads in agri-tech and business innovation education, supported by a strong startup ecosystem."
+  },
+  {
+    "country": "New Zealand",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Life Sciences & Medicine",
+      "Engineering & Technology"
+    ],
+    "comments": "New Zealand is enhancing health sciences and sustainable technology programs aligned with environmental goals."
+  },
+  {
+    "country": "Norway",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Business, Economics & Management",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Norway's education emphasizes energy tech and finance, with increasing focus on green and digital sectors."
+  },
+  {
+    "country": "Poland",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "Poland is growing its IT and engineering sectors rapidly, attracting EU research funding for health sciences."
+  },
+  {
+    "country": "Portugal",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Engineering & Technology",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Portugal develops strong business schools and emerging tech education supported by EU digital transformation initiatives."
+  },
+  {
+    "country": "Singapore",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Engineering & Technology",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Singapore leads Asia in fintech, biotech, and engineering education with strong university-industry collaborations."
+  },
+  {
+    "country": "South Korea",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "South Korea focuses heavily on AI, IT, and biomedical education, investing in top research institutions."
+  },
+  {
+    "country": "Spain",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Engineering & Technology",
+      "Life Sciences & Medicine"
+    ],
+    "comments": "Spain’s universities strengthen their business and engineering programs, especially in renewable energies and health."
+  },
+  {
+    "country": "Sweden",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "Sweden tops in sustainability sciences and tech education with strong governmental research support."
+  },
+  {
+    "country": "Switzerland",
+    "top_disciplines": [
+      "Business, Economics & Management",
+      "Life Sciences & Medicine",
+      "Engineering & Technology"
+    ],
+    "comments": "Switzerland remains world-class in finance and pharma education, investing in biotech and AI programs."
+  },
+  {
+    "country": "United Kingdom",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "UK remains a leader in diverse disciplines, with ongoing expansion in AI, biomedical research, and business innovation."
+  },
+  {
+    "country": "United States",
+    "top_disciplines": [
+      "Engineering & Technology",
+      "Life Sciences & Medicine",
+      "Business, Economics & Management"
+    ],
+    "comments": "The US leads globally in higher education innovation across STEM, health, and business fields, with vast research funding."
+  }
+]
