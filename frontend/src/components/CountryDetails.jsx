@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import DonutProgress from "./DonutProgress";
 import { iconMap } from "../data/Data";
 import { Globe2 } from "lucide-react";
-
-const API_BASE = "http://localhost:5000/api";
+import { API_BASE } from "../data/Data";
 
 function useNorryInfo(countryName) {
     const [info, setInfo] = useState("");
