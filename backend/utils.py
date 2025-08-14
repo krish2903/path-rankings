@@ -148,14 +148,12 @@ def calculate_scores(group_weights=None, selected_disciplines=None, selected_ind
         results.append({
             "country_id": country.id,
             "country_name": country.name,
-            # raw component scores
+            "country_code": country.country_code,
             "overall_score": round(total_score, 2),
             "discipline_score": round(discipline_score, 2),
             "industry_score": round(industry_score, 2),
-            # weighted score for ranking
             "final_score": round(final_score, 2),
             "groups": group_scores
         })
 
-    # Sort by final_score
     return sorted(results, key=lambda x: x["final_score"], reverse=True)
