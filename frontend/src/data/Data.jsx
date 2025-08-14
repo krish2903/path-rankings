@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 // API BASE
-export const API_BASE = "https://path-rankings-backend.onrender.com";
+export const API_BASE = "https://path-rankings-backend.onrender.com/api/";
 
 // Industries
 export const INDUSTRIES = [
