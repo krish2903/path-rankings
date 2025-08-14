@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Sparkle } from "lucide-react";
-import { iconMap } from "../data/Data";
+import { API_BASE, iconMap } from "../data/Data";
 
 const getIcon = (name) => {
     for (const key in iconMap) {
@@ -20,7 +20,7 @@ export default function Metrics() {
 
     useEffect(() => {
         setLoading(true);
-        fetch("http://localhost:5000/api/get-metric-groups")
+        fetch(`${API_BASE}/get-metric-groups`)
             .then(res => res.json())
             .then(groupsData => {
                 setMetricGroups(groupsData);
