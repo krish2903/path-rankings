@@ -1,4 +1,5 @@
 from db import db
+from sqlalchemy.dialects.postgresql import ARRAY
 
 class Country(db.Model):
     __tablename__ = 'countries'
@@ -51,9 +52,6 @@ class CountryIndustry(db.Model):
             "top_growing_sectors": self.growing_industries,
             "comments": self.comments
         }
-
-from db import db
-from sqlalchemy.dialects.postgresql import ARRAY
 
 class CountryDisciplines(db.Model):
     __tablename__ = 'country_disciplines'
