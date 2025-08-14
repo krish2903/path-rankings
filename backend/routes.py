@@ -70,6 +70,19 @@ def get_countries():
 
     return jsonify(result), 200
 
+@bp.route('/get-country-codes', methods=['GET'])
+def get_country_codes():
+    countries = Country.query.all()
+    
+    result = []
+    for c in countries:
+        result.append({
+            "name": c.name,
+            "code": c.country_code
+        })
+    
+    return jsonify(result), 200
+
 @bp.route('/get-metric-groups', methods=['GET'])
 def get_metric_groups():
     groups = MetricGroup.query.all()
