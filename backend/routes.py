@@ -101,6 +101,45 @@ def get_country_disciplines():
     result = [c.to_dict() for c in disciplines]
     return jsonify(result)
 
+@bp.route('/country-metrics', methods=['GET'])
+def get_country_metrics():
+    country_id = request.args.get('country_id', type=int)
+    country_name = request.args.get('country_name', type=str)
+
+    country = None
+    if country_id:
+        country = Country.query.filter_by(id=country_id).first()
+    elif country_name:
+        country = Country.query.filter(Country.name.ilike(country_name)).first()
+
+    if not country:
+        return jsonify({"error": "Country not found"}), 404
+
+    query = (
+        db.session.query(
+            MetricGroup.name.label('metric_group_name'),
+            Metric.name.label('metric_name'),
+            Metric.description.label('metric_description'),
+            Metric.unit.label('unit'),                             
+            country_metrics.c.raw_value
+        )
+        .join(Metric, Metric.id == country_metrics.c.metric_id)
+        .join(MetricGroup, Metric.group_id == MetricGroup.id)
+        .filter(country_metrics.c.country_id == country.id)
+    )
+
+    results = []
+    for row in query.all():
+        results.append({
+            "metric_group": row.metric_group_name,
+            "metric_name": row.metric_name,
+            "metric_description": row.metric_description,
+            "unit": row.unit,
+            "raw_value": row.raw_value
+        })
+
+    return jsonify(results)
+
 @bp.route('/country-info', methods=['GET'])
 def country_info():
     country = request.args.get('country')
@@ -113,17 +152,20 @@ def country_info():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@bp.route('/rankings', methods=['GET'])
+@bp.route("/rankings")
 def get_rankings():
-    group_weights = {}
-    for key, value in request.args.items():
-        if key.startswith('group_'):
-            group_id = int(key.split('_')[1])
-            try:
-                weight = float(value)
-                group_weights[group_id] = weight
-            except (ValueError, TypeError):
-                continue
-    
-    rankings = calculate_scores(group_weights)
-    return jsonify(rankings), 200
+    group_weights = {
+        int(k.replace("group_", "")): float(v)
+        for k, v in request.args.items()
+        if k.startswith("group_")
+    }
+    selected_disciplines = request.args.getlist("discipline")
+    selected_industries = request.args.getlist("industry")
+
+    results = calculate_scores(
+        group_weights=group_weights,
+        selected_disciplines=selected_disciplines,
+        selected_industries=selected_industries
+    )
+    return jsonify(results)
+

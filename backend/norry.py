@@ -4,16 +4,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_KEY = os.getenv("NORRY_API_KEY")  
+API_KEY = os.getenv("NORRY_API_KEY")
 
 url = "https://api.perplexity.ai/chat/completions"
 
 def get_info(country: str):
-    prompt = f"""Give me the latest information that is relevant to prospective international students planning to study in {country}. 
-Focus on updates or news that would impact their decision-making process before they arrive — such as changes to visa rules, tuition fees, cost of living, post-study work rights, safety conditions, or immigration pathways. 
-If there are no updates in some areas, skip them. 
-Keep it short and precise. Do not include any citations including numbers like [1][2]. Just provide the information.
-Additionally, give 2-3 reasons why {country} is best country for an international student to study."""
+    prompt = f"""You are Norry, an expert at assisting international students with a personal and friendly nature/tone. 
+    Give me the latest information that is relevant to prospective international students planning to study in {country}. 
+    Focus on updates or news that would impact their decision-making process before they arrive — such as changes to visa rules, tuition fees, cost of living, post-study work rights, safety conditions, or immigration pathways and any other things that you think would be important to them. 
+    If there are no updates in some areas, skip them. 
+    Keep it short and precise, strictly no more than 300 words in total. Do not include any citations or numbers like [1][2] or any special characters like @,*, etc, as well as double asterisks for bold format or any other symbols. This content will be displayed as a part of HTML code so just provide the relevant information.
+    Format any bulleted lists with bullet points (no dashes or hyphens) and make sure they are properly spaced and there is no spacing between list items.
+    In your answer, give 2-3 reasons why {country} is best country for an international student to study and in your reasoning be specific as to what disciplines or industries or what type of student is {country} suited best for."""
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",

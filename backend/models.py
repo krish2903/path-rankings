@@ -28,6 +28,7 @@ class Metric(db.Model):
     description = db.Column(db.Text)
     group_id = db.Column(db.Integer, db.ForeignKey('metric_groups.id'), nullable=False)
     is_positive = db.Column(db.Boolean, nullable=False, default=True)
+    unit = db.Column(db.String(50), nullable=True)
 
 country_metrics = db.Table('country_metrics',
     db.Column('country_id', db.Integer, db.ForeignKey('countries.id'), primary_key=True),
