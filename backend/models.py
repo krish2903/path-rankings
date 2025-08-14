@@ -5,6 +5,7 @@ class Country(db.Model):
     __tablename__ = 'countries'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    country_code = db.Column(db.String(3), unique=True, nullable=True)
     flag = db.Column(db.LargeBinary, nullable=True) 
     
     metrics = db.relationship(
