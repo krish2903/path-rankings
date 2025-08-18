@@ -334,7 +334,7 @@ const RankingsPage = () => {
                             <p className="px-4 text-xs mb-1 md:mb-0 text-center md:text-left sm:text-sm tracking-tight text-black/60 italic">
                                 Want to hear directly from someone who has experienced it?
                             </p>
-                            <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 mb-4 italic">
+                            <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 mb-3 italic">
                                 <a
                                     href="#"
                                     className="font-medium text-teal-600 underline"
@@ -350,6 +350,7 @@ const RankingsPage = () => {
                                 </a>{" "}
                                 to speak with one of our experienced advisors!
                             </p>
+                            <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 mb-4 italic"><b>Note:</b> Final rankings are based on 1 year of study, regardless of the study level.</p>
                             <FilterSection
                                 countries={countries}
                                 selectedCountries={selectedCountries}
