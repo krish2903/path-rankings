@@ -11,43 +11,63 @@ body,
   margin: 0;
 }
 
-.transition-smooth {
-  transition: all 0.2s ease-in-out;
-}
-
-.loading-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes arrowBounceHorizontal {
-  0%   { transform: translateX(0); opacity: 0.5; }
-  25%  { transform: translateX(6px); opacity: 1; }
-  50%  { transform: translateX(0); opacity: 0.5; }
-  75%  { transform: translateX(-6px); opacity: 1; }
-  100% { transform: translateX(0); opacity: 0.5; }
-}
-
-@keyframes arrowBounceVertical {
-  0%   { transform: translateY(0); opacity: 0.5; }
-  25%  { transform: translateY(-6px); opacity: 1; }
-  50%  { transform: translateY(0); opacity: 0.5; }
-  75%  { transform: translateY(6px); opacity: 1; }
-  100% { transform: translateY(0); opacity: 0.5; }
-}
-
-.arrow-horizontal {
-  animation: arrowBounceHorizontal 1.4s ease-in-out infinite;
-}
-
-.arrow-vertical {
-  animation: arrowBounceVertical 1.4s ease-in-out infinite;
-}
-
-.arrow-hint {
-  color: #f97316; /* Tailwind orange-500 */
-  font-size: 18px;
+.hint-arrow-circle {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
-  user-select: none;
+}
+
+.hint-arrow-circle.horizontal {
+  left: 30%;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: arrow-bounce-lr 3s ease-in-out infinite;
+}
+
+.hint-arrow-circle.vertical {
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: arrow-bounce-ud 3s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce-lr {
+  0% {
+    transform: translateY(-50%) translateX(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translateY(-50%) translateX(7px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-50%) translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes arrow-bounce-ud {
+  0% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-7px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 0;
+  }
 }
 
 @keyframes pulse {
@@ -98,12 +118,15 @@ body,
 }
 
 .scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Safari and Chrome */
+  display: none;
+  /* Safari and Chrome */
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .fadeIn {
@@ -144,6 +167,7 @@ body,
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .transition-smooth,
   .btn-hover-lift,
   .fade-in {
