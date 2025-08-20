@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Lock } from "lucide-react";
+import { Flag, GraduationCap, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import Metrics from "../components/Metrics";
 import Header from "../components/Header";
@@ -69,12 +69,7 @@ const LandingPage = () => {
                             aria-label="Dream Country Search"
                         >
                             <header className="flex flex-col items-center gap-2">
-                                <img
-                                    src="./countryIcon.svg"
-                                    className="w-7 h-7 sm:w-8 sm:h-8"
-                                    loading="lazy"
-                                    alt="Country Icon"
-                                />
+                                <Flag width={30} height={30} />
                                 <h2 className="text-base sm:text-lg font-medium tracking-tight text-black/60">
                                     Shortlist the <span className="font-medium text-black">right countries</span> for you!
                                 </h2>
@@ -106,12 +101,7 @@ const LandingPage = () => {
                             )}
 
                             <header className="flex flex-col items-center gap-2 opacity-40">
-                                <img
-                                    src="./uniIcon.svg"
-                                    className="w-7 h-7 sm:w-8 sm:h-8"
-                                    loading="lazy"
-                                    alt="Country Icon"
-                                />
+                                <GraduationCap width={30} height={30} />
                                 <h2 className="text-base sm:text-lg font-medium tracking-tight text-black/60">
                                     Shortlist the <span className="font-medium text-black">right universities</span> for you!
                                 </h2>
