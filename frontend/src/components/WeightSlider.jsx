@@ -9,6 +9,8 @@ export default function CustomSegmentedSlider({
   weights = {},
   onWeightChange = () => { },
 }) {
+  const MIN_HEIGHT_PX = 48;
+
   const thumbsCount = groups.length - 1;
 
   // Initial positions from weights
@@ -38,6 +40,7 @@ export default function CustomSegmentedSlider({
   // Percentages for segments
   const percentages = [];
   for (let i = 0; i < groups.length; i++) {
+    console.log(positions);
     if (i === 0) {
       percentages.push(positions[0]);
     } else if (i === groups.length - 1) {
@@ -47,20 +50,32 @@ export default function CustomSegmentedSlider({
     }
   }
 
+  // Clamp position with minimum segment height respected for vertical sliders
   const clampPosition = (pos, idx) => {
-    const min = idx === 0 ? 0 : positions[idx - 1];
-    const max = idx === thumbsCount - 1 ? 100 : positions[idx + 1];
-    return clamp(pos, min, max);
+    if (!isVertical) {
+      const min = idx === 0 ? 0 : positions[idx - 1];
+      const max = idx === thumbsCount - 1 ? 100 : positions[idx + 1];
+      return clamp(pos, min, max);
+    } else {
+      if (!sliderRef.current) return pos;
+      const rect = sliderRef.current.getBoundingClientRect();
+      const minPct = (MIN_HEIGHT_PX / rect.height) * 100;
+
+      const min =
+        idx === 0 ? 0 : positions[idx - 1] + minPct; 
+      const max =
+        idx === thumbsCount - 1 ? 100 : positions[idx + 1] - minPct;
+
+      return clamp(pos, min, max);
+    }
   };
 
   const updatePositionFromPointer = (clientX, clientY) => {
     if (!sliderRef.current || draggingThumb.current == null) return;
-
     const rect = sliderRef.current.getBoundingClientRect();
     let percent;
-
     if (isVertical) {
-      const y = clamp(clientY - rect.top, 0, rect.height);
+      const y = clamp(clientY - rect.top, MIN_HEIGHT_PX, rect.height - MIN_HEIGHT_PX);
       percent = Math.round((y / rect.height) * 100);
     } else {
       const x = clamp(clientX - rect.left, 0, rect.width);
@@ -70,19 +85,38 @@ export default function CustomSegmentedSlider({
     let newPositions = [...positions];
     const idx = draggingThumb.current;
     newPositions[idx] = clampPosition(percent, idx);
+
+    // Calculate new segment percentages with min height logic
+    const minPct = 0;
+    const newPercentages = [];
+
+    for (let i = 0; i < groups.length; i++) {
+      let segmentPercent;
+      if (i === 0) {
+        segmentPercent = newPositions[0];
+        if (isVertical && segmentPercent < minPct) {
+          segmentPercent = 0;
+          newPositions[0] = 0;
+        }
+      } else if (i === groups.length - 1) {
+        segmentPercent = 100 - newPositions[newPositions.length - 1];
+        if (isVertical && segmentPercent < minPct) {
+          segmentPercent = 0;
+          newPositions[newPositions.length - 1] = 100;
+        }
+      } else {
+        segmentPercent = newPositions[i] - newPositions[i - 1];
+        if (isVertical && segmentPercent < minPct) {
+          segmentPercent = 0;
+          newPositions[i] = newPositions[i - 1];
+        }
+      }
+      newPercentages.push(segmentPercent);
+    }
+
     setPositions(newPositions);
 
-    // Update weights
-    const newPercentages = [];
-    for (let i = 0; i < groups.length; i++) {
-      if (i === 0) {
-        newPercentages.push(newPositions[0]);
-      } else if (i === groups.length - 1) {
-        newPercentages.push(100 - newPositions[newPositions.length - 1]);
-      } else {
-        newPercentages.push(newPositions[i] - newPositions[i - 1]);
-      }
-    }
+    // Notify parent with normalized weights
     const newWeights = {};
     groups.forEach((group, i) => {
       newWeights[group.id] = newPercentages[i] / 100;
@@ -90,7 +124,7 @@ export default function CustomSegmentedSlider({
     onWeightChange(newWeights);
   };
 
-  // Mouse
+  // Mouse handlers
   const handleThumbMouseDown = (thumbIdx, e) => {
     e.preventDefault();
     setShowHint(false); // Hide hint
@@ -108,10 +142,10 @@ export default function CustomSegmentedSlider({
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
-  // Touch
+  // Touch handlers
   const handleThumbTouchStart = (thumbIdx, e) => {
     e.preventDefault();
-    setShowHint(false); // Hide hint
+    setShowHint(false);
     draggingThumb.current = thumbIdx;
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
     document.addEventListener("touchend", handleTouchEnd);
@@ -132,7 +166,7 @@ export default function CustomSegmentedSlider({
     document.removeEventListener("touchcancel", handleTouchEnd);
   };
 
-  // Keyboard
+  // Keyboard handlers with similar logic as pointer updates
   const handleThumbKeyDown = (thumbIdx, e) => {
     setShowHint(false); // Hide hint
     let delta =
@@ -145,18 +179,37 @@ export default function CustomSegmentedSlider({
     let newPositions = [...positions];
     const idx = thumbIdx;
     newPositions[idx] = clampPosition(positions[idx] + delta, idx);
-    setPositions(newPositions);
+    const rect = sliderRef.current?.getBoundingClientRect();
+    const minPct = isVertical && rect ? (MIN_HEIGHT_PX / rect.height) * 100 : 0;
 
     const newPercentages = [];
+
     for (let i = 0; i < groups.length; i++) {
+      let segmentPercent;
       if (i === 0) {
-        newPercentages.push(newPositions[0]);
+        segmentPercent = newPositions[0];
+        if (isVertical && segmentPercent < minPct) {
+          segmentPercent = 0;
+          newPositions[0] = 0;
+        }
       } else if (i === groups.length - 1) {
-        newPercentages.push(100 - newPositions[newPositions.length - 1]);
+        segmentPercent = 100 - newPositions[newPositions.length - 1];
+        if (isVertical && segmentPercent < minPct) {
+          segmentPercent = 0;
+          newPositions[newPositions.length - 1] = 100;
+        }
       } else {
-        newPercentages.push(newPositions[i] - newPositions[i - 1]);
+        segmentPercent = newPositions[i] - newPositions[i - 1];
+        if (isVertical && segmentPercent < minPct) {
+          segmentPercent = 0;
+          newPositions[i] = newPositions[i - 1];
+        }
       }
+      newPercentages.push(segmentPercent);
     }
+
+    setPositions(newPositions);
+
     const newWeights = {};
     groups.forEach((group, i) => {
       newWeights[group.id] = newPercentages[i] / 100;
@@ -172,26 +225,32 @@ export default function CustomSegmentedSlider({
       <div
         ref={sliderRef}
         className={`relative bg-gray-100 ${isVertical
-            ? "w-full h-72 rounded-2xl border border-orange-400"
-            : "w-full h-18 flex rounded-full"
+          ? "w-full h-72 rounded-2xl border border-orange-400 flex flex-col"
+          : "w-full h-18 flex rounded-full"
           }`}
       >
         {/* Segments */}
         {groups.map((group, idx) => (
           <div
             key={group.id}
-            className={`bg-transparent flex flex-col items-center justify-center relative border-black/5 px-4 ${isVertical
-                ? "border-b border-t first:border-t-0"
-                : "gap-0.5 border-r border-l first:border-l-0 last:border-r-0"
+            className={`bg-transparent flex items-center justify-center relative border-black/5 px-4 ${isVertical
+              ? "flex-row border-b border-t first:border-t-0"
+              : "flex-col gap-0.5 border-r border-l first:border-l-0 last:border-r-0"
               }`}
             style={{
               ...(isVertical
-                ? { height: `${percentages[idx]}%` }
-                : { width: `${percentages[idx]}%` }),
-              boxSizing: "border-box",
-              transition: isVertical
-                ? "height 0.2s cubic-bezier(.4,2,.6,1)"
-                : "width 0.2s cubic-bezier(.4,2,.6,1)",
+                ? {
+                  flexGrow: percentages[idx],
+                  height: 0,
+                  minHeight: MIN_HEIGHT_PX,
+                  boxSizing: "border-box",
+                  transition: "flex-grow 0.2s cubic-bezier(.4,2,.6,1)",
+                }
+                : {
+                  width: `${percentages[idx]}%`,
+                  boxSizing: "border-box",
+                  transition: "width 0.2s cubic-bezier(.4,2,.6,1)",
+                }),
             }}
           >
             <span
@@ -201,14 +260,13 @@ export default function CustomSegmentedSlider({
               {group.name}
             </span>
             <span
-              className="block min-w-0 bg-white rounded-full py-1 px-3 mt-px text-xs text-black/80 truncate"
+              className="block min-w-16 text-center bg-white rounded-full py-1 px-3 mt-px text-xs text-black/80 truncate"
               title={`${percentages[idx].toFixed(1)}%`}
             >
               {percentages[idx].toFixed(1)}%
             </span>
           </div>
         ))}
-
         {/* Thumbs */}
         {positions.map((pos, idx) => (
           <div
@@ -231,10 +289,10 @@ export default function CustomSegmentedSlider({
               alignItems: "center",
               justifyContent: "center",
               background: "none",
-              width: 32,
-              height: 40,
+              width: 48,
+              height: 48,
               left: isVertical ? "50%" : `calc(${pos}% - 16px)`,
-              top: isVertical ? `calc(${pos}% - 20px)` : 16,
+              top: isVertical ? `calc(${pos}% - 24px)` : 16,
               transform: isVertical ? "translateX(-50%)" : "none",
             }}
           >
