@@ -207,7 +207,7 @@ export default function CustomSegmentedSlider({
 
             {/* Boundary controls */}
             {idx < groups.length - 1 && (
-              <div className="relative flex justify-between items-center">
+              <div className="relative flex justify-between items-center select-none">
                 <button
                   aria-label={`Move weight from ${groups[idx + 1].name} to ${groups[idx].name}`}
                   className="absolute -top-4 left-4 rounded-full bg-orange-400 text-white font-bold text-lg h-8 w-8"
