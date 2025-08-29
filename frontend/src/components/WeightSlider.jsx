@@ -240,7 +240,7 @@ export default function CustomSegmentedSlider({
             </button>
             <div className="flex-1 flex flex-col items-center justify-center px-3 py-2">
               <span
-                className="block text-sm text-black/80 truncate"
+                className="block text-xs font-medium text-black/80 truncate"
                 title={group.name}
               >
                 {group.name}
