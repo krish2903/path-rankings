@@ -4,17 +4,22 @@ function clamp(val, min, max) {
   return Math.max(min, Math.min(max, val));
 }
 
+function sum(arr) {
+  return arr.reduce((a, b) => a + b, 0);
+}
+
 export default function CustomSegmentedSlider({
   groups = [],
   weights = {},
   onWeightChange = () => { },
 }) {
-  const INCREMENT_STEP = 0.5;
+  // --- CONFIG ---
+  const CONTAINER_HEIGHT = 350;
+  const MIN_SEGMENT_HEIGHT = 40; // px, min px for any segment
+  const INCREMENT_STEP = 0.5; // percent
   const sliderRef = useRef(null);
   const draggingThumb = useRef(null);
   const timers = useRef({});
-
-  // Responsive layout state (vertical/mobile if viewport width < 640px)
   const [isVertical, setIsVertical] = useState(false);
   const [showHint, setShowHint] = useState(true);
 
@@ -25,11 +30,9 @@ export default function CustomSegmentedSlider({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // -------------------------------
-  // Percentages (used for mobile layout)
-  // -------------------------------
-  const initialPercentages = groups.map(
-    (g) => Math.round((weights[g.id] ?? 0) * 100)
+  // --- State Setup ---
+  const initialPercentages = groups.map(g =>
+    Math.round((weights[g.id] ?? 0) * 100)
   );
   const [percentages, setPercentages] = useState(
     initialPercentages.length === groups.length
@@ -37,9 +40,7 @@ export default function CustomSegmentedSlider({
       : Array(groups.length).fill(Math.round(100 / groups.length))
   );
 
-  // -------------------------------
-  // DESKTOP: positions and derived percentages
-  // -------------------------------
+  // --- DESKTOP STATE ---
   const thumbsCount = groups.length - 1;
   const initialPositions = [];
   let cumSum = 0;
@@ -56,7 +57,6 @@ export default function CustomSegmentedSlider({
       desktopPercentages.push(100 - positions[positions.length - 1]);
     else desktopPercentages.push(positions[i] - positions[i - 1]);
   }
-
   const clampPosition = (pos, idx) => {
     const min = idx === 0 ? 0 : positions[idx - 1];
     const max = idx === thumbsCount - 1 ? 100 : positions[idx + 1];
@@ -80,6 +80,7 @@ export default function CustomSegmentedSlider({
     onWeightChange(newWeights);
   };
 
+  // --- Mouse/Touch Desktop ---
   const handleThumbMouseDown = (thumbIdx, e) => {
     e.preventDefault();
     setShowHint(false);
@@ -122,39 +123,72 @@ export default function CustomSegmentedSlider({
 
   const hintThumbIdx = Math.floor(positions.length / 2);
 
-  // -------------------------------
-  // VERTICAL RENDER (MOBILE)
-  // -------------------------------
-  function renderVertical() {
-    function handleBoundaryAdjust(idx, direction) {
-      setPercentages((oldPer) => {
-        const newPer = [...oldPer];
-        const step = INCREMENT_STEP;
+  // --- VERTICAL HEIGHT CALC ---
+  function calculateProportionalHeights(inputPercentages) {
+    // Step 1: Convert to desired heights (px)
+    let desired = inputPercentages.map(
+      pct => (pct / 100) * CONTAINER_HEIGHT
+    );
+    // Step 2: Clamp segments to at least min height, sum total overflow
+    let minHeights = desired.map(h => Math.max(MIN_SEGMENT_HEIGHT, h));
+    let overflow = sum(minHeights) - CONTAINER_HEIGHT;
 
+    // Step 3: If overflow, shrink only those above the minimum
+    if (overflow > 0) {
+      let flexIndices = [];
+      let flexHeights = 0;
+      minHeights.forEach((h, i) => {
+        if (desired[i] > MIN_SEGMENT_HEIGHT) {
+          flexIndices.push(i);
+          flexHeights += desired[i];
+        }
+      });
+      if (flexIndices.length > 0) {
+        let ratio = (flexHeights - overflow) / flexHeights;
+        minHeights = minHeights.map((h, i) =>
+          flexIndices.includes(i)
+            ? Math.max(MIN_SEGMENT_HEIGHT, desired[i] * ratio)
+            : h
+        );
+      }
+    }
+    return minHeights;
+  }
+
+  // --- VERTICAL (MOBILE) MODE ---
+  function renderVertical() {
+    const heights = calculateProportionalHeights(percentages);
+
+    function handleBoundaryAdjust(idx, direction) {
+      setPercentages(oldPer => {
+        let newPer = [...oldPer];
         if (direction === "up") {
-          if (newPer[idx + 1] > 0) {
-            newPer[idx] = clamp(newPer[idx] + step, 0, 100);
-            newPer[idx + 1] = clamp(newPer[idx + 1] - step, 0, 100);
+          if (oldPer[idx + 1] > 0) {
+            newPer[idx] = clamp(newPer[idx] + INCREMENT_STEP, 0, 100);
+            newPer[idx + 1] = clamp(newPer[idx + 1] - INCREMENT_STEP, 0, 100);
           }
         } else if (direction === "down") {
-          if (newPer[idx] > 0) {
-            newPer[idx] = clamp(newPer[idx] - step, 0, 100);
-            newPer[idx + 1] = clamp(newPer[idx + 1] + step, 0, 100);
+          if (oldPer[idx] > 0) {
+            newPer[idx] = clamp(newPer[idx] - INCREMENT_STEP, 0, 100);
+            newPer[idx + 1] = clamp(newPer[idx + 1] + INCREMENT_STEP, 0, 100);
           }
         }
-
-        const total = newPer.reduce((a, b) => a + b, 0);
-        if (total !== 100) {
-          const diff = 100 - total;
-          newPer[idx] = clamp(newPer[idx] + diff, 0, 100);
+        // Normalize minor drift
+        const tot = sum(newPer);
+        if (tot !== 100) {
+          const diff = 100 - tot;
+          let maxIdx = newPer.reduce(
+            (max, n, i, arr) => (n > arr[max] ? i : max),
+            0
+          );
+          newPer[maxIdx] = clamp(newPer[maxIdx] + diff, 0, 100);
         }
-
+        // Call onWeightChange with true normalized values
         const weightsResult = {};
         groups.forEach((g, i) => {
           weightsResult[g.id] = newPer[i] / 100;
         });
         onWeightChange(weightsResult);
-
         return newPer;
       });
     }
@@ -175,36 +209,50 @@ export default function CustomSegmentedSlider({
     return (
       <div
         ref={sliderRef}
-        className="w-full h-full flex flex-col border border-orange-400 bg-gray-100 rounded-2xl overflow-hidden"
+        className="w-full"
+        style={{
+          height: CONTAINER_HEIGHT,
+          minHeight: CONTAINER_HEIGHT,
+          maxHeight: CONTAINER_HEIGHT,
+          display: "flex",
+          flexDirection: "column",
+          border: "1px solid #f97316",
+          background: "#f9fafb",
+          borderRadius: "1.5rem",
+          overflow: "hidden",
+        }}
       >
         {groups.map((group, idx) => (
           <React.Fragment key={group.id}>
             {/* Segment */}
             <div
-              className="flex items-center justify-center border-b border-black/5 px-4"
+              className="flex items-center justify-center border-b border-black/5 px-8"
               style={{
-                flexGrow: 1,
-                minHeight: 0,
-                background: percentages[idx] === 0 ? "#f3f3f3" : "transparent",
-                transition: "background-color 0.2s cubic-bezier(.4,2,.6,1)",
+                transition: "height 0.2s cubic-bezier(.4,2,.6,1)",
+                height: `${heights[idx]}px`,
+                minHeight: `${MIN_SEGMENT_HEIGHT}px`,
+                background:
+                  percentages[idx] === 0 ? "#f3f3f3" : "transparent",
+                color: percentages[idx] === 0 ? "#aaa" : "inherit",
               }}
             >
-              <div className="flex-1 flex flex-col items-center justify-center py-2">
+              <div className="flex-1 flex items-center justify-between gap-8 px-8 py-2">
                 <span
-                  className="block text-xs font-medium text-black/80 truncate"
+                  className="block text-xs font-medium"
                   title={group.name}
+                  style={{ color: percentages[idx] === 0 ? "#aaa" : "inherit" }}
                 >
                   {group.name}
                 </span>
                 <span
-                  className="block bg-white w-16 text-center rounded-full py-1 px-2 mt-px text-xs text-black/80"
+                  className="block bg-white w-16 text-center rounded-full py-1 px-2 mt-px text-xs"
                   title={`${percentages[idx].toFixed(1)}%`}
+                  style={{ color: percentages[idx] === 0 ? "#aaa" : "inherit" }}
                 >
                   {percentages[idx].toFixed(1)}%
                 </span>
               </div>
             </div>
-
             {/* Boundary controls */}
             {idx < groups.length - 1 && (
               <div className="relative flex justify-between items-center select-none">
@@ -260,9 +308,7 @@ export default function CustomSegmentedSlider({
     );
   }
 
-  // -------------------------------
-  // DESKTOP RENDER
-  // -------------------------------
+  // --- DESKTOP RENDER ---
   function renderDesktop() {
     return (
       <div className="w-full select-none">
@@ -294,7 +340,6 @@ export default function CustomSegmentedSlider({
               </span>
             </div>
           ))}
-
           {positions.map((pos, idx) => (
             <div
               key={idx}
@@ -351,8 +396,6 @@ export default function CustomSegmentedSlider({
     );
   }
 
-  // -------------------------------
-  // FINAL RENDER SWITCH
-  // -------------------------------
+  // --- FINAL RENDER SWITCH ---
   return isVertical ? renderVertical() : renderDesktop();
 }
