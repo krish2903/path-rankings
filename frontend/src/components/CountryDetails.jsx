@@ -116,7 +116,7 @@ const CountryDetailsPage = ({
                 </h1>
                 <p className="rounded-full py-1 px-4 bg-slate-200">
                     <span className="text-sm font-bold">
-                        {country.overall_score.toFixed(2)}%
+                        {country.final_score.toFixed(2)}%
                     </span>
                 </p>
             </div>
