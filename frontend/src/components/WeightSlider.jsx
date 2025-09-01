@@ -15,8 +15,8 @@ export default function CustomSegmentedSlider({
 }) {
   // --- CONFIG ---
   const CONTAINER_HEIGHT = 350;
-  const MIN_SEGMENT_HEIGHT = 40; // px, min px for any segment
-  const INCREMENT_STEP = 0.5; // percent
+  const MIN_SEGMENT_HEIGHT = 40; 
+  const INCREMENT_STEP = 0.5; 
   const sliderRef = useRef(null);
   const draggingThumb = useRef(null);
   const timers = useRef({});
@@ -80,7 +80,7 @@ export default function CustomSegmentedSlider({
     onWeightChange(newWeights);
   };
 
-  // --- Mouse/Touch Desktop ---
+  // --- Mouse/Touch ---
   const handleThumbMouseDown = (thumbIdx, e) => {
     e.preventDefault();
     setShowHint(false);
@@ -125,15 +125,12 @@ export default function CustomSegmentedSlider({
 
   // --- VERTICAL HEIGHT CALC ---
   function calculateProportionalHeights(inputPercentages) {
-    // Step 1: Convert to desired heights (px)
     let desired = inputPercentages.map(
       pct => (pct / 100) * CONTAINER_HEIGHT
     );
-    // Step 2: Clamp segments to at least min height, sum total overflow
     let minHeights = desired.map(h => Math.max(MIN_SEGMENT_HEIGHT, h));
     let overflow = sum(minHeights) - CONTAINER_HEIGHT;
 
-    // Step 3: If overflow, shrink only those above the minimum
     if (overflow > 0) {
       let flexIndices = [];
       let flexHeights = 0;
@@ -155,7 +152,7 @@ export default function CustomSegmentedSlider({
     return minHeights;
   }
 
-  // --- VERTICAL (MOBILE) MODE ---
+  // --- MOBILE ---
   function renderVertical() {
     const heights = calculateProportionalHeights(percentages);
 
@@ -173,7 +170,7 @@ export default function CustomSegmentedSlider({
             newPer[idx + 1] = clamp(newPer[idx + 1] + INCREMENT_STEP, 0, 100);
           }
         }
-        // Normalize minor drift
+
         const tot = sum(newPer);
         if (tot !== 100) {
           const diff = 100 - tot;
@@ -183,7 +180,7 @@ export default function CustomSegmentedSlider({
           );
           newPer[maxIdx] = clamp(newPer[maxIdx] + diff, 0, 100);
         }
-        // Call onWeightChange with true normalized values
+
         const weightsResult = {};
         groups.forEach((g, i) => {
           weightsResult[g.id] = newPer[i] / 100;
@@ -245,7 +242,7 @@ export default function CustomSegmentedSlider({
                   {group.name}
                 </span>
                 <span
-                  className="block bg-white w-16 text-center rounded-full py-1 px-2 mt-px text-xs"
+                  className="block bg-white text-center rounded-full py-1 px-2 mt-px text-xs"
                   title={`${percentages[idx].toFixed(1)}%`}
                   style={{ color: percentages[idx] === 0 ? "#aaa" : "inherit" }}
                 >
@@ -308,7 +305,7 @@ export default function CustomSegmentedSlider({
     );
   }
 
-  // --- DESKTOP RENDER ---
+  // --- DESKTOP ---
   function renderDesktop() {
     return (
       <div className="w-full select-none">
@@ -396,6 +393,5 @@ export default function CustomSegmentedSlider({
     );
   }
 
-  // --- FINAL RENDER SWITCH ---
   return isVertical ? renderVertical() : renderDesktop();
 }
