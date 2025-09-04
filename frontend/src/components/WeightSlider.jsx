@@ -15,13 +15,26 @@ export default function CustomSegmentedSlider({
 }) {
   // --- CONFIG ---
   const CONTAINER_HEIGHT = 350;
-  const MIN_SEGMENT_HEIGHT = 40; 
-  const INCREMENT_STEP = 0.5; 
+  const MIN_SEGMENT_HEIGHT = 40;
+  const INCREMENT_STEP = 0.5;
   const sliderRef = useRef(null);
   const draggingThumb = useRef(null);
   const timers = useRef({});
   const [isVertical, setIsVertical] = useState(false);
   const [showHint, setShowHint] = useState(true);
+
+  useEffect(() => {
+    function clearAllTimers() {
+      Object.values(timers.current).forEach(clearTimeout);
+      timers.current = {};
+    }
+    window.addEventListener("touchend", clearAllTimers);
+    window.addEventListener("mouseup", clearAllTimers);
+    return () => {
+      window.removeEventListener("touchend", clearAllTimers);
+      window.removeEventListener("mouseup", clearAllTimers);
+    };
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsVertical(window.innerWidth < 640);
