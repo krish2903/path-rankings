@@ -23,7 +23,7 @@ const countryFeatures = [
     "Compare 20+ top countries to find your perfect fit",
     "Find study destinations that match your preferences",
     "Access the latest news & info to stay updated",
-    "Learn directly from 100+ international students’ real experiences",
+    "Learn directly from 10,000+ international students’ real experiences",
 ];
 
 const uniFeatures = [
@@ -138,7 +138,7 @@ const LandingPage = () => {
             >
                 <header>
                     <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl font-medium tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-gray-400">
-                        By International Students. For International Students.
+                        By International <span className="text-orange-700">Students</span>. For International <span className="text-orange-700">Students</span>.
                     </h2>
                 </header>
                 <div className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 max-w-full sm:max-w-2xl md:max-w-5xl tracking-tight text-black/60">

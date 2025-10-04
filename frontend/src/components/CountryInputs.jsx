@@ -20,7 +20,7 @@ const ItemSelector = ({
   };
 
   return (
-    <div className="flex flex-col w-full md:max-w-[90%] p-4 pt-0">
+    <div className="flex flex-col w-full md:max-w-[90%] px-4">
       <h2 className="text-md sm:text-lg font-medium text-black/50 mb-4 md:mb-10 text-center">
         Select {maxSelection} {typeLabel}
       </h2>
@@ -114,7 +114,7 @@ export default function CountryInputs({
         />
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 justify-center w-full max-w-xs sm:max-w-none">
           <button
-            className={`bg-gray-200 hover:bg-gray-300 text-black/80 font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition-all duration-300 ease-in-out w-full sm:w-32 ${selectedDisciplines.length > 0 ? "opacity-0 pointer-events-none" : "opacity-100"
+            className={`bg-gray-200 hover:bg-gray-300 text-black/80 font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition-all duration-300 ease-in-out w-full sm:w-32 ${selectedDisciplines.length > 0 ? "hidden pointer-events-none" : "block"
               }`}
             onClick={scrollToIndustry}
             aria-hidden={selectedDisciplines.length > 0}
