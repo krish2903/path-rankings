@@ -9,26 +9,25 @@ from models import (
     CountryDisciplines
 )
 
-def calculate_scores(group_weights=None, selected_disciplines=None, selected_industries=None):
+def calculate_country_scores(group_weights=None, selected_disciplines=None, selected_industries=None):
     countries = Country.query.all()
     metrics = Metric.query.all()
     metric_groups = MetricGroup.query.all()
 
-    # --- Setup default group weights if none provided ---
+    # --- DEFAULT GROUP WEIGHTS ---
     if group_weights is None:
         group_weights = {}
         total_groups = len(metric_groups)
         for group in metric_groups:
             group_weights[group.id] = 1.0 / total_groups
 
-    # --- Map group → metrics and store names ---
     group_to_metrics = {}
     group_id_to_name = {}
     for mg in metric_groups:
         group_to_metrics[mg.id] = [m for m in metrics if m.group_id == mg.id]
         group_id_to_name[mg.id] = mg.name
 
-    # --- Pre-calculate logs and ranges for all metrics ---
+    # --- LOG TRANSFORMATION + MIN/MAX NORMALISATION ---
     metric_log_ranges = {}
     metric_log_values = {}
     for metric in metrics:
@@ -47,23 +46,22 @@ def calculate_scores(group_weights=None, selected_disciplines=None, selected_ind
         max_log = max(log_values) if log_values else 1
         metric_log_ranges[metric.id] = (min_log, max_log)
 
-    # --- Build lookups for disciplines & industries ---
     country_discipline_map = {
         row.country: list(row.top_disciplines)
         for row in CountryDisciplines.query.all()
     }
     country_industry_map = {
-        row.country: list(row.dominant_industries)   # only dominant industries
+        row.country: list(row.dominant_industries)
         for row in CountryIndustry.query.all()
     }
 
-    # --- Calculate scores per country ---
+    # --- SCORE CALCULATION LOGIC ---
     results = []
     for country in countries:
         total_score = 0
         group_scores = {}
 
-        # ----- Metric Group Scoring -----
+        # ----- METRIC GROUPS SCORING -----
         for group_id, metrics_in_group in group_to_metrics.items():
             group_score = 0
             group_metric_scores = {}
@@ -96,7 +94,7 @@ def calculate_scores(group_weights=None, selected_disciplines=None, selected_ind
             }
             total_score += group_score_weighted
 
-        # ----- Discipline Score -----
+        # ----- DISCIPLINE SCORING -----
         discipline_score = 0
         if selected_disciplines:
             top_disciplines = country_discipline_map.get(country.name, [])
@@ -107,7 +105,7 @@ def calculate_scores(group_weights=None, selected_disciplines=None, selected_ind
                         i = top_disciplines.index(sel)
                         discipline_score += 100 - 20 * i
 
-        # ----- Industry Score -----
+        # ----- INDUSTRY SCORING -----
         industry_score = 0
         if selected_industries:
             top_dominant = country_industry_map.get(country.name, [])
@@ -118,7 +116,7 @@ def calculate_scores(group_weights=None, selected_disciplines=None, selected_ind
                         i = top_dominant.index(sel)
                         industry_score += 100 - 20 * i
 
-        # ----- Apply weighting rules -----
+        # ----- SCORE WEIGHTINGS -----
         has_disciplines = bool(selected_disciplines and len(selected_disciplines) > 0)
         has_industries = bool(selected_industries and len(selected_industries) > 0)
 
@@ -134,7 +132,7 @@ def calculate_scores(group_weights=None, selected_disciplines=None, selected_ind
             overall_weight = 0.8
             discipline_weight = 0.0
             industry_weight = 0.2
-        else:  # both selected
+        else:  
             overall_weight = 0.8
             discipline_weight = 0.1
             industry_weight = 0.1

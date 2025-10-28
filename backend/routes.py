@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import db, Country, CountryIndustry, CountryDisciplines, MetricGroup, Metric, country_metrics
-from utils import calculate_scores
+from utils import calculate_country_scores
 from norry import get_info
 import base64
 
@@ -152,7 +152,7 @@ def country_info():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@bp.route("/rankings")
+@bp.route("/country-rankings")
 def get_rankings():
     group_weights = {
         int(k.replace("group_", "")): float(v)
@@ -162,7 +162,7 @@ def get_rankings():
     selected_disciplines = request.args.getlist("discipline")
     selected_industries = request.args.getlist("industry")
 
-    results = calculate_scores(
+    results = calculate_country_scores(
         group_weights=group_weights,
         selected_disciplines=selected_disciplines,
         selected_industries=selected_industries
