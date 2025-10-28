@@ -20,7 +20,7 @@ const CheckIcon = () => (
 const showOverlay = true;
 
 const countryFeatures = [
-    "Compare 20+ top countries to find your perfect fit",
+    "Compare 20+ countries to find your perfect fit",
     "Find study destinations that match your preferences",
     "Access the latest news & info to stay updated",
     "Learn directly from 10,000+ international students’ real experiences",
@@ -45,27 +45,24 @@ const LandingPage = () => {
     };
 
     return (
-        <main className="w-full min-h-screen bg-white fadeIn">
-            <Header />
-
+        <main className="min-h-screen bg-gradient-to-b from-[#fff5f0] to-white fadeIn">
             {/* RANKINGS SECTION */}
             <section
-                className="w-full py-6 sm:py-6 flex flex-col bg-gray-50"
+                className="w-full flex flex-col"
                 aria-label="Explore Rankings"
             >
-                <div className="flex flex-col items-center justify-center flex-1 w-full px-4 sm:px-8 py-12 sm:py-20">
-                    <h1 className="text-2xl md:text-5xl font-medium tracking-tight md:mb-4 text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400 py-2">
+                <div className="rounded-3xl flex flex-col items-center justify-center flex-1 w-full px-4 sm:px-8 py-32">
+                    <h1 className="text-2xl md:text-5xl font-medium tracking-tight md:mb-4 text-transparent bg-clip-text bg-gradient-to-b from-black to-black/40 py-2">
                         PATH Rankings Explorer
                     </h1>
                     <h1 className="w-full text-center text-md md:text-2xl font-medium tracking-tight text-black/80">
                         What would you like to explore today?
                     </h1>
-                    <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 mt-4 flex-wrap justify-center w-full">
+                    <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 mt-4 flex-wrap justify-center w-full">
                         {/* Country Card */}
                         <Link
                             to="/country-rankings"
-                            className={`max-w-full sm:max-w-md w-full rounded-3xl drop-shadow-lg hover:shadow-lg hover:scale-103 transition inset-shadow-sm/10 min-h-[320px] md:min-h-96 flex flex-col justify-center gap-2 sm:gap-3 duration-200 cursor-pointer p-6 sm:p-12 focus:outline-none ${selection === "country" ? "bg-orange-50" : "bg-white"
-                                }`}
+                            className={`max-w-full sm:max-w-md w-full rounded-3xl drop-shadow-lg hover:shadow-lg hover:scale-103 transition inset-shadow-sm/10 min-h-[320px] md:min-h-96 flex flex-col justify-center gap-2 sm:gap-3 duration-200 cursor-pointer p-6 sm:p-12 focus:outline-none bg-white`}
                             aria-label="Dream Country Search"
                         >
                             <header className="flex flex-col items-center gap-2">
@@ -74,7 +71,7 @@ const LandingPage = () => {
                                     Shortlist the <span className="font-medium text-black">right countries</span> for you!
                                 </h2>
                             </header>
-                            <p className="text-sm md:text-base text-justify text-black/60 leading-tight tracking-tight mb-2">
+                            <p className="text-sm text-justify text-black/60 leading-tight tracking-tight mb-2">
                                 Selecting the right country for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.</p>
                             <ul className="space-y-2 sm:space-y-3 w-full list-none">
                                 {countryFeatures.map((feature, idx) => (
@@ -95,8 +92,8 @@ const LandingPage = () => {
                         >
                             {showOverlay && (
                                 <div className="absolute inset-0 bg-black/50 rounded-3xl flex flex-col items-center justify-center gap-2 z-20">
-                                    <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-white" aria-hidden="true" />
-                                    <span className="text-white font-medium text-base sm:text-lg">Coming Soon</span>
+                                    <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-white/80" aria-hidden="true" />
+                                    <span className="text-white/80 font-medium">Coming Soon</span>
                                 </div>
                             )}
 
@@ -106,7 +103,7 @@ const LandingPage = () => {
                                     Shortlist the <span className="font-medium text-black">right universities</span> for you!
                                 </h2>
                             </header>
-                            <p className="text-sm md:text-base text-justify text-black/60 leading-tight tracking-tight mb-2 blur-xs">
+                            <p className="text-sm text-justify text-black/60 leading-tight tracking-tight mb-2 blur-xs">
                                 Selecting the right country for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.</p>
                             <ul className="space-y-2 sm:space-y-3 w-full list-none blur-xs">
                                 {countryFeatures.map((feature, idx) => (
@@ -118,10 +115,10 @@ const LandingPage = () => {
                             </ul>
                         </article>
                     </div>
-                    <div className="flex flex-col justify-center items-center gap-2 mt-2">
+                    <div className="flex flex-col justify-center items-center gap-2 mt-4">
                         <button
                             onClick={scrollToHero}
-                            className="bg-gray-200 hover:bg-gray-300 text-black/80 font-medium mt-4 py-1 sm:py-2 px-5 sm:px-6 rounded-full text-base sm:text-md transition cursor-pointer"
+                            className="bg-orange-700/80 hover:bg-orange-700/75 text-white font-medium mt-4 py-2 sm:py-4 px-5 sm:px-8 rounded-full text-base transition cursor-pointer"
                             aria-label="Continue to Rankings Section"
                         >
                             Learn More
@@ -133,7 +130,7 @@ const LandingPage = () => {
             {/* HERO SECTION */}
             <section
                 ref={heroRef}
-                className="relative bg-white w-full min-h-screen px-4 sm:px-6 md:px-8 py-10 sm:py-14 md:py-16 flex flex-col items-center justify-center text-center"
+                className="relative w-full min-h-screen px-4 sm:px-6 md:px-8 py-10 sm:py-14 md:py-16 flex flex-col items-center justify-center text-center"
                 aria-label="PATH Rankings Explorer Introduction"
             >
                 <header>
@@ -180,7 +177,7 @@ const LandingPage = () => {
             {/* ABOUT SECTION */}
             <section
                 ref={aboutRef}
-                className="w-full min-h-screen sm:min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4 sm:px-8 py-12 sm:py-16"
+                className="w-full min-h-screen sm:min-h-screen flex flex-col justify-center items-center px-4 sm:px-8 py-12 sm:py-16"
                 aria-label="What are PATH Rankings?"
             >
                 <div className="flex flex-col items-center w-full gap-3 sm:gap-4">
@@ -210,7 +207,7 @@ const LandingPage = () => {
 
             {/* ABOUT SECTION CONTINUED */}
             <section
-                className="w-full flex flex-col justify-center items-center bg-white px-4 sm:px-8 py-16 sm:py-24"
+                className="w-full flex flex-col justify-center items-center px-4 sm:px-8 py-16 sm:py-24"
                 aria-label="What do we cover?"
             >
                 <div className="flex flex-col items-center justify-center w-full gap-4">
@@ -244,7 +241,7 @@ const LandingPage = () => {
 
             {/* METRICS SECTION */}
             <section
-                className="w-full py-16 sm:py-24 flex flex-col justify-center items-center bg-gray-50 px-4 sm:px-8"
+                className="w-full py-16 sm:py-24 flex flex-col justify-center items-center px-4 sm:px-8"
                 aria-label="What aspects we measure"
             >
                 <div className="flex flex-col items-center justify-center w-full gap-4">

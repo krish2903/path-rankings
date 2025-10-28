@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
-    <header className="fixed flex h-[4rem] px-16 w-screen justify-center items-center z-99 backdrop-blur-md shadow-sm bg-white/70">
+    <header className="fixed flex h-[3.5rem] md:h-[5.5rem] w-full justify-center items-center z-99 border-b border-gray-200 bg-[#fff5f0]">
       <Link to="/">
         <img src="/logo.png" alt="Logo" className="max-h-8 cursor-pointer" />
       </Link>
