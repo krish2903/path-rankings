@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { INDUSTRIES, DISCIPLINES, iconMap } from "../data/Data";
 import { Check } from "lucide-react";
 
-
 const ItemSelector = ({
   items = [],
   selectedItems = [],
@@ -80,6 +79,7 @@ export default function CountryInputs({
   setSelectedDisciplines = () => { },
   selectedIndustries = [],
   setSelectedIndustries = () => { },
+  buttonLoading,
 }) {
   const disciplineRef = useRef(null);
   const industryRef = useRef(null);
@@ -101,7 +101,7 @@ export default function CountryInputs({
       {/* Discipline Selection */}
       <section
         ref={disciplineRef}
-        className="snap-start min-w-full flex flex-col justify-center items-center px-3 sm:px-6 md:px-20"
+        className="snap-start snap-always min-w-full flex flex-col justify-center items-center px-3 sm:px-6 md:px-20"
       >
         <h2 className="text-lg sm:text-xl md:text-2xl font-medium tracking-tight text-center text-black/70 md:mb-4 py-1">
           Which discipline are you interested in?
@@ -138,7 +138,7 @@ export default function CountryInputs({
       {/* Industry Selection */}
       <section
         ref={industryRef}
-        className="snap-start min-w-full flex flex-col justify-center items-center px-3 sm:px-6 md:px-8"
+        className="snap-start snap-always min-w-full flex flex-col justify-center items-center px-3 sm:px-6 md:px-8"
       >
         <h2 className="text-lg sm:text-xl md:text-2xl font-medium tracking-tight text-center text-black/70 py-1">
           Which industry are you looking to enter?
@@ -160,14 +160,14 @@ export default function CountryInputs({
             Skip
           </button>
           <button
-            className={`${selectedIndustries.length === 0
+            className={`${selectedIndustries.length === 0 || buttonLoading
                 ? "bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed"
                 : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
               } font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition w-full sm:w-32`}
             onClick={onStart}
-            disabled={selectedIndustries.length === 0}
+            disabled={selectedIndustries.length === 0 || buttonLoading}
           >
-            Start
+            {buttonLoading ? "Loading..." : "Start"}
           </button>
         </div>
       </section>

@@ -12,7 +12,7 @@ const FilterDropdown = ({
   <div className={`relative ${className}`}>
     <button
       onClick={onToggle}
-      className="cursor-pointer flex items-center h-8 px-4 rounded-full bg-slate-200 transition-colors text-xs sm:text-sm font-medium text-black/80 hover:bg-orange-200 justify-between w-full sm:w-auto"
+      className="cursor-pointer flex items-center h-8 px-4 rounded-full bg-slate-200/70 transition-colors text-xs sm:text-sm font-medium text-black/80 hover:bg-orange-200 justify-between w-full sm:w-auto"
       type="button"
     >
       <span>

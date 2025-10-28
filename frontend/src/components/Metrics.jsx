@@ -49,7 +49,7 @@ export default function Metrics() {
                                     <Icon className="w-8 h-8 text-[#ec5b22] drop-shadow-md" />
                                 </div>
                                 <div className="flex flex-col items-center text-center gap-2 flex-1">
-                                    <span className="text-lg font-semibold text-black/80 tracking-tight">
+                                    <span className="text-md font-medium text-black/80 tracking-tight">
                                         {group.name}
                                     </span>
                                     <span className="text-sm text-black/60 tracking-tight leading-snug">

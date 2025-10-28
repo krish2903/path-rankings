@@ -24,19 +24,6 @@ export default function CustomSegmentedSlider({
   const [showHint, setShowHint] = useState(true);
 
   useEffect(() => {
-    function clearAllTimers() {
-      Object.values(timers.current).forEach(clearTimeout);
-      timers.current = {};
-    }
-    window.addEventListener("touchend", clearAllTimers);
-    window.addEventListener("mouseup", clearAllTimers);
-    return () => {
-      window.removeEventListener("touchend", clearAllTimers);
-      window.removeEventListener("mouseup", clearAllTimers);
-    };
-  }, []);
-
-  useEffect(() => {
     const handleResize = () => setIsVertical(window.innerWidth < 640);
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -324,7 +311,7 @@ export default function CustomSegmentedSlider({
       <div className="w-full select-none">
         <div
           ref={sliderRef}
-          className="relative bg-gray-100 w-full h-18 flex rounded-full"
+          className="relative bg-black/3 w-full h-18 flex rounded-full"
         >
           {groups.map((group, idx) => (
             <div

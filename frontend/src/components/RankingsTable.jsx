@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { Star } from "lucide-react";
+import { Cross, Star, X } from "lucide-react";
 import { iconMap } from "../data/Data";
 import DonutProgress from "./DonutProgress";
 import CountryDetailsPage from "./CountryDetails";
+import { getScoreBucket } from "../lib/utils";
 
 function getValue(row, key, groupNames) {
   if (key === "rank") return row.rank;
@@ -136,7 +137,7 @@ const RankingsTable = ({
               <div
                 key={country.country_id}
                 onClick={() => handleCardClick(country)}
-                className="flex flex-col p-4 space-y-4 rounded-4xl inset-shadow-sm shadow-md border border-gray-100 bg-gradient-to-t from-white to-gray-50 cursor-pointer transform transition-transform duration-200 hover:scale-102"
+                className="flex flex-col p-4 space-y-4 rounded-4xl inset-shadow-sm shadow-md border border-black/5 bg-white/50 cursor-pointer transform transition-transform duration-200 hover:scale-102"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -151,16 +152,18 @@ const RankingsTable = ({
                     <span className="text-sm font-bold text-white">{country.rank}</span>
                   </div>
                   <div className="flex gap-2 flex-wrap justify-end">
-                    {country.rank === 1 && (
-                      <div className="flex items-center rounded-full py-0.5 px-3 bg-[#E97451]">
-                        <span className="text-sm font-medium text-white">Top Choice</span>
-                      </div>
-                    )}
-                    <div className="rounded-full py-0.5 px-2.5 bg-slate-200">
-                      <span className="text-sm font-bold">
-                        {country.final_score.toFixed(2)}%
-                      </span>
-                    </div>
+                    {(() => {
+                      const bucket = getScoreBucket(country.final_score);
+                      return (
+                        <div
+                          className={`rounded-full py-0.5 px-2.5 ${bucket.classes}`}
+                          title={`${bucket.label} (${country.final_score.toFixed(2)}%)`}
+                          aria-label={`${bucket.label}`}
+                        >
+                          <span className="text-sm font-medium">{bucket.label}</span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -195,8 +198,7 @@ const RankingsTable = ({
                         <div
                           key={groupName}
                           className="flex flex-col items-center justify-center py-2 text-black/80"
-                          title={`${groupName}: ${score === "—" ? "No data" : score + "%"
-                            }`}
+                          title={`${groupName}: ${score === "—" ? "No data" : getScoreBucket(numericScore).label}`}
                         >
                           {score === "—" ? (
                             <div className="text-sm text-orange-600 font-bold">—</div>
@@ -270,9 +272,9 @@ const RankingsTable = ({
           <div className="bg-gradient-to-t from-white to-slate-100 rounded-3xl w-[95%] sm:max-w-[90%] lg:max-w-[75%] max-h-[90vh] overflow-auto scrollbar-hide px-4 sm:px-8 py-8 sm:py-14 relative shadow-lg fadeIn">
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 text-xs md:text-sm px-3 py-2 bg-slate-200 text-gray-600 hover:bg-slate-300 rounded-full cursor-pointer"
+              className="absolute top-4 right-4 text-xs md:text-sm p-2.5 bg-black/5 text-gray-600 hover:bg-black/7 rounded-full cursor-pointer"
             >
-              ✕
+              <X size={16} />
             </button>
             <CountryDetailsPage
               country={selectedCountry}

@@ -4,6 +4,7 @@ import DonutProgress from "./DonutProgress";
 import { iconMap } from "../data/Data";
 import { Globe2 } from "lucide-react";
 import { API_BASE } from "../data/Data";
+import { getScoreBucket } from "../lib/utils";
 
 function useNorryInfo(countryName) {
     const [info, setInfo] = useState("");
@@ -114,11 +115,18 @@ const CountryDetailsPage = ({
                 >
                     {country.country_name}
                 </h1>
-                <p className="rounded-full py-1 px-4 bg-slate-200">
-                    <span className="text-sm font-bold">
-                        {country.final_score.toFixed(2)}%
-                    </span>
-                </p>
+                {(() => {
+                    const bucket = getScoreBucket(country.final_score);
+                    return (
+                        <p
+                            className={`rounded-full py-1 px-4 ${bucket.classes}`}
+                            title={`${bucket.label} (${country.final_score.toFixed(2)}%)`}
+                            aria-label={`${bucket.label}`}
+                        >
+                            <span className="text-sm font-medium">{bucket.label}</span>
+                        </p>
+                    );
+                })()}
             </div>
 
             {/* Key Insights Circle Graphs */}
@@ -181,7 +189,7 @@ const CountryDetailsPage = ({
                                         <span className="text-xs font-medium uppercase text-gray-400 tracking-wide mb-2 block">
                                             {m.metric_group}
                                         </span>
-                                        <h2 className="text-sm sm:text-base font-semibold text-gray-700 mb-1">
+                                        <h2 className="text-sm font-medium text-gray-700 mb-1">
                                             {m.metric_name}
                                         </h2>
                                         <p
@@ -373,8 +381,9 @@ const CountryDetailsPage = ({
                 <ul className="list-disc list-inside italic space-y-1">
                     <li className="text-sm sm:text-md tracking-tight text-black/60 px-2">
                         <a
-                            href="#"
-                            className="font-semibold text-teal-600 underline"
+                            href="https://www.inforens.com/guides"
+                            target="_blank"
+                            className="font-medium text-orange-700 underline"
                         >
                             Connect with a mentor
                         </a>{" "}
@@ -382,8 +391,9 @@ const CountryDetailsPage = ({
                     </li>
                     <li className="text-sm sm:text-md tracking-tight text-black/60 px-2">
                         <a
-                            href="#"
-                            className="font-semibold text-teal-600 underline"
+                            href="https://www.inforens.com/contact-us"
+                            target="_blank"
+                            className="font-medium text-orange-700 underline"
                         >
                             Contact us today
                         </a>{" "}
