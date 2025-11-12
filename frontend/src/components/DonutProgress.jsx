@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { getScoreBucket } from "@/lib/utils";
 
 const DonutProgress = ({ value, size = 60, strokeWidth = 6, Icon, tooltip }) => {
   const radius = (size - strokeWidth) / 2;
@@ -86,9 +87,20 @@ const DonutProgress = ({ value, size = 60, strokeWidth = 6, Icon, tooltip }) => 
 
       {/* Percentage text */}
       <div className="flex items-center justify-center">
-        <span className="text-xs font-bold text-orange-600 select-none">
-          {value}%
-        </span>
+        <div className="flex gap-2 flex-wrap justify-end">
+          {(() => {
+            const bucket = getScoreBucket(value);
+            return (
+              <div
+                className={`text-orange-600 font-bold`}
+                title={`${bucket.label} (${value.toFixed(2)}%)`}
+                aria-label={`${bucket.label}`}
+              >
+                <span className="text-sm font-medium">{bucket.donutLabel}</span>
+              </div>
+            );
+          })()}
+        </div>
       </div>
     </div>
   );

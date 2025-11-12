@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 
 # Environment variables file
-.env
+backend/.env
 
 # Virtual environments
 venv/
@@ -23,3 +23,4 @@ env/
 
 #data folder
 backend/data/
+backend/initialisation.py

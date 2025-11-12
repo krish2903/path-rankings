@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { INDUSTRIES, DISCIPLINES, iconMap } from "../data/Data";
 import { Check } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 
 const ItemSelector = ({
   items = [],
@@ -36,15 +37,15 @@ const ItemSelector = ({
               type="button"
               onClick={() => toggleItem(name)}
               className={`relative cursor-pointer flex flex-col items-center focus:outline-none transition-colors ${selected
-                  ? "border-orange-500"
-                  : "border-transparent hover:border-orange-300"
+                ? "border-orange-500"
+                : "border-transparent hover:border-orange-300"
                 }`}
               aria-pressed={selected}
               aria-label={`${name} ${selected ? "selected" : "not selected"}`}
               title={name}
             >
               <div
-                className={`relative flex items-center justify-center h-16 w-16 md:h-20 md:w-20 rounded-full border-3 bg-white ${selected ? "border-orange-500" : "border-black/10"
+                className={`relative flex items-center justify-center h-16 w-16 md:h-22 md:w-22 rounded-full ring-3 bg-black/3 ${selected ? "ring-orange-500 bg-orange-300/20" : "ring-black/5 hover:bg-orange-400/5 hover:ring-orange-400/20"
                   } transition-colors`}
               >
                 {Icon && (
@@ -56,7 +57,7 @@ const ItemSelector = ({
               </div>
 
               {selected && (
-                <span className="absolute -top-0.5 right-3 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-orange-500 rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 right-5 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 bg-orange-500 rounded-full flex items-center justify-center">
                   <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 stroke-[3px] text-white" />
                 </span>
               )}
@@ -114,7 +115,7 @@ export default function CountryInputs({
         />
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 justify-center w-full max-w-xs sm:max-w-none">
           <button
-            className={`bg-gray-200 hover:bg-gray-300 text-black/80 font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition-all duration-300 ease-in-out w-full sm:w-32 ${selectedDisciplines.length > 0 ? "hidden pointer-events-none" : "block"
+            className={`bg-black/80 hover:bg-black/75 text-white font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition-all duration-300 ease-in-out w-full sm:w-32 cursor-pointer ${selectedDisciplines.length > 0 ? "hidden pointer-events-none" : "block"
               }`}
             onClick={scrollToIndustry}
             aria-hidden={selectedDisciplines.length > 0}
@@ -124,9 +125,9 @@ export default function CountryInputs({
           </button>
           <button
             className={`${selectedDisciplines.length === 0
-                ? "bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed"
-                : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
-              } font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition w-full sm:w-32`}
+              ? "bg-black/20 text-black/80 opacity-50 cursor-not-allowed"
+              : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
+              } font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition w-full sm:w-32`}
             onClick={scrollToIndustry}
             disabled={selectedDisciplines.length === 0}
           >
@@ -151,8 +152,8 @@ export default function CountryInputs({
         />
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 justify-center w-full max-w-xs sm:max-w-none">
           <button
-            className={`bg-gray-200 hover:bg-gray-300 text-black/80 font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition-all duration-300 cursor-pointer ease-in-out w-full sm:w-32 ${selectedIndustries.length > 0 ? "hidden opacity-0 pointer-events-none" : "block opacity-100"
-              }`}
+            className={`bg-black/80 hover:bg-black/75 text-white font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition-all duration-300 ease-in-out w-full sm:w-32 cursor-pointer ${selectedIndustries.length > 0 ? "hidden pointer-events-none" : "block"
+              } ${buttonLoading ? "hidden" : "block"}`}
             onClick={onStart}
             aria-hidden={selectedIndustries.length > 0}
             tabIndex={selectedIndustries.length > 0 ? -1 : 0}
@@ -161,13 +162,13 @@ export default function CountryInputs({
           </button>
           <button
             className={`${selectedIndustries.length === 0 || buttonLoading
-                ? "bg-gray-300 text-gray-500 opacity-50 cursor-not-allowed"
-                : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
-              } font-semibold py-2 sm:py-3 rounded-full text-sm sm:text-base md:text-lg transition w-full sm:w-32`}
+              ? "bg-black/20 text-black/80 opacity-50 cursor-not-allowed"
+              : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
+              } flex justify-center items-center font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition w-full sm:w-32`}
             onClick={onStart}
             disabled={selectedIndustries.length === 0 || buttonLoading}
           >
-            {buttonLoading ? "Loading..." : "Start"}
+            {buttonLoading ? <ClipLoader size={18} color="#666" /> : "Start"}
           </button>
         </div>
       </section>

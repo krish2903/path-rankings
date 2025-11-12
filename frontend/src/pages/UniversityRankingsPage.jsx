@@ -17,7 +17,7 @@ function areWeightsAdjusted(weights, metricGroups) {
     return values.some((v) => v > 0);
 }
 
-const RankingsPage = () => {
+const UniRankingsPage = () => {
     const {
         rankings, setRankings,
         countries, setCountries,
@@ -202,10 +202,10 @@ const RankingsPage = () => {
                     <section className="h-screen w-full flex flex-col md:flex-row justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
                         <header className="text-center">
                             <h1 className="text-4xl lg:text-5xl font-medium tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400 py-2">
-                                Country Rankings
+                                University Rankings
                             </h1>
                             <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
-                                <p>Explore the rankings of countries based on your preferences.</p>
+                                <p>Explore the rankings of the top universities based on your preferences.</p>
                             </div>
                         </header>
                         <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
@@ -393,4 +393,4 @@ const RankingsPage = () => {
     );
 };
 
-export default RankingsPage;
+export default UniRankingsPage;

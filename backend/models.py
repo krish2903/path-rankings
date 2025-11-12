@@ -15,6 +15,33 @@ class Country(db.Model):
         lazy='dynamic'
     )
 
+country_metrics = db.Table('country_metrics',
+    db.Column('country_id', db.Integer, db.ForeignKey('countries.id'), primary_key=True),
+    db.Column('metric_id', db.Integer, db.ForeignKey('metrics.id'), primary_key=True),
+    db.Column('raw_value', db.Float, nullable=False)
+)
+
+class University(db.Model):
+    __tablename__ = 'universities'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), unique=True, nullable=False)
+    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
+    city = db.Column(db.String(100), nullable=False)
+
+    metrics = db.relationship(
+        'Metric',
+        secondary='university_metrics',
+        backref=db.backref('universities', lazy='dynamic'),
+        lazy='dynamic'
+    )
+
+university_metrics = db.Table(
+    'university_metrics',
+    db.Column('university_id', db.Integer, db.ForeignKey('universities.id'), primary_key=True),
+    db.Column('metric_id', db.Integer, db.ForeignKey('metrics.id'), primary_key=True),
+    db.Column('raw_value', db.Float, nullable=False)
+)
+
 class MetricGroup(db.Model):
     __tablename__ = 'metric_groups'
     id = db.Column(db.Integer, primary_key=True)
@@ -31,12 +58,6 @@ class Metric(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey('metric_groups.id'), nullable=False)
     is_positive = db.Column(db.Boolean, nullable=False, default=True)
     unit = db.Column(db.String(50), nullable=True)
-
-country_metrics = db.Table('country_metrics',
-    db.Column('country_id', db.Integer, db.ForeignKey('countries.id'), primary_key=True),
-    db.Column('metric_id', db.Integer, db.ForeignKey('metrics.id'), primary_key=True),
-    db.Column('raw_value', db.Float, nullable=False)
-)
 
 class CountryIndustry(db.Model):
     __tablename__ = 'country_industries'

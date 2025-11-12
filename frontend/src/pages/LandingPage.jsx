@@ -2,7 +2,6 @@ import React, { useRef, useState } from "react";
 import { Flag, GraduationCap, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import Metrics from "../components/Metrics";
-import Header from "../components/Header";
 
 const CheckIcon = () => (
     <svg
@@ -51,8 +50,8 @@ const LandingPage = () => {
                 className="w-full flex flex-col"
                 aria-label="Explore Rankings"
             >
-                <div className="rounded-3xl flex flex-col items-center justify-center flex-1 w-full px-4 sm:px-8 py-32">
-                    <h1 className="text-2xl md:text-5xl font-medium tracking-tight md:mb-4 text-transparent bg-clip-text bg-gradient-to-b from-black to-black/40 py-2">
+                <div className="rounded-3xl flex flex-col items-center justify-center flex-1 w-full px-4 sm:px-8 py-20 md:py-32">
+                    <h1 className="text-3xl md:text-5xl font-medium tracking-tight md:mb-4 text-transparent bg-clip-text bg-gradient-to-b from-black to-black/40 py-2">
                         PATH Rankings Explorer
                     </h1>
                     <h1 className="w-full text-center text-md md:text-2xl font-medium tracking-tight text-black/80">
@@ -130,11 +129,11 @@ const LandingPage = () => {
             {/* HERO SECTION */}
             <section
                 ref={heroRef}
-                className="relative w-full min-h-screen px-4 sm:px-6 md:px-8 py-10 sm:py-14 md:py-16 flex flex-col items-center justify-center text-center"
+                className="relative w-full px-4 sm:px-6 md:px-8 py-24 md:py-36 flex flex-col items-center justify-center text-center"
                 aria-label="PATH Rankings Explorer Introduction"
             >
                 <header>
-                    <h2 className="text-base sm:text-lg md:text-xl lg:text-3xl font-medium tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-gray-400">
+                    <h2 className="text-2xl lg:text-4xl font-medium tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-br from-gray-900 to-gray-400">
                         By International <span className="text-orange-700">Students</span>. For International <span className="text-orange-700">Students</span>.
                     </h2>
                 </header>
@@ -177,11 +176,11 @@ const LandingPage = () => {
             {/* ABOUT SECTION */}
             <section
                 ref={aboutRef}
-                className="w-full min-h-screen sm:min-h-screen flex flex-col justify-center items-center px-4 sm:px-8 py-12 sm:py-16"
+                className="w-full flex flex-col justify-center items-center px-4 sm:px-8 py-12 sm:py-16"
                 aria-label="What are PATH Rankings?"
             >
                 <div className="flex flex-col items-center w-full gap-3 sm:gap-4">
-                    <h1 className="w-full text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight text-black/80 py-1">
+                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-5xl font-medium tracking-tight py-1">
                         What are PATH Rankings?
                     </h1>
                     <p className="text-sm sm:text-base text-black/60 tracking-tight">
@@ -207,11 +206,11 @@ const LandingPage = () => {
 
             {/* ABOUT SECTION CONTINUED */}
             <section
-                className="w-full flex flex-col justify-center items-center px-4 sm:px-8 py-16 sm:py-24"
+                className="w-full flex flex-col justify-center items-center px-4 sm:px-8 py-12 sm:py-16"
                 aria-label="What do we cover?"
             >
                 <div className="flex flex-col items-center justify-center w-full gap-4">
-                    <h1 className="w-full text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight text-black/80">
+                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-5xl font-medium tracking-tight py-1">
                         What do we cover?
                     </h1>
                     <p className="text-sm sm:text-base text-black/60 tracking-tight mb-4 text-center">
@@ -241,11 +240,11 @@ const LandingPage = () => {
 
             {/* METRICS SECTION */}
             <section
-                className="w-full py-16 sm:py-24 flex flex-col justify-center items-center px-4 sm:px-8"
+                className="w-full flex flex-col justify-center items-center px-4 sm:px-8 py-12 sm:py-16"
                 aria-label="What aspects we measure"
             >
                 <div className="flex flex-col items-center justify-center w-full gap-4">
-                    <h1 className="w-full text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight text-black/80">
+                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-5xl font-medium tracking-tight py-1">
                         What aspects do we take into consideration?
                     </h1>
                     <Metrics />

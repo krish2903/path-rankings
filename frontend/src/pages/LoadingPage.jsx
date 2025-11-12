@@ -2,14 +2,14 @@ import React from "react";
 
 export default function LoadingPage() {
     return (
-        <div className="flex flex-col items-center justify-center pb-64 min-h-screen bg-white gap-6">
+        <div className="flex flex-col items-center justify-center min-h-screen gap-6">
             <img
-                src="/logo.png"
+                src="https://illustrations.popsy.co/amber/looking-at-the-map.svg"
                 alt="Logo"
-                className="h-14 fadeIn"
+                className="h-64 fadeIn"
             />
 
-            <div className="w-36 h-0.5 rounded-full bg-gray-300 relative overflow-hidden">
+            <div className="w-36 h-0.5 rounded-full bg-black/10 relative overflow-hidden">
                 <div
                     className="absolute top-0 left-0 h-0.5 rounded-full bg-orange-500 animate-gradient-x"
                     style={{ width: "50%" }}

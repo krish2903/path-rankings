@@ -5,33 +5,34 @@ import { iconMap } from "../data/Data";
 import { Globe2 } from "lucide-react";
 import { API_BASE } from "../data/Data";
 import { getScoreBucket } from "../lib/utils";
+import { ClipLoader } from "react-spinners";
 
 function useNorryInfo(countryName) {
     const [info, setInfo] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (!countryName) return;
-        setLoading(true);
-        setError(null);
+    // useEffect(() => {
+    //     if (!countryName) return;
+    //     setLoading(true);
+    //     setError(null);
 
-        fetch(`${API_BASE}/country-info?country=${encodeURIComponent(countryName)}`)
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.error) {
-                    setError(data.error);
-                    setInfo("");
-                } else {
-                    setInfo(data.info);
-                }
-            })
-            .catch(() => {
-                setError("Failed to fetch info");
-                setInfo("");
-            })
-            .finally(() => setLoading(false));
-    }, [countryName]);
+    //     fetch(`${API_BASE}/country-info?country=${encodeURIComponent(countryName)}`)
+    //         .then((res) => res.json())
+    //         .then((data) => {
+    //             if (data.error) {
+    //                 setError(data.error);
+    //                 setInfo("");
+    //             } else {
+    //                 setInfo(data.info);
+    //             }
+    //         })
+    //         .catch(() => {
+    //             setError("Failed to fetch info");
+    //             setInfo("");
+    //         })
+    //         .finally(() => setLoading(false));
+    // }, [countryName]);
 
     return { info, loading, error };
 }
@@ -173,7 +174,7 @@ const CountryDetailsPage = ({
             {/* Raw Metrics Cards */}
             <section>
                 {metricsLoading ? (
-                    <p className="text-center text-gray-500">Loading metrics...</p>
+                    <ClipLoader size={18} color="#666" />
                 ) : metricsError ? (
                     <p className="text-center text-red-500">{metricsError}</p>
                 ) : rawMetrics.length > 0 ? (
@@ -192,20 +193,19 @@ const CountryDetailsPage = ({
                                         <h2 className="text-sm font-medium text-gray-700 mb-1">
                                             {m.metric_name}
                                         </h2>
-                                        <p
-                                            className="font-medium text-xs md:text-sm text-black/40 mb-3"
-                                            style={{ minHeight: '3.5rem', lineHeight: '1.2rem' }}
-                                        >
+                                        <p className="font-medium text-xs md:text-sm text-black/40 mb-3">
                                             {m.metric_description}
                                         </p>
                                     </div>
-
-                                    <div className="text-lg sm:text-2xl font-bold text-orange-600 whitespace-nowrap">
-                                        {m.raw_value}
-                                        <span className="text-xs sm:text-sm font-medium text-gray-500 ml-1">
-                                            {m.unit}
-                                        </span>
-                                    </div>
+                                    { m.raw_value != 0 ?
+                                        <div className="text-lg sm:text-2xl font-bold text-orange-600 whitespace-nowrap">
+                                            {m.raw_value}
+                                            <span className="text-xs sm:text-sm font-medium text-gray-500 ml-1">
+                                                {m.unit}
+                                            </span>
+                                        </div> :
+                                        <p className="italic font-medium text-xs md:text-sm text-black/60">Unfortunately, this data is unavailable at the moment, however, you can <a href="https://www.inforens.com/contact-us" target="_blank" className="underline text-orange-700">contact our experts</a> to obtain the latest information on <b>{country.country_name}</b>.</p>
+                                    }
                                 </div>
                             ))}
                     </div>

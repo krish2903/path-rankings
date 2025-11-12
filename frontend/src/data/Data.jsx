@@ -48,6 +48,15 @@ export const DISCIPLINES = [
   "Teaching & Education"
 ];
 
+// Buckets
+export const BUCKETS = [
+  "No Match",
+  "Best Match",
+  "Good Match",
+  "Fair Match",
+  "Weak Match"
+];
+
 export const iconMap = {
   // Metric group icons
   "Career Advancement Prospects": Briefcase,

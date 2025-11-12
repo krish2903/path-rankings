@@ -1,43 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { ChevronDown, ChevronUp, Search, RotateCcw, Check } from "lucide-react";
+import { useState } from "react";
+import { Search, Check } from "lucide-react";
+import { SheetHeader, SheetTitle, SheetFooter, SheetClose, SheetDescription } from "@/components/ui/sheet";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./ui/accordion";
+import { BUCKETS } from "@/data/Data";
 
-const FilterDropdown = ({
-  label,
-  count,
-  isOpen,
-  onToggle,
-  children,
-  className = "",
-}) => (
-  <div className={`relative ${className}`}>
-    <button
-      onClick={onToggle}
-      className="cursor-pointer flex items-center h-8 px-4 rounded-full bg-slate-200/70 transition-colors text-xs sm:text-sm font-medium text-black/80 hover:bg-orange-200 justify-between w-full sm:w-auto"
-      type="button"
-    >
-      <span>
-        {label}
-        {typeof count === "number" && (
-          <span className="ml-1 text-xs sm:text-sm text-orange-700 font-semibold">
-            ({count})
-          </span>
-        )}
-      </span>
-      {isOpen ? (
-        <ChevronUp className="h-4 w-4 text-orange-700 ml-2" />
-      ) : (
-        <ChevronDown className="h-4 w-4 text-orange-700 ml-2" />
-      )}
-    </button>
-    {isOpen && (
-      <div className="absolute left-0 mt-2 z-20 w-full sm:w-72 max-w-[90vw] bg-white rounded-3xl border border-gray-200 shadow-md p-4">
-        {children}
-      </div>
-    )}
-  </div>
-);
-
-const FilterSection = ({
+export default function FilterSheetContent({
   countries,
   selectedCountries,
   onCountryChange,
@@ -47,35 +14,28 @@ const FilterSection = ({
   industries,
   selectedIndustries,
   onIndustryChange,
+  selectedBuckets,
+  onBucketsChange,
   onApplyFilters,
-}) => {
-  const [openDropdown, setOpenDropdown] = useState(null);
+  onResetFilters,
+}) {
   const [countrySearch, setCountrySearch] = useState("");
   const [disciplineSearch, setDisciplineSearch] = useState("");
   const [industrySearch, setIndustrySearch] = useState("");
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setOpenDropdown(null);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const filteredCountries = countries.filter((country) =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase())
   );
+  const filteredDisciplines = disciplines.filter((n) =>
+    n.toLowerCase().includes(disciplineSearch.toLowerCase())
+  );
+  const filteredIndustries = industries.filter((n) =>
+    n.toLowerCase().includes(industrySearch.toLowerCase())
+  );
+
   const allFilteredCountriesSelected =
     filteredCountries.length > 0 &&
     filteredCountries.every((c) => selectedCountries.includes(c.id));
-
   const toggleSelectAllCountries = () => {
     if (allFilteredCountriesSelected) {
       filteredCountries.forEach(
@@ -90,184 +50,166 @@ const FilterSection = ({
     }
   };
 
-  const filteredDisciplines = disciplines.filter((n) =>
-    n.toLowerCase().includes(disciplineSearch.toLowerCase())
-  );
-  const filteredIndustries = industries.filter((n) =>
-    n.toLowerCase().includes(industrySearch.toLowerCase())
-  );
-
   return (
-    <div ref={containerRef} className="w-full px-2 mb-6 md:mb-4">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 w-full sm:w-auto">
-          {/* Country Filter */}
-          <FilterDropdown
-            label="Country"
-            count={selectedCountries.length}
-            isOpen={openDropdown === "country"}
-            onToggle={() =>
-              setOpenDropdown(
-                openDropdown === "country" ? null : "country"
-              )
-            }
-            className="w-full sm:w-auto"
-          >
-            <div className="mb-2 relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search countries..."
-                value={countrySearch}
-                onChange={(e) => setCountrySearch(e.target.value)}
-                className="w-full pl-8 pr-2 py-1 text-xs bg-gray-100 rounded-full focus:outline-none"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={toggleSelectAllCountries}
-              className="cursor-pointer w-full text-xs font-medium text-orange-700 bg-orange-100 rounded-full py-1 mb-1 hover:bg-orange-200"
-            >
-              {allFilteredCountriesSelected
-                ? "Deselect All"
-                : "Select All"}
-            </button>
-            <div className="max-h-74 overflow-y-auto">
-              {filteredCountries.map((country) => (
-                <label
-                  key={country.id}
-                  className="flex items-center space-x-2 px-2 py-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedCountries.includes(country.id)}
-                    onChange={(e) =>
-                      onCountryChange(country.id, e.target.checked)
-                    }
-                    className="accent-black cursor-pointer"
-                  />
-                  <span className="text-xs sm:text-sm text-black/80">
-                    {country.name}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </FilterDropdown>
-
-          {/* Discipline Filter */}
-          <FilterDropdown
-            label="Discipline"
-            count={selectedDisciplines.length}
-            isOpen={openDropdown === "discipline"}
-            onToggle={() =>
-              setOpenDropdown(
-                openDropdown === "discipline" ? null : "discipline"
-              )
-            }
-            className="w-full sm:w-auto"
-          >
-            <div className="mb-2 relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search disciplines..."
-                value={disciplineSearch}
-                onChange={(e) => setDisciplineSearch(e.target.value)}
-                className="w-full pl-8 pr-2 py-1 text-xs bg-gray-100 rounded-full focus:outline-none"
-              />
-            </div>
-            <div className="max-h-74 overflow-y-auto">
-              {filteredDisciplines.map((name) => {
-                const isSelected = selectedDisciplines.includes(name);
-                return (
-                  <label
-                    key={name}
-                    className="flex items-center space-x-2 px-2 py-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      disabled={
-                        !isSelected && selectedDisciplines.length >= 1
-                      }
-                      onChange={(e) =>
-                        onDisciplineChange(name, e.target.checked)
-                      }
-                      className="accent-black cursor-pointer"
-                    />
-                    <span className="text-xs sm:text-sm text-black/80">
-                      {name}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </FilterDropdown>
-
-          {/* Industry Filter */}
-          <FilterDropdown
-            label="Industry"
-            count={selectedIndustries.length}
-            isOpen={openDropdown === "industry"}
-            onToggle={() =>
-              setOpenDropdown(
-                openDropdown === "industry" ? null : "industry"
-              )
-            }
-            className="w-full sm:w-auto"
-          >
-            <div className="mb-2 relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search industries..."
-                value={industrySearch}
-                onChange={(e) => setIndustrySearch(e.target.value)}
-                className="w-full pl-8 pr-2 py-1 text-xs bg-gray-100 rounded-full focus:outline-none"
-              />
-            </div>
-            <div className="max-h-74 overflow-y-auto">
-              {filteredIndustries.map((name) => {
-                const isSelected = selectedIndustries.includes(name);
-                return (
-                  <label
-                    key={name}
-                    className="flex items-center space-x-2 px-2 py-1.5 rounded-full hover:bg-gray-100 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      disabled={
-                        !isSelected && selectedIndustries.length >= 1
-                      }
-                      onChange={(e) =>
-                        onIndustryChange(name, e.target.checked)
-                      }
-                      className="accent-black cursor-pointer"
-                    />
-                    <span className="text-xs sm:text-sm text-black/80">
-                      {name}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </FilterDropdown>
-        </div>
-
-        {/* Apply Button */}
-        <div className="flex gap-2 w-full sm:w-auto">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Sheet Header */}
+      <SheetHeader className="border-b border-black/5 px-2 py-4">
+        <SheetTitle>Filters</SheetTitle>
+        <SheetDescription className="text-xs text-black/70">Change the filters based on your preferences!</SheetDescription>
+        {onResetFilters && (
           <button
-            onClick={onApplyFilters}
-            className="cursor-pointer flex items-center justify-center gap-1 px-4 h-8 text-xs sm:text-sm font-medium text-white bg-[#E97451] hover:bg-orange-600 rounded-full w-full sm:w-auto"
+            type="button"
+            onClick={onResetFilters}
+            className="text-xs text-orange-700 underline hover:text-orange-900 transition ml-2"
           >
-            <Check className="h-4 w-4" />
-            <span>Apply</span>
+            Reset All
           </button>
-        </div>
+        )}
+      </SheetHeader>
+
+      {/* Filters Content */}
+      <div className="flex-1 overflow-y-auto px-2 py-2">
+        <Accordion type="single" defaultValue="country" collapsible>
+          {/* Country Section */}
+          <AccordionItem value="country">
+            <AccordionTrigger className="w-full flex justify-between">
+              <p className="w-full">Country</p>
+              <span className="text-xs text-orange-700 font-semibold px-8">({selectedCountries.length})</span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="mb-2 bg-black/5 py-2 px-3 rounded-full flex items-center gap-2">
+                <Search className="h-4 w-4 text-black/50" />
+                <input
+                  type="text"
+                  placeholder="Search countries..."
+                  value={countrySearch}
+                  onChange={(e) => setCountrySearch(e.target.value)}
+                  className="w-full text-xs outline-none"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={toggleSelectAllCountries}
+                className={`cursor-pointer w-full text-xs font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn ${allFilteredCountriesSelected ? "hidden" : "block"}`}
+              >
+                Select All
+              </button>
+              <div className="max-h-64 overflow-y-auto pr-1 space-y-1">
+                {filteredCountries.map((country) => (
+                  <label
+                    key={country.id}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg hover:bg-black/3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedCountries.includes(country.id)}
+                      onChange={(e) => onCountryChange(country.id, e.target.checked)}
+                      className="accent-orange-700 cursor-pointer"
+                    />
+                    <div className="w-full flex justify-between items-center pr-2">
+                      <span className="text-sm tracking-tight">{country.name}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Discipline Section */}
+          <AccordionItem value="discipline">
+            <AccordionTrigger className="w-full flex justify-between">
+              <p className="w-full">Discipline</p>
+              <span className="text-xs text-orange-700 font-semibold px-8">({selectedDisciplines.length})</span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="h-full overflow-y-auto pr-1 space-y-1">
+                {filteredDisciplines.map((name) => (
+                  <label
+                    key={name}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-black/3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedDisciplines.includes(name)}
+                      disabled={
+                        !selectedDisciplines.includes(name) && selectedDisciplines.length >= 1
+                      }
+                      onChange={(e) => onDisciplineChange(name, e.target.checked)}
+                      className="accent-orange-700 cursor-pointer"
+                    />
+                    <span className="text-sm tracking-tight">{name}</span>
+                  </label>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Industry Section */}
+          <AccordionItem value="industry">
+            <AccordionTrigger className="w-full flex justify-between">
+              <p className="w-full">Industry</p>
+              <span className="text-xs text-orange-700 font-semibold px-8">({selectedIndustries.length})</span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="h-full overflow-y-auto pr-1 space-y-1">
+                {filteredIndustries.map((name) => (
+                  <label
+                    key={name}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-black/3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedIndustries.includes(name)}
+                      disabled={
+                        !selectedIndustries.includes(name) && selectedIndustries.length >= 1
+                      }
+                      onChange={(e) => onIndustryChange(name, e.target.checked)}
+                      className="accent-orange-700 cursor-pointer"
+                    />
+                    <span className="text-sm tracking-tight">{name}</span>
+                  </label>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          {/* Category Section */}
+          <AccordionItem value="category">
+            <AccordionTrigger className="w-full flex justify-between">
+              <p className="w-full">Category</p>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="h-full overflow-y-auto pr-1 space-y-1">
+                {BUCKETS.map((b) => (
+                  <label
+                    key={b}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-black/3 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedBuckets.includes(b)}
+                      onChange={(e) => onBucketsChange(b, e.target.checked)}
+                      className="accent-orange-700 cursor-pointer"
+                    />
+                    <span className="text-sm tracking-tight">{b}</span>
+                  </label>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
+
+      {/* Sheet Footer (apply button) */}
+      <SheetFooter className="px-4 py-4 shadow-sm">
+        <SheetClose
+          onClick={onApplyFilters}
+          className="w-full flex items-center justify-center gap-2 px-4 h-9 text-sm font-semibold rounded-full text-white bg-[#E97451] hover:bg-orange-600 cursor-pointer transition"
+        >
+          <Check className="h-5 w-5" />
+          Apply Filters
+        </SheetClose>
+      </SheetFooter>
     </div>
   );
-};
-
-export default FilterSection;
+}

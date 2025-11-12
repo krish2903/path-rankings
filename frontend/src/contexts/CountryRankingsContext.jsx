@@ -13,9 +13,11 @@ export function CountryRankingsProvider({ children }) {
   // Filter/Selection States
   const [weights, setWeights] = useState({});
   const [pendingWeights, setPendingWeights] = useState({});
+  const [pendingRatings, setPendingRatings] = useState({}); 
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [selectedDisciplines, setSelectedDisciplines] = useState([]);
   const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const [selectedBuckets, setSelectedBuckets] = useState([]);
 
   // Loading States
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,6 @@ export function CountryRankingsProvider({ children }) {
     return values.every((val) => val === values[0]);
   }, [pendingWeights]);
 
-  // Wrap everything needed for shared usage
   const ctx = {
     rankings, setRankings,
     countries, setCountries,
@@ -40,9 +41,11 @@ export function CountryRankingsProvider({ children }) {
     disciplinesData, setDisciplinesData,
     weights, setWeights,
     pendingWeights, setPendingWeights,
+    pendingRatings, setPendingRatings, 
     selectedCountries, setSelectedCountries,
     selectedDisciplines, setSelectedDisciplines,
     selectedIndustries, setSelectedIndustries,
+    selectedBuckets, setSelectedBuckets,
     loading, setLoading,
     buttonLoading, setButtonLoading,
     mobileSliderOpen, setMobileSliderOpen,
