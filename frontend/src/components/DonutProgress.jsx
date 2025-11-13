@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getScoreBucket } from "@/lib/utils";
+import { getDonutScoreBucket } from "@/lib/utils";
 
 const DonutProgress = ({ value, size = 60, strokeWidth = 6, Icon, tooltip }) => {
   const radius = (size - strokeWidth) / 2;
@@ -89,7 +89,7 @@ const DonutProgress = ({ value, size = 60, strokeWidth = 6, Icon, tooltip }) => 
       <div className="flex items-center justify-center">
         <div className="flex gap-2 flex-wrap justify-end">
           {(() => {
-            const bucket = getScoreBucket(value);
+            const bucket = getDonutScoreBucket(value);
             return (
               <div
                 className={`text-orange-600 font-bold`}

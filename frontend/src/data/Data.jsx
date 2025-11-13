@@ -50,7 +50,6 @@ export const DISCIPLINES = [
 
 // Buckets
 export const BUCKETS = [
-  "No Match",
   "Best Match",
   "Good Match",
   "Fair Match",

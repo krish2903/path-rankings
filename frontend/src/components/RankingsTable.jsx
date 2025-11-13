@@ -1,14 +1,14 @@
-import { useState, useMemo } from "react";
-import { Cross, Star, X } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Star, X } from "lucide-react";
 import { iconMap } from "../data/Data";
 import DonutProgress from "./DonutProgress";
 import CountryDetailsPage from "./CountryDetails";
-import { getScoreBucket } from "../lib/utils";
+import { getBuckets } from "../lib/utils";
 
 function getValue(row, key, groupNames) {
   if (key === "rank") return row.rank;
   if (key === "country_name") return row.country_name;
-  if (key === "final_score") return row.final_score;
+  if (key === "final_score" || key === "score") return row.score;
   if (key === "overall_score") return row.overall_score;
   if (key === "discipline_score") return row.discipline_score;
   if (key === "industry_score") return row.industry_score;
@@ -26,9 +26,11 @@ const RankingsTable = ({
   industriesData = [],
   disciplinesData = [],
 }) => {
-  const [sortConfig, setSortConfig] = useState({ key: "final_score", direction: "desc" });
+  const [sortConfig, setSortConfig] = useState({ key: "score", direction: "desc" });
   const [selectedCountry, setSelectedCountry] = useState(null);
+  const [bucketedData, setBucketedData] = useState([]);
 
+  // Calculate metric group names
   let groupNames = [];
   if (metricGroups && metricGroups.length) {
     groupNames = metricGroups.map((g) => g.name);
@@ -36,10 +38,11 @@ const RankingsTable = ({
     groupNames = Object.keys(rankings[0].groups);
   }
 
+  // Table columns
   const columns = [
     { key: "rank", label: "No.", numeric: true },
     { key: "country_name", label: "Name", numeric: false },
-    { key: "final_score", label: "Final Score", numeric: true },
+    { key: "score", label: "Final Score", numeric: true },
     { key: "overall_score", label: "Overall Score", numeric: true },
     { key: "discipline_score", label: "Discipline Score", numeric: true },
     { key: "industry_score", label: "Industry Score", numeric: true },
@@ -50,11 +53,29 @@ const RankingsTable = ({
     })),
   ];
 
-  const dataWithRank = rankings.map((row, idx) => ({
+  // Compute bucketed/graded countries from rankings
+  useEffect(() => {
+    if (!rankings.length) {
+      setBucketedData([]);
+      return;
+    }
+    const scored = getBuckets(
+      rankings.map((row) => ({
+        country: row.country_name,
+        score: row.final_score,
+        ...row,
+      }))
+    );
+    setBucketedData(scored);
+  }, [rankings]);
+
+  // Add rank index
+  const dataWithRank = bucketedData.map((row, idx) => ({
     ...row,
     rank: idx + 1,
   }));
 
+  // Sort data
   const sortedData = useMemo(() => {
     if (!sortConfig.key) return dataWithRank;
     const col = columns.find((c) => c.key === sortConfig.key);
@@ -62,11 +83,9 @@ const RankingsTable = ({
     return [...dataWithRank].sort((a, b) => {
       const aValue = getValue(a, sortConfig.key, groupNames);
       const bValue = getValue(b, sortConfig.key, groupNames);
-
       if (aValue == null && bValue == null) return 0;
       if (aValue == null) return 1;
       if (bValue == null) return -1;
-
       if (col.numeric) {
         return sortConfig.direction === "asc"
           ? Number(aValue) - Number(bValue)
@@ -79,6 +98,7 @@ const RankingsTable = ({
     });
   }, [dataWithRank, sortConfig, columns, groupNames]);
 
+  // Prepare industry/discipline lookup
   const industriesByCountry = useMemo(() => {
     const map = {};
     industriesData.forEach((entry) => {
@@ -88,7 +108,6 @@ const RankingsTable = ({
     });
     return map;
   }, [industriesData]);
-
   const disciplinesByCountry = useMemo(() => {
     const map = {};
     disciplinesData.forEach((entry) => {
@@ -132,7 +151,6 @@ const RankingsTable = ({
               industriesByCountry[country.country_name.toLowerCase()] ?? null;
             const disciplineInfo =
               disciplinesByCountry[country.country_name.toLowerCase()] ?? null;
-
             return (
               <div
                 key={country.country_id}
@@ -141,9 +159,7 @@ const RankingsTable = ({
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    handleCardClick(country);
-                  }
+                  if (e.key === "Enter" || e.key === " ") handleCardClick(country);
                 }}
                 aria-label={`View details for ${country.country_name}`}
               >
@@ -152,18 +168,14 @@ const RankingsTable = ({
                     <span className="text-sm font-bold text-white">{country.rank}</span>
                   </div>
                   <div className="flex gap-2 flex-wrap justify-end">
-                    {(() => {
-                      const bucket = getScoreBucket(country.final_score);
-                      return (
-                        <div
-                          className={`rounded-full py-0.5 px-2.5 ${bucket.classes}`}
-                          title={`${bucket.label} (${country.final_score.toFixed(2)}%)`}
-                          aria-label={`${bucket.label}`}
-                        >
-                          <span className="text-sm font-medium">{bucket.label}</span>
-                        </div>
-                      );
-                    })()}
+                    <div
+                      className={`flex items-center gap-1.5 rounded-full py-0.5 px-2.5 ${country.classes}`}
+                      title={`${country.label} (${country.grade}) (${Number(country.score).toFixed(2)}%)`}
+                      aria-label={`${country.label} (${country.grade})`}
+                    >
+                      <span className="text-sm font-medium">{country.bucket}</span>
+                      <div className="flex justify-center items-center w-6 h-6 bg-white/50 ring ring-white/30 rounded-full font-semibold text-xs">{country.grade}</div>
+                    </div>
                   </div>
                 </div>
 
@@ -183,7 +195,9 @@ const RankingsTable = ({
 
                   <div className="min-h-10">
                     {disciplineInfo?.comments && (
-                      <p className="text-xs md:text-sm text-gray-600">{disciplineInfo.comments}</p>
+                      <p className="text-xs md:text-sm text-gray-600">
+                        {disciplineInfo.comments}
+                      </p>
                     )}
                   </div>
 
@@ -193,12 +207,11 @@ const RankingsTable = ({
                       const score = scoreRaw != null ? scoreRaw.toFixed(2) : "—";
                       const numericScore = score === "—" ? 0 : parseFloat(score);
                       const IconComponent = iconMap[groupName] || Star;
-
                       return (
                         <div
                           key={groupName}
                           className="flex flex-col items-center justify-center py-2 text-black/80"
-                          title={`${groupName}: ${score === "—" ? "No data" : getScoreBucket(numericScore).label}`}
+                          title={`${groupName}: ${score === "—" ? "No data" : country.bucket}`}
                         >
                           {score === "—" ? (
                             <div className="text-sm text-orange-600 font-bold">—</div>
@@ -262,7 +275,6 @@ const RankingsTable = ({
           })}
         </div>
       </div>
-
       {selectedCountry && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-2 sm:p-6"
