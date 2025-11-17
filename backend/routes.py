@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
 from models import db, Country, CountryIndustry, CountryDisciplines, MetricGroup, Metric, country_metrics
 from utils import calculate_country_scores
-from norry import get_info
+from norry import get_info, extract_json_object
 import base64
+import json
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -147,8 +148,16 @@ def country_info():
         return jsonify({"error": "Missing country parameter"}), 400
 
     try:
-        info = get_info(country)
-        return jsonify({"country": country, "info": info})
+        info_raw = get_info(country)
+        json_str = extract_json_object(info_raw)
+        print(json_str)
+        if not json_str:
+            return jsonify({"error": "No JSON object found in response", "original": info_raw}), 500
+        try:
+            info_json = json.loads(json_str)
+        except Exception as e:
+            return jsonify({"error": f"JSON decode error: {str(e)}", "original": json_str}), 500
+        return jsonify({"country": country, "cards": info_json.get("cards", [])})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

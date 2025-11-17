@@ -19,7 +19,13 @@ import {
   BookOpen,
   BriefcaseMedical,
   BookOpenCheck,
-  School
+  School,
+  Lightbulb,
+  MapPin,
+  Home,
+  Newspaper,
+  FileBadge,
+  Wallet
 } from "lucide-react";
 
 // API BASE
@@ -83,4 +89,15 @@ export const iconMap = {
   "Business, Economics & Management": BriefcaseBusiness,
   "Social Sciences & Law": Users,
   "Teaching & Education": BookOpen,
+
+  //Nori News Icons
+  "Government Policies": Globe2,
+  "Career Opportunities": Briefcase,
+  "Financial Benefits": CircleDollarSign,
+  "Student Hacks": Lightbulb,
+  "Travel Destinations": MapPin,
+  "Life Quality": Home,
+  "Campus News": Newspaper,
+  "Visa Updates": FileBadge,
+  "Cost of Living": Wallet,
 };

@@ -72,9 +72,9 @@ export default function FilterSheetContent({
         <Accordion type="single" defaultValue="country" collapsible>
           {/* Country Section */}
           <AccordionItem value="country">
-            <AccordionTrigger className="w-full flex justify-between">
+            <AccordionTrigger className="w-full px-2 flex justify-between">
               <p className="w-full">Country</p>
-              <span className="text-xs text-orange-700 font-semibold px-8">({selectedCountries.length})</span>
+              <span className="text-xs text-orange-700 font-medium px-8">({selectedCountries.length})</span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="mb-2 bg-black/5 py-2 px-3 rounded-full flex items-center gap-2">
@@ -98,7 +98,7 @@ export default function FilterSheetContent({
                 {filteredCountries.map((country) => (
                   <label
                     key={country.id}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-lg hover:bg-black/3 cursor-pointer"
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-black/3 cursor-pointer"
                   >
                     <input
                       type="checkbox"
@@ -107,7 +107,7 @@ export default function FilterSheetContent({
                       className="accent-orange-700 cursor-pointer"
                     />
                     <div className="w-full flex justify-between items-center pr-2">
-                      <span className="text-sm tracking-tight">{country.name}</span>
+                      <span className="text-xs tracking-tight">{country.name}</span>
                     </div>
                   </label>
                 ))}
@@ -117,9 +117,9 @@ export default function FilterSheetContent({
 
           {/* Discipline Section */}
           <AccordionItem value="discipline">
-            <AccordionTrigger className="w-full flex justify-between">
+            <AccordionTrigger className="w-full px-2 flex justify-between">
               <p className="w-full">Discipline</p>
-              <span className="text-xs text-orange-700 font-semibold px-8">({selectedDisciplines.length})</span>
+              <span className="text-xs text-orange-700 font-medium px-8">({selectedDisciplines.length})</span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="h-full overflow-y-auto pr-1 space-y-1">
@@ -137,7 +137,7 @@ export default function FilterSheetContent({
                       onChange={(e) => onDisciplineChange(name, e.target.checked)}
                       className="accent-orange-700 cursor-pointer"
                     />
-                    <span className="text-sm tracking-tight">{name}</span>
+                    <span className="text-xs tracking-tight">{name}</span>
                   </label>
                 ))}
               </div>
@@ -146,9 +146,9 @@ export default function FilterSheetContent({
 
           {/* Industry Section */}
           <AccordionItem value="industry">
-            <AccordionTrigger className="w-full flex justify-between">
+            <AccordionTrigger className="w-full px-2 flex justify-between">
               <p className="w-full">Industry</p>
-              <span className="text-xs text-orange-700 font-semibold px-8">({selectedIndustries.length})</span>
+              <span className="text-xs text-orange-700 font-medium px-8">({selectedIndustries.length})</span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="h-full overflow-y-auto pr-1 space-y-1">
@@ -166,7 +166,7 @@ export default function FilterSheetContent({
                       onChange={(e) => onIndustryChange(name, e.target.checked)}
                       className="accent-orange-700 cursor-pointer"
                     />
-                    <span className="text-sm tracking-tight">{name}</span>
+                    <span className="text-xs tracking-tight">{name}</span>
                   </label>
                 ))}
               </div>
@@ -175,7 +175,7 @@ export default function FilterSheetContent({
 
           {/* Category Section */}
           <AccordionItem value="category">
-            <AccordionTrigger className="w-full flex justify-between">
+            <AccordionTrigger disabled={true} className="w-full px-2 text-black/30 flex justify-between">
               <p className="w-full">Category</p>
             </AccordionTrigger>
             <AccordionContent>

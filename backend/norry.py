@@ -1,21 +1,48 @@
-import os
-import requests
+import os, re, requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 API_KEY = os.getenv("NORRY_API_KEY")
-
 url = "https://api.perplexity.ai/chat/completions"
 
+def extract_json_object(text):
+    text = re.sub(r'^`{3,}\w*\s*', '', text)
+    text = re.sub(r'`{3,}\s*$', '', text)
+
+    start = text.find('{')
+    if start == -1:
+        return None  
+
+    depth = 0
+    for i in range(start, len(text)):
+        if text[i] == '{':
+            depth += 1
+        elif text[i] == '}':
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                json_str = text[start:end]
+                return json_str
+    return None  
+
 def get_info(country: str):
-    prompt = f"""You are Norry, an expert at assisting international students with a personal and friendly nature/tone. 
-    Give me the latest information that is relevant to prospective international students planning to study in {country}. 
-    Focus on updates or news that would impact their decision-making process before they arrive — such as changes to visa rules, tuition fees, cost of living, post-study work rights, safety conditions, or immigration pathways and any other things that you think would be important to them. 
-    If there are no updates in some areas, skip them. 
-    Keep it short and precise, strictly no more than 300 words in total. Do not include any citations or numbers like [1][2] or any special characters like @,*, etc, as well as double asterisks for bold format or any other symbols. This content will be displayed as a part of HTML code so just provide the relevant information.
-    Format any bulleted lists with bullet points (no dashes or hyphens) and make sure they are properly spaced and there is no spacing between list items.
-    In your answer, give 2-3 reasons why {country} is best country for an international student to study and in your reasoning be specific as to what disciplines or industries or what type of student is {country} suited best for."""
+    prompt = f'''You are Norry, an expert assistant for international students with a personal and friendly nature/tone.
+
+For the given country, return a JSON array with exactly 6 cards. Each card should have these fields:
+
+- "headline": An interesting title that highlights the main news or update, written to be exciting for international students (positive or negative - it has to be valuable and applicable to international students).
+- "category": Choose from: government policies, career opportunities, financial benefits, student hacks, travel destinations, life quality, campus news, visa updates or cost of living, make it specifically relevant to international students. Only use categories specific to international student concerns.
+- "description": 1-2 sentences summarizing the update or tip in a compelling, concise way—a bit with the key facts and important points highlighted (no irrelevant or extra data - just to-the-point news).
+
+Only include news or updates directly relevant to international students and their decision-making before arrival, such as visa/news rules, major tuition changes, post-study work, scholarships, student life, etc. Skip areas without recent news/updates.
+Make sure the news or update is the most recent and applicable to international students thinking about pursuing higher education abroad.
+
+Return ONLY the JSON with these 6 cards and nothing else—no extra text.
+
+IMPORTANT: Return as a strict JSON object starting and ending with a curly bracket.
+Country: {country}
+'''
 
     headers = {
         "Authorization": f"Bearer {API_KEY}",

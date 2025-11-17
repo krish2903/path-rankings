@@ -1,16 +1,15 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DonutProgress from "./DonutProgress";
-import { iconMap } from "../data/Data";
 import { Globe2 } from "lucide-react";
-import { API_BASE } from "../data/Data";
+import { API_BASE, iconMap } from "../data/Data";
 import { ClipLoader } from "react-spinners";
 
 function useNorryInfo(countryName) {
-  const [info, setInfo] = useState("");
+  const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  /*
+
   useEffect(() => {
     if (!countryName) return;
     setLoading(true);
@@ -20,19 +19,25 @@ function useNorryInfo(countryName) {
       .then((data) => {
         if (data.error) {
           setError(data.error);
-          setInfo("");
+          setCards([]);
         } else {
-          setInfo(data.info);
+          // console.log(Object.values(data.cards));
+          setCards(Object.values(data.cards));
+          // console.log(cards);
         }
       })
       .catch(() => {
         setError("Failed to fetch info");
-        setInfo("");
+        setCards([]);
       })
       .finally(() => setLoading(false));
   }, [countryName]);
-  */
-  return { info, loading, error };
+
+  // useEffect(() => {
+  //   console.log("cards updated:", cards);
+  // }, [cards]);
+
+  return { cards, loading, error };
 }
 
 const CountryDetailsPage = ({
@@ -55,21 +60,6 @@ const CountryDetailsPage = ({
   const industriesData = isModal ? propIndustriesData : location.state?.industriesData;
   const disciplinesData = isModal ? propDisciplinesData : location.state?.disciplinesData;
 
-  if (!country) {
-    if (isModal) return null;
-    return (
-      <div className="p-8">
-        <p>No country data available.</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 px-4 py-2 bg-orange-500 text-white rounded"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (!country?.country_name) return;
     const fetchMetrics = async () => {
@@ -91,10 +81,39 @@ const CountryDetailsPage = ({
     fetchMetrics();
   }, [country?.country_name]);
 
+  const getIcon = (name) => {
+    for (const key in iconMap) {
+      if (name.toLowerCase().includes(key.toLowerCase())) {
+        return iconMap[key];
+      }
+    }
+    return Sparkle;
+  };
+
   const industryInfo = industriesData?.find(
     (entry) => entry.country.toLowerCase() === country.country_name.toLowerCase()
   );
-  const { info, loading: infoLoading, error } = useNorryInfo(country.country_name);
+
+  const disciplineInfo = disciplinesData?.find(
+    (entry) => entry.country.toLowerCase() === country.country_name.toLowerCase()
+  );
+
+  const { cards, loading: norryLoading, error: norryError } = useNorryInfo(country?.country_name);
+
+  if (!country) {
+    if (isModal) return null;
+    return (
+      <div className="p-8">
+        <p>No country data available.</p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-4 py-2 bg-orange-500 text-white rounded"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 px-3 sm:px-4">
@@ -109,16 +128,15 @@ const CountryDetailsPage = ({
         >
           {country.country_name}
         </h1>
-        {/* Bucket and grade from country */}
         {country.bucket && country.classes && country.grade && (
-          <p
+          <div
             className={`flex items-center gap-1.5 rounded-full py-1 px-4 ${country.classes}`}
             title={`${country.bucket} (${country.grade}) (${Number(country.score).toFixed(2)}%)`}
             aria-label={`${country.bucket} (${country.grade})`}
           >
             <span className="text-sm font-medium">{country.bucket}</span>
             <div className="flex justify-center items-center w-6 h-6 bg-white/50 ring ring-white/30 rounded-full font-semibold text-xs">{country.grade}</div>
-            </p>
+          </div>
         )}
       </div>
 
@@ -219,59 +237,50 @@ const CountryDetailsPage = ({
         )}
       </section>
 
-      {/* Disciplines Section */}
+      {/* Top Disciplines Section */}
       <section>
         <h1 className="w-full text-center text-xs sm:text-sm pb-1 font-medium uppercase text-black/50 mb-1 tracking-wider border-b border-black/10">
           Top Disciplines
         </h1>
-        {(() => {
-          const disciplineInfo = disciplinesData.find(
-            (entry) =>
-              entry.country.toLowerCase() === country.country_name.toLowerCase()
-          );
-          if (!disciplineInfo) {
-            return (
-              <p className="text-center text-gray-500 font-medium">
-                No disciplines information available.
+        {disciplineInfo ? (
+          <div className="flex flex-col items-center">
+            {disciplineInfo.comments && (
+              <p className="mt-4 text-black/60 text-center text-sm sm:text-md">
+                {disciplineInfo.comments}
               </p>
-            );
-          }
-          return (
-            <div className="flex flex-col items-center">
-              {disciplineInfo.comments && (
-                <p className="mt-4 text-black/60 text-center text-sm sm:text-md">
-                  {disciplineInfo.comments}
-                </p>
-              )}
-              {disciplineInfo.top_disciplines.length > 0 ? (
-                <div className="w-full max-w-xl grid grid-cols-3 justify-items-center mt-6 gap-y-4 gap-x-1">
-                  {disciplineInfo.top_disciplines.map((discipline, i) => {
-                    const IconComponent = iconMap[discipline] || null;
-                    return (
-                      <div
-                        key={i}
-                        className="flex flex-col items-center px-1 gap-1 md:gap-2"
-                      >
-                        {IconComponent && (
-                          <div className="flex items-center justify-center bg-indigo-900 rounded-full p-2 md:p-4">
-                            <IconComponent className="h-4 w-4 md:h-6 md:w-6 text-white" />
-                          </div>
-                        )}
-                        <span className="text-xs font-medium tracking-tight text-black/60 text-center">
-                          {discipline}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="italic text-gray-500">
-                  No top disciplines available.
-                </p>
-              )}
-            </div>
-          );
-        })()}
+            )}
+            {disciplineInfo.top_disciplines.length > 0 ? (
+              <div className="w-full max-w-xl grid grid-cols-3 justify-items-center mt-6 gap-y-4 gap-x-1">
+                {disciplineInfo.top_disciplines.map((discipline, i) => {
+                  const IconComponent = iconMap[discipline] || null;
+                  return (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center px-1 gap-1 md:gap-2"
+                    >
+                      {IconComponent && (
+                        <div className="flex items-center justify-center bg-indigo-900 rounded-full p-2 md:p-4">
+                          <IconComponent className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                        </div>
+                      )}
+                      <span className="text-xs font-medium tracking-tight text-black/60 text-center">
+                        {discipline}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="italic text-gray-500">
+                No top disciplines available.
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 font-medium">
+            No disciplines information available.
+          </p>
+        )}
       </section>
 
       {/* Top Industries Section */}
@@ -344,30 +353,63 @@ const CountryDetailsPage = ({
         )}
       </section>
 
-      {/* Nori Info */}
-      <div className="px-2 py-2 text-xs sm:text-sm rounded-md min-h-[80px] text-justify whitespace-pre-wrap">
+      {/* Nori Info Cards */}
+      <section>
         <h1 className="w-full text-center text-xs sm:text-sm pb-1 font-medium uppercase text-black/50 mb-1 tracking-wider border-b border-black/10">
-          Here's what Nori, your personal AI companion, says
+          Top News with Nori
         </h1>
-        <div className="flex flex-col justify-center items-center pt-4 gap-4">
-          <img src="./norry.png" className="h-16 w-16" />
-          {infoLoading && (
-            <p className="text-black/60 tracking-tight font-light">
-              Still thinking...
-            </p>
-          )}
-          {error && (
-            <p className="text-black/60 tracking-tight font-light">
-              Nori is sleeping at the moment. Try Again later!
-            </p>
-          )}
-          {!infoLoading && !error && info && (
-            <p className="text-black/80 tracking-tight font-light fadeIn">
-              {info}
-            </p>
-          )}
-        </div>
-      </div>
+        {norryLoading ? (
+          <div className="w-full flex justify-center py-6">
+            <ClipLoader size={22} color="#666" />
+          </div>
+        ) : norryError ? (
+          <p className="text-red-500 text-center font-medium">{norryError}</p>
+        ) : cards.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2 py-4">
+            {cards.map((card, idx) => {
+              const Icon = getIcon(card.category);
+              return (
+                <div
+                  key={idx}
+                  className="flex flex-col justify-top bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-200 fadeIn"
+                >
+                  {/* {card.image_url && (
+                  <img
+                    src={card.image_url}
+                    alt={card.headline}
+                    className="w-full h-32 object-cover rounded-xl mb-2"
+                  />
+                )} */}
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs font-medium uppercase text-gray-400 tracking-wide mb-2">
+                      <Icon className="w-4 h-4 text-[#ec5b22]" />
+                      {card.category}
+                    </div>
+                    <h2 className="text-sm font-medium text-gray-700 mb-1">
+                      {card.headline}
+                    </h2>
+                  </div>
+                  <p className="font-medium text-xs md:text-sm text-black/40 mb-3">
+                    {card.description}
+                  </p>
+                  {/* {card.source_url && (
+                  <a
+                    href={card.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 px-3 py-2 bg-orange-500 text-white text-xs rounded-lg font-medium self-start hover:bg-orange-600 transition"
+                  >
+                    Read More
+                  </a>
+                )} */}
+                </div>
+              )
+            })}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500">No trending news available for this country.</p>
+        )}
+      </section>
 
       {/* More Info */}
       <section>
