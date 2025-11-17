@@ -1,7 +1,7 @@
 import requests
 
 # Base URL for your backend API
-BASE_URL = "http://localhost:5000/api/rankings"
+BASE_URL = "http://localhost:5000/api/country-rankings"
 
 # The 20 test configurations as (G1, G2, G3, G4)
 # G1 = Financial Value & Returns
@@ -9,7 +9,6 @@ BASE_URL = "http://localhost:5000/api/rankings"
 # G3 = Life Quality & Long-term Settlement
 # G4 = Govt & Policy Environment
 test_weights = [
-    (0.25, 0.25, 0.25, 0.25),
     (1.00, 0.00, 0.00, 0.00),
     (0.00, 1.00, 0.00, 0.00),
     (0.00, 0.00, 1.00, 0.00),
@@ -19,16 +18,7 @@ test_weights = [
     (0.50, 0.00, 0.00, 0.50),
     (0.00, 0.50, 0.50, 0.00),
     (0.00, 0.50, 0.00, 0.50),
-    (0.00, 0.00, 0.50, 0.50),
-    (0.33, 0.33, 0.33, 0.01),
-    (0.40, 0.20, 0.20, 0.20),
-    (0.20, 0.40, 0.20, 0.20),
-    (0.20, 0.20, 0.40, 0.20),
-    (0.20, 0.20, 0.20, 0.40),
-    (0.60, 0.10, 0.10, 0.20),
-    (0.10, 0.60, 0.10, 0.20),
-    (0.10, 0.10, 0.60, 0.20),
-    (0.10, 0.10, 0.20, 0.60)
+    (0.00, 0.00, 0.50, 0.50)
 ]
 
 # The exact mapping of group IDs in your DB for the API query parameters.
@@ -78,5 +68,5 @@ def run_tests():
 
 
 if __name__ == "__main__":
-    print("Running API tests for 20 weight combinations...\n")
+    print("Running API tests for weight combinations...\n")
     run_tests()
