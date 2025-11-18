@@ -1,3 +1,4 @@
+from linecache import lazycache
 from db import db
 from sqlalchemy.dialects.postgresql import ARRAY
 
@@ -34,6 +35,8 @@ class University(db.Model):
         backref=db.backref('universities', lazy='dynamic'),
         lazy='dynamic'
     )
+
+    country = db.relationship("Country", backref="universities")
 
 university_metrics = db.Table(
     'university_metrics',

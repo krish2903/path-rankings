@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
-from models import db, Country, CountryIndustry, CountryDisciplines, MetricGroup, Metric, country_metrics
-from utils import calculate_country_scores
+from models import University, db, Country, CountryIndustry, CountryDisciplines, MetricGroup, Metric, country_metrics
+from utils import calculate_country_scores, calculate_university_scores
 from norry import get_info, extract_json_object
 import base64
 import json
+from sqlalchemy.orm import joinedload
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -70,6 +71,34 @@ def get_countries():
         })
 
     return jsonify(result), 200
+
+@bp.route('/get-universities', methods=['GET'])
+def get_universities():
+    try:
+        universities = db.session.query(University).options(
+            joinedload(University.country)
+        ).all()
+        
+        result = []
+        for u in universities:
+            country_name = u.country.name if u.country else None
+            
+            result.append({
+                "id": u.id,
+                "name": u.name,
+                "city": u.city,
+                "country_name": country_name, 
+            })
+        
+        return jsonify({"success": True, "results": result})
+
+    except Exception as e:
+        print(f"Error fetching university list: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to fetch university list.",
+            "details": str(e)
+        }), 500
 
 @bp.route('/get-metric-groups', methods=['GET'])
 def get_metric_groups():
@@ -178,3 +207,26 @@ def get_rankings():
     )
     return jsonify(results)
 
+@bp.route('/university-rankings', methods=['GET'])
+def university_rankings():
+    try:
+        group_weights = {
+            int(k.replace("group_", "")): float(v)
+            for k, v in request.args.items()
+            if k.startswith("group_")
+        }
+
+        ranked_results = calculate_university_scores(group_weights=group_weights)
+        
+        return jsonify({
+            "success": True,
+            "results": ranked_results
+        })
+
+    except Exception as e:
+        print(f"Error calculating university rankings: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to calculate rankings.",
+            "details": str(e)
+        }), 500

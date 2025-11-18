@@ -199,14 +199,15 @@ const UniRankingsPage = () => {
             {!weightsAdjusted ? (
                 <>
                     {/* Initial Weights Section */}
-                    <section className="h-screen w-full flex flex-col md:flex-row justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
-                        <header className="text-center">
+                    <section className="h-screen w-full flex flex-col md:grid md:grid-cols-2 justify-items-center justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
+                        <header className="flex flex-col items-center text-center">
                             <h1 className="text-4xl lg:text-5xl font-medium tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400 py-2">
                                 University Rankings
                             </h1>
                             <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
                                 <p>Explore the rankings of the top universities based on your preferences.</p>
                             </div>
+                            <img src="https://illustrations.popsy.co/amber/studying.svg" className="hidden sm:block max-h-96" />
                         </header>
                         <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
                             {metricGroups.length > 0 && (
@@ -301,16 +302,19 @@ const UniRankingsPage = () => {
                                                         <span>Preferences</span>
                                                     </div>
                                                 </DrawerTrigger>
-                                                <DrawerContent className="px-8 md:px-64">
+                                                <DrawerContent className="px-8 lg:px-64">
                                                     <div className="h-2 w-32 md:w-48 bg-black/5 rounded-full mx-auto mb-4" />
                                                     <DrawerTitle className="text-center py-2">Preferences</DrawerTitle>
                                                     <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
-                                                    {metricGroups.length > 0 ? (
-                                                        <PrioritySelector
-                                                            groups={metricGroups}
-                                                            onWeightChange={setPendingWeights}
-                                                        />
-                                                    ) : "Error"}
+                                                    <div className="w-full flex items-center justify-center">
+                                                        <img src="https://illustrations.popsy.co/amber/studying.svg" className="hidden sm:block max-h-96" />
+                                                        {metricGroups.length > 0 ? (
+                                                            <PrioritySelector
+                                                                groups={metricGroups}
+                                                                onWeightChange={setPendingWeights}
+                                                            />
+                                                        ) : "Error"}
+                                                    </div>
                                                     <DrawerClose asChild>
                                                         <button
                                                             className={`max-w-sm md:max-w-md bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 mx-auto my-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingWeights, metricGroups)

@@ -98,8 +98,7 @@ export default function PrioritySelector({ groups = [], onWeightChange }) {
         Use the slider to rate <b>every group</b> from 1-5.<br />
         <b>1</b> being not important and <b>5</b> being highly important.<br />
       </p>
-      <div className="w-full flex gap-4 py-4 justify-center">
-        <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="hidden sm:block max-h-84" />
+      <div className="w-full flex gap-4 py-4 max-w-lg justify-center">
         <div className="w-full flex flex-col gap-4">
           {groups.map(g => (
             <LikertGroupCard
