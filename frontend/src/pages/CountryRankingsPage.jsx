@@ -206,7 +206,7 @@ const RankingsPage = () => {
                             <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
                                 <p>Explore the rankings of countries based on your preferences.</p>
                             </div>
-                            <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="max-h-36 sm:max-h-96 fadeIn" />
+                            <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="max-h-32 sm:max-h-96 fadeIn" />
                         </header>
                         <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
                             {countryMetricGroups.length > 0 && (
@@ -307,7 +307,7 @@ const RankingsPage = () => {
                                                     <DrawerTitle className="text-center py-2">Preferences</DrawerTitle>
                                                     <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
                                                     <div className="flex flex-col sm:flex-row justify-center items-center">
-                                                        <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="max-h-36 sm:max-h-96" />
+                                                        <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="max-h-32 sm:max-h-96" />
                                                         {countryMetricGroups.length > 0 ? (
                                                             <PrioritySelector
                                                                 groups={countryMetricGroups}

@@ -212,7 +212,7 @@ const UniRankingsPage = () => {
                             <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
                                 <p>Explore the rankings of the top universities based on your preferences.</p>
                             </div>
-                            <img src="https://illustrations.popsy.co/amber/studying.svg" className="max-h-36 sm:max-h-96 fadeIn" />
+                            <img src="https://illustrations.popsy.co/amber/studying.svg" className="max-h-32 sm:max-h-96 fadeIn" />
                         </header>
                         <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
                             {uniMetricGroups.length > 0 && (
@@ -292,7 +292,7 @@ const UniRankingsPage = () => {
                                                     <DrawerTitle className="text-center py-2">Preferences</DrawerTitle>
                                                     <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
                                                     <div className="w-full flex flex-col sm:flex-row items-center justify-center">
-                                                        <img src="https://illustrations.popsy.co/amber/studying.svg" className="max-h-36 sm:max-h-96" />
+                                                        <img src="https://illustrations.popsy.co/amber/studying.svg" className="max-h-32 sm:max-h-96" />
                                                         {uniMetricGroups.length > 0 ? (
                                                             <PrioritySelector
                                                                 groups={uniMetricGroups}
