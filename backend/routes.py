@@ -106,6 +106,25 @@ def get_universities():
             "details": str(e)
         }), 500
 
+@bp.route('/get-cities', methods=['GET'])
+def get_cities():
+    try:
+        cities = db.session.query(University.city).distinct().all()
+        
+        unique_cities = [c[0] for c in cities if c[0]]
+        
+        result = [{"city": city} for city in unique_cities]
+        
+        return jsonify(result), 200
+    
+    except Exception as e:
+        print(f"Error fetching city list: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to fetch city list.",
+            "details": str(e)
+        }), 500
+
 @bp.route('/get-metric-groups', methods=['GET'])
 def get_metric_groups():
     groups = MetricGroup.query.all()

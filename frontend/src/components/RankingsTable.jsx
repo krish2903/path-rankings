@@ -142,8 +142,10 @@ const RankingsTable = ({
 
   if (!rankings.length) {
     return (
-      <div className="flex flex-col py-16 items-center justify-center bg-white rounded-2xl overflow-hidden">
-        <p className="text-md font-light tracking-tight text-black/80">No rankings data available</p>
+      <div className="flex flex-col py-16 gap-2 items-center justify-center overflow-hidden">
+        <img src="https://illustrations.popsy.co/amber/question-mark.svg" className="max-h-64" />
+        <p className="text-md font-medium tracking-tight text-black/80">No rankings found.</p>
+        <p className="text-sm font-light tracking-tight text-black/80">Please try changing your filtering options!</p>
       </div>
     );
   }

@@ -45,13 +45,13 @@ const UniRankingsPage = () => {
         const fetchStart = Date.now();
         Promise.all([
             fetch(`${API_BASE}/get-countries`).then((res) => res.json()),
-            // fetch(`${API_BASE}/get-cities`).then((res) => res.json()),
+            fetch(`${API_BASE}/get-cities`).then((res) => res.json()),
             fetch(`${API_BASE}/get-universities`).then((res) => res.json()),
             fetch(`${API_BASE}/get-metric-groups`).then((res) => res.json()),
         ])
-            .then(([countryData, uniData, groupsData]) => {
+            .then(([countryData, cityData, uniData, groupsData]) => {
                 setCountries(countryData);
-                // setCities(cityData);
+                setCities(cityData);
                 setUniversities(uniData);
 
                 const filteredGroups = groupsData.filter(
@@ -67,8 +67,8 @@ const UniRankingsPage = () => {
                 const countryIds = countryData.map((c) => c.id);
                 setSelectedUniCountries((prev) => prev?.length ? prev : countryIds);
 
-                // const cityNames = cityData.map((c) => c.name);
-                // setSelectedUniCities((prev) => prev?.length ? prev : cityNames);
+                const cityNames = cityData.map((c) => c.city);
+                setSelectedUniCities((prev) => prev?.length ? prev : cityNames);
 
                 // Only set initial weights if both weights and pendingWeights are empty
                 if (Object.keys(uniWeights).length === 0 && Object.keys(pendingUniWeights).length === 0) {
@@ -158,15 +158,21 @@ const UniRankingsPage = () => {
             });
     };
 
-    const handleUniChange = (countryId, isChecked) => {
+    const handleUniChange = (Id, isChecked) => {
         setSelectedUnis((prev) =>
-            isChecked ? [...prev, countryId] : prev.filter((id) => id !== countryId)
+            isChecked ? [...prev, Id] : prev.filter((id) => id !== Id)
         );
     };
 
     const handleCountryChange = (countryId, isChecked) => {
         setSelectedUniCountries((prev) =>
             isChecked ? [...prev, countryId] : prev.filter((id) => id !== countryId)
+        );
+    };
+
+    const handleCityChange = (name, isChecked) => {
+        setSelectedUniCities((prev) =>
+            isChecked ? [...prev, name] : prev.filter((n) => n !== name)
         );
     };
 
@@ -179,6 +185,7 @@ const UniRankingsPage = () => {
         return uniRankings
             .filter((uni) => selectedUnis.includes(uni.university_id))
             .filter((uni) => selectedUniCountries.includes(uni.country_id))
+            .filter((uni) => selectedUniCities.includes(uni.city))
             .map((ranking) => ({
                 ...ranking,
                 flag: countryFlagMap[ranking.university_id] || null,
@@ -326,10 +333,13 @@ const UniRankingsPage = () => {
                                                     <FilterSheetContent
                                                         countries={countries}
                                                         universities={universities}
+                                                        cities={cities}
                                                         selectedCountries={selectedUniCountries}
                                                         selectedUnis={selectedUnis}
+                                                        selectedCities={selectedUniCities}
                                                         onCountryChange={handleCountryChange}
                                                         onUniChange={handleUniChange}
+                                                        onCityChange={handleCityChange}
                                                         selectedBuckets={selectedBuckets}
                                                         onBucketsChange={(name, checked) => {
                                                             setSelectedBuckets((prev) =>
