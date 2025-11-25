@@ -82,15 +82,21 @@ def get_universities():
         result = []
         for u in universities:
             country_name = u.country.name if u.country else None
+            country_flag = u.country.flag if u.country else None
+            if country_flag:
+                encoded_flag = base64.b64encode(country_flag).decode('utf-8')
+                country_flag = f"data:image/png;base64,{encoded_flag}"
+            else: country_flag = None
             
             result.append({
                 "id": u.id,
                 "name": u.name,
                 "city": u.city,
                 "country_name": country_name, 
+                "country_flag": country_flag
             })
         
-        return jsonify({"success": True, "results": result})
+        return jsonify(result), 200
 
     except Exception as e:
         print(f"Error fetching university list: {e}")
@@ -218,10 +224,7 @@ def university_rankings():
 
         ranked_results = calculate_university_scores(group_weights=group_weights)
         
-        return jsonify({
-            "success": True,
-            "results": ranked_results
-        })
+        return jsonify(ranked_results)
 
     except Exception as e:
         print(f"Error calculating university rankings: {e}")

@@ -2,13 +2,14 @@ import { useContext, useEffect, useMemo, useRef } from "react";
 import FilterSheetContent from "../components/FilterSection";
 import RankingsTable from "../components/RankingsTable";
 import { ListFilter, Settings2 } from "lucide-react";
-import CountryInputs from "../components/CountryInputs";
-import { DISCIPLINES, INDUSTRIES, API_BASE } from "../data/Data";
+import { API_BASE } from "../data/Data";
 import LoadingPage from "../pages/LoadingPage";
-import { CountryRankingsContext } from "../contexts/CountryRankingsContext";
+import { RankingsContext } from "../contexts/RankingsContext";
 import PrioritySelector from "@/components/PrioritySelector";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { ClipLoader } from "react-spinners";
+import RankingsMap from "@/components/RankingsMap";
 
 function areWeightsAdjusted(weights, metricGroups) {
     if (!metricGroups.length || Object.keys(weights).length === 0) return false;
@@ -19,62 +20,65 @@ function areWeightsAdjusted(weights, metricGroups) {
 
 const UniRankingsPage = () => {
     const {
-        rankings, setRankings,
+        uniRankings, setUniRankings,
+        universities, setUniversities,
         countries, setCountries,
-        metricGroups, setMetricGroups,
-        industriesData, setIndustriesData,
-        disciplinesData, setDisciplinesData,
-        weights, setWeights,
-        pendingWeights, setPendingWeights,
-        selectedCountries, setSelectedCountries,
-        selectedDisciplines, setSelectedDisciplines,
-        selectedIndustries, setSelectedIndustries,
+        cities, setCities,
+        selectedUniCountries, setSelectedUniCountries,
+        selectedUniCities, setSelectedUniCities,
+        uniMetricGroups, setUniMetricGroups,
+        uniWeights, setUniWeights,
+        pendingUniWeights, setPendingUniWeights,
+        selectedUnis, setSelectedUnis,
         selectedBuckets, setSelectedBuckets,
         loading, setLoading,
         buttonLoading, setButtonLoading,
-        mobileSliderOpen, setMobileSliderOpen,
-    } = useContext(CountryRankingsContext);
+    } = useContext(RankingsContext);
 
-    const inputsRef = useRef(null);
     const tableRef = useRef(null);
     const containerRef = useRef(null);
 
-    const weightsAdjusted = areWeightsAdjusted(weights, metricGroups);
+    const weightsAdjusted = areWeightsAdjusted(uniWeights, uniMetricGroups);
 
     useEffect(() => {
         setLoading(true);
         const fetchStart = Date.now();
         Promise.all([
             fetch(`${API_BASE}/get-countries`).then((res) => res.json()),
+            // fetch(`${API_BASE}/get-cities`).then((res) => res.json()),
+            fetch(`${API_BASE}/get-universities`).then((res) => res.json()),
             fetch(`${API_BASE}/get-metric-groups`).then((res) => res.json()),
-            fetch(`${API_BASE}/industries`).then((res) => res.json()),
-            fetch(`${API_BASE}/disciplines`).then((res) => res.json()),
         ])
-            .then(([countriesData, groupsData, industriesDataResult, disciplinesDataResult]) => {
-                setCountries(countriesData);
+            .then(([countryData, uniData, groupsData]) => {
+                setCountries(countryData);
+                // setCities(cityData);
+                setUniversities(uniData);
 
                 const filteredGroups = groupsData.filter(
                     (group) =>
-                        group.name !== "Academic Excellence & Research" &&
-                        group.name !== "Student Experiences & Campus Life"
+                        group.name !== "Quality of Life & Long-term Settlement" &&
+                        group.name !== "Government & Policy Environment"
                 );
-                setMetricGroups(filteredGroups);
+                setUniMetricGroups(filteredGroups);
 
-                const countryIds = countriesData.map((c) => c.id);
-                setSelectedCountries((prev) => prev?.length ? prev : countryIds);
+                const uniIds = uniData.map((u) => u.id);
+                setSelectedUnis((prev) => prev?.length ? prev : uniIds);
+
+                const countryIds = countryData.map((c) => c.id);
+                setSelectedUniCountries((prev) => prev?.length ? prev : countryIds);
+
+                // const cityNames = cityData.map((c) => c.name);
+                // setSelectedUniCities((prev) => prev?.length ? prev : cityNames);
 
                 // Only set initial weights if both weights and pendingWeights are empty
-                if (Object.keys(weights).length === 0 && Object.keys(pendingWeights).length === 0) {
+                if (Object.keys(uniWeights).length === 0 && Object.keys(pendingUniWeights).length === 0) {
                     const initialWeights = {};
                     filteredGroups.forEach((group) => {
                         initialWeights[group.id] = 0;
                     });
-                    setWeights(initialWeights);
-                    setPendingWeights(initialWeights);
+                    setUniWeights(initialWeights);
+                    setPendingUniWeights(initialWeights);
                 }
-
-                setIndustriesData(industriesDataResult);
-                setDisciplinesData(disciplinesDataResult);
 
                 const fetchElapsed = Date.now() - fetchStart;
                 const minDelay = 1000;
@@ -83,8 +87,8 @@ const UniRankingsPage = () => {
                 setTimeout(() => {
                     setLoading(false);
                     // Only fetch rankings if weights have been adjusted
-                    if (areWeightsAdjusted(weights, filteredGroups)) {
-                        fetchRankings(weights).then(setRankings);
+                    if (areWeightsAdjusted(uniWeights, filteredGroups)) {
+                        fetchRankings(uniWeights).then(setUniRankings);
                     }
                 }, wait);
             })
@@ -100,33 +104,20 @@ const UniRankingsPage = () => {
             .map(([groupId, weight]) => `group_${groupId}=${weight}`)
             .join("&");
 
-        const disciplinesParam = selectedDisciplines
-            .map((d) => `discipline=${encodeURIComponent(d)}`)
-            .join("&");
-
-        const industriesParam = selectedIndustries
-            .map((i) => `industry=${encodeURIComponent(i)}`)
-            .join("&");
-
-        const queryString = [weightsParam, disciplinesParam, industriesParam]
+        const queryString = [weightsParam]
             .filter(Boolean)
             .join("&");
 
-        return fetch(`${API_BASE}/country-rankings?${queryString}`).then((res) => res.json());
-    };
-
-    // UI Handlers
-    const scrollToInputs = () => {
-        inputsRef.current?.scrollIntoView({ behavior: "smooth" });
+        return fetch(`${API_BASE}/university-rankings?${queryString}`).then((res) => res.json());
     };
 
     const handleBegin = () => {
-        if (!areWeightsAdjusted(pendingWeights, metricGroups)) return;
+        if (!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)) return;
         setButtonLoading(true);
-        fetchRankings(pendingWeights)
+        fetchRankings(pendingUniWeights)
             .then((rankingsData) => {
-                setRankings(rankingsData);
-                setWeights(pendingWeights);
+                setUniRankings(rankingsData);
+                setUniWeights(pendingUniWeights);
                 setButtonLoading(false);
                 tableRef.current?.scrollIntoView({ behavior: "smooth" });
             })
@@ -137,13 +128,13 @@ const UniRankingsPage = () => {
     };
 
     const handleApplyWeights = () => {
-        if (JSON.stringify(weights) === JSON.stringify(pendingWeights)) return;
-        if (!areWeightsAdjusted(pendingWeights, metricGroups)) return;
+        if (JSON.stringify(uniWeights) === JSON.stringify(pendingUniWeights)) return;
+        if (!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)) return;
         setButtonLoading(true);
-        setWeights(pendingWeights);
-        fetchRankings(pendingWeights)
+        setUniWeights(pendingUniWeights);
+        fetchRankings(pendingUniWeights)
             .then((rankingsData) => {
-                setRankings(rankingsData);
+                setUniRankings(rankingsData);
                 setButtonLoading(false);
                 tableRef.current?.scrollIntoView({ behavior: "smooth" });
             })
@@ -155,9 +146,9 @@ const UniRankingsPage = () => {
 
     const applyAllFilters = () => {
         setButtonLoading(true);
-        fetchRankings(pendingWeights)
+        fetchRankings(pendingUniWeights)
             .then((rankingsData) => {
-                setRankings(rankingsData);
+                setUniRankings(rankingsData);
                 setButtonLoading(false);
                 tableRef.current?.scrollIntoView({ behavior: "smooth" });
             })
@@ -167,25 +158,32 @@ const UniRankingsPage = () => {
             });
     };
 
+    const handleUniChange = (countryId, isChecked) => {
+        setSelectedUnis((prev) =>
+            isChecked ? [...prev, countryId] : prev.filter((id) => id !== countryId)
+        );
+    };
+
     const handleCountryChange = (countryId, isChecked) => {
-        setSelectedCountries((prev) =>
+        setSelectedUniCountries((prev) =>
             isChecked ? [...prev, countryId] : prev.filter((id) => id !== countryId)
         );
     };
 
     const filteredRankings = useMemo(() => {
-        if (!rankings.length) return [];
+        if (!uniRankings.length) return [];
         const countryFlagMap = {};
-        countries.forEach((c) => {
-            countryFlagMap[c.id] = c.flag;
+        universities.forEach((u) => {
+            countryFlagMap[u.id] = u.country_flag;
         });
-        return rankings
-            .filter((country) => selectedCountries.includes(country.country_id))
+        return uniRankings
+            .filter((uni) => selectedUnis.includes(uni.university_id))
+            .filter((uni) => selectedUniCountries.includes(uni.country_id))
             .map((ranking) => ({
                 ...ranking,
-                flag: countryFlagMap[ranking.country_id] || null,
+                flag: countryFlagMap[ranking.university_id] || null,
             }));
-    }, [rankings, selectedCountries, countries]);
+    }, [uniRankings, selectedUnis, selectedUniCountries, universities]);
 
     if (loading) {
         return <LoadingPage />;
@@ -207,51 +205,31 @@ const UniRankingsPage = () => {
                             <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
                                 <p>Explore the rankings of the top universities based on your preferences.</p>
                             </div>
-                            <img src="https://illustrations.popsy.co/amber/studying.svg" className="hidden sm:block max-h-96" />
+                            <img src="https://illustrations.popsy.co/amber/studying.svg" className="max-h-36 sm:max-h-96 fadeIn" />
                         </header>
                         <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
-                            {metricGroups.length > 0 && (
+                            {uniMetricGroups.length > 0 && (
                                 <PrioritySelector
-                                    groups={metricGroups}
-                                    onWeightChange={setPendingWeights}
+                                    groups={uniMetricGroups}
+                                    onWeightChange={setPendingUniWeights}
+                                    category="University"
                                 />
                             )}
                             <button
-                                className={`bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingWeights, metricGroups)
+                                className={`bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)
                                     ? "opacity-50 cursor-not-allowed"
                                     : "cursor-pointer"
                                     }`}
-                                onClick={scrollToInputs}
-                                disabled={buttonLoading || loading || !areWeightsAdjusted(pendingWeights, metricGroups)}
+                                onClick={handleBegin}
+                                disabled={buttonLoading || loading || !areWeightsAdjusted(pendingUniWeights, uniMetricGroups)}
                             >
                                 {buttonLoading ? (
-                                    <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+                                    <ClipLoader size={22} color="#eee" />
                                 ) : (
                                     "Begin"
                                 )}
                             </button>
                         </div>
-                    </section>
-
-                    {/* Country Inputs Section */}
-                    <section
-                        ref={inputsRef}
-                        className="h-screen flex flex-col justify-center items-center snap-start px-4 py-8 pt-18 text-center"
-                    >
-                        <h1 className="w-full text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight text-black/80 py-1">
-                            Want a more <b className="text-orange-700">focussed</b> experience?
-                        </h1>
-                        <h2 className="text-sm sm:text-base lg:text-lg text-black/80 tracking-tight mt-2 mb-4 md:mb-8">
-                            Answer a few questions, and get more personalised results!
-                        </h2>
-                        <CountryInputs
-                            onStart={handleBegin}
-                            selectedDisciplines={selectedDisciplines}
-                            setSelectedDisciplines={setSelectedDisciplines}
-                            selectedIndustries={selectedIndustries}
-                            setSelectedIndustries={setSelectedIndustries}
-                            buttonLoading={buttonLoading}
-                        />
                     </section>
                 </>
             ) : (
@@ -261,7 +239,7 @@ const UniRankingsPage = () => {
                         ref={tableRef}
                         className="flex flex-col items-center h-screen snap-start overflow-auto bg-gradient-to-t from-white to-[#fff5f0] px-2 sm:px-6 lg:px-12 py-20 md:py-28"
                     >
-                        {rankings.length > 0 && (
+                        {uniRankings.length > 0 && (
                             <div className="w-full">
                                 <div>
                                     <div className="flex flex-col sm:flex-row justify-between">
@@ -306,23 +284,24 @@ const UniRankingsPage = () => {
                                                     <div className="h-2 w-32 md:w-48 bg-black/5 rounded-full mx-auto mb-4" />
                                                     <DrawerTitle className="text-center py-2">Preferences</DrawerTitle>
                                                     <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
-                                                    <div className="w-full flex items-center justify-center">
-                                                        <img src="https://illustrations.popsy.co/amber/studying.svg" className="hidden sm:block max-h-96" />
-                                                        {metricGroups.length > 0 ? (
+                                                    <div className="w-full flex flex-col sm:flex-row items-center justify-center">
+                                                        <img src="https://illustrations.popsy.co/amber/studying.svg" className="max-h-36 sm:max-h-96" />
+                                                        {uniMetricGroups.length > 0 ? (
                                                             <PrioritySelector
-                                                                groups={metricGroups}
-                                                                onWeightChange={setPendingWeights}
+                                                                groups={uniMetricGroups}
+                                                                onWeightChange={setPendingUniWeights}
+                                                                category="University"
                                                             />
                                                         ) : "Error"}
                                                     </div>
                                                     <DrawerClose asChild>
                                                         <button
-                                                            className={`max-w-sm md:max-w-md bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 mx-auto my-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingWeights, metricGroups)
+                                                            className={`max-w-sm md:max-w-md bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 mx-auto my-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)
                                                                 ? "opacity-50 cursor-not-allowed"
                                                                 : "cursor-pointer"
                                                                 }`}
                                                             onClick={handleApplyWeights}
-                                                            disabled={!areWeightsAdjusted(pendingWeights, metricGroups)}
+                                                            disabled={!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)}
                                                         >
                                                             {buttonLoading ? (
                                                                 <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
@@ -346,26 +325,11 @@ const UniRankingsPage = () => {
                                                 <SheetContent side="right" className="w-screen md:max-w-sm">
                                                     <FilterSheetContent
                                                         countries={countries}
-                                                        selectedCountries={selectedCountries}
+                                                        universities={universities}
+                                                        selectedCountries={selectedUniCountries}
+                                                        selectedUnis={selectedUnis}
                                                         onCountryChange={handleCountryChange}
-                                                        disciplines={DISCIPLINES}
-                                                        selectedDisciplines={selectedDisciplines}
-                                                        onDisciplineChange={(name, checked) => {
-                                                            setSelectedDisciplines((prev) =>
-                                                                checked
-                                                                    ? [...prev, name]
-                                                                    : prev.filter((d) => d !== name)
-                                                            );
-                                                        }}
-                                                        industries={INDUSTRIES}
-                                                        selectedIndustries={selectedIndustries}
-                                                        onIndustryChange={(name, checked) => {
-                                                            setSelectedIndustries((prev) =>
-                                                                checked
-                                                                    ? [...prev, name]
-                                                                    : prev.filter((i) => i !== name)
-                                                            );
-                                                        }}
+                                                        onUniChange={handleUniChange}
                                                         selectedBuckets={selectedBuckets}
                                                         onBucketsChange={(name, checked) => {
                                                             setSelectedBuckets((prev) =>
@@ -375,6 +339,7 @@ const UniRankingsPage = () => {
                                                             );
                                                         }}
                                                         onApplyFilters={applyAllFilters}
+                                                        category="University"
                                                     />
                                                 </SheetContent>
                                             </Sheet>
@@ -383,9 +348,8 @@ const UniRankingsPage = () => {
                                     <RankingsTable
                                         rankings={filteredRankings}
                                         loading={loading}
-                                        metricGroups={metricGroups}
-                                        industriesData={industriesData}
-                                        disciplinesData={disciplinesData}
+                                        metricGroups={uniMetricGroups}
+                                        category="University"
                                     />
                                 </div>
                             </div>

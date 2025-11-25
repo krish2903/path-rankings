@@ -3,10 +3,10 @@ import LandingPage from "./pages/LandingPage";
 import CountryRankingsPage from "./pages/CountryRankingsPage";
 import UniversityRankingsPage from "./pages/UniversityRankingsPage";
 import Header from "./components/Header";
-import { CountryRankingsProvider } from "./contexts/CountryRankingsContext";
+import { RankingsProvider } from "./contexts/RankingsContext";
 
 const App = () => (
-  <CountryRankingsProvider>
+  <RankingsProvider>
     <div className="max-w-screen">
       <Header />
       <Routes>
@@ -15,7 +15,7 @@ const App = () => (
         <Route path="/university-rankings" element={<UniversityRankingsPage />} />
       </Routes>
     </div>
-  </CountryRankingsProvider>
+  </RankingsProvider>
 );
 
 export default App;

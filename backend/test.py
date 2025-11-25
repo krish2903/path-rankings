@@ -9,10 +9,10 @@ BASE_URL_UNIVERSITY_LIST = "http://localhost:5000/api/get-universities"
 
 # The 10 test weight configurations for a 4-group model (W1, W2, W3, W4)
 test_weights = [
-    # (1.00, 0.00, 0.00, 0.00),
-    # (0.00, 1.00, 0.00, 0.00),
+    (1.00, 0.00, 0.00, 0.00),
+    (0.00, 1.00, 0.00, 0.00),
     (0.00, 0.00, 1.00, 0.00),
-    # (0.00, 0.00, 0.00, 1.00),
+    (0.00, 0.00, 0.00, 1.00),
     # (0.50, 0.50, 0.00, 0.00),
     # (0.50, 0.00, 0.50, 0.00),
     # (0.50, 0.00, 0.00, 0.50),
@@ -99,7 +99,7 @@ def run_country_tests():
             print(f"[ERROR] Test {idx} API request failed for COUNTRY: {e}")
             continue
 
-        data = response.json().get('results', [])
+        data = response.json()
 
         # Filter to the target list of countries and preserve API order
         filtered_results = [
@@ -153,7 +153,7 @@ def run_university_tests():
         
         print(f"\nUniversity Test {idx} - Weights: {w1}, {w2}, {w3}, {w4}")
         
-        limit = len(filtered_results)
+        limit = min(20, len(filtered_results)) #Change to limit the top results
         for rank, university in enumerate(filtered_results[:limit], start=1):
             score = next((row['final_score'] for row in data if row.get("university_name") == university), 'N/A')
             print(f"{rank}. {university} (Score: {score})")
@@ -163,6 +163,6 @@ def run_university_tests():
 
 
 if __name__ == "__main__":
-    fetch_all_university_names() 
-    # run_country_tests()
-    run_university_tests()
+    # fetch_all_university_names() 
+    run_country_tests()
+    # run_university_tests()

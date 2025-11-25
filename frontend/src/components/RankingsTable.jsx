@@ -7,8 +7,7 @@ import { getBuckets } from "../lib/utils";
 
 function getValue(row, key, groupNames) {
   if (key === "rank") return row.rank;
-  if (key === "country_name") return row.country_name;
-  if (key === "final_score" || key === "score") return row.score;
+  if (key === "final_score" || key === "score") return row.final_score ?? row.score;
   if (key === "overall_score") return row.overall_score;
   if (key === "discipline_score") return row.discipline_score;
   if (key === "industry_score") return row.industry_score;
@@ -16,6 +15,7 @@ function getValue(row, key, groupNames) {
     const groupName = key.slice(6);
     return row.groups?.[groupName]?.group_score ?? null;
   }
+  if (key.endsWith("_name")) return row[key];
   return null;
 }
 
@@ -25,49 +25,50 @@ const RankingsTable = ({
   metricGroups,
   industriesData = [],
   disciplinesData = [],
+  category = "Country",
 }) => {
-  const [sortConfig, setSortConfig] = useState({ key: "score", direction: "desc" });
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [bucketedData, setBucketedData] = useState([]);
+  const isCountry = category.toLowerCase() === "country";
 
-  // Calculate metric group names
-  let groupNames = [];
-  if (metricGroups && metricGroups.length) {
-    groupNames = metricGroups.map((g) => g.name);
-  } else if (rankings.length) {
-    groupNames = Object.keys(rankings[0].groups);
-  }
+  // Keys differ between Country and University
+  const idKey = isCountry ? "country_id" : "university_id";
+  const nameKey = isCountry ? "country_name" : "university_name";
 
-  // Table columns
+  const groupNames = metricGroups.map(g => g.name);
+
+  // Compose columns dynamically
   const columns = [
     { key: "rank", label: "No.", numeric: true },
-    { key: "country_name", label: "Name", numeric: false },
-    { key: "score", label: "Final Score", numeric: true },
-    { key: "overall_score", label: "Overall Score", numeric: true },
-    { key: "discipline_score", label: "Discipline Score", numeric: true },
-    { key: "industry_score", label: "Industry Score", numeric: true },
-    ...groupNames.map((name) => ({
-      key: `group_${name}`,
-      label: name,
-      numeric: true,
-    })),
+    { key: nameKey, label: "Name", numeric: false },
+    { key: "final_score", label: "Final Score", numeric: true },
+    // Only show these for countries
+    ...(isCountry
+      ? [
+        { key: "overall_score", label: "Overall Score", numeric: true },
+        { key: "discipline_score", label: "Discipline Score", numeric: true },
+        { key: "industry_score", label: "Industry Score", numeric: true },
+      ]
+      : []),
+    ...groupNames.map((name) => ({ key: `group_${name}`, label: name, numeric: true })),
   ];
 
-  // Compute bucketed/graded countries from rankings
+  // Bucket and rank the data (currently only for country; for university you can adjust/remove bucket logic if needed)
+  const [bucketedData, setBucketedData] = useState([]);
+
   useEffect(() => {
     if (!rankings.length) {
       setBucketedData([]);
       return;
     }
+
     const scored = getBuckets(
       rankings.map((row) => ({
-        country: row.country_name,
+        country: row[nameKey],
         score: row.final_score,
         ...row,
       }))
     );
     setBucketedData(scored);
-  }, [rankings]);
+  }, [rankings, nameKey]);
 
   // Add rank index
   const dataWithRank = bucketedData.map((row, idx) => ({
@@ -75,18 +76,23 @@ const RankingsTable = ({
     rank: idx + 1,
   }));
 
-  // Sort data
+  // Sorting state
+  const [sortConfig, setSortConfig] = useState({ key: "final_score", direction: "desc" });
+
+  // Sorting logic
   const sortedData = useMemo(() => {
-    if (!sortConfig.key) return dataWithRank;
-    const col = columns.find((c) => c.key === sortConfig.key);
-    if (!col) return dataWithRank;
+    if (!columns.length) return dataWithRank;
     return [...dataWithRank].sort((a, b) => {
-      const aValue = getValue(a, sortConfig.key, groupNames);
-      const bValue = getValue(b, sortConfig.key, groupNames);
+      const { key } = columns.find((c) => c.key === sortConfig.key) || {};
+      if (!key) return 0;
+      const aValue = getValue(a, key, groupNames);
+      const bValue = getValue(b, key, groupNames);
+
       if (aValue == null && bValue == null) return 0;
       if (aValue == null) return 1;
       if (bValue == null) return -1;
-      if (col.numeric) {
+
+      if (columns.find((c) => c.key === key)?.numeric) {
         return sortConfig.direction === "asc"
           ? Number(aValue) - Number(bValue)
           : Number(bValue) - Number(aValue);
@@ -98,8 +104,9 @@ const RankingsTable = ({
     });
   }, [dataWithRank, sortConfig, columns, groupNames]);
 
-  // Prepare industry/discipline lookup
+  // Lookup maps for industries and disciplines (only used for countries)
   const industriesByCountry = useMemo(() => {
+    if (!isCountry) return {};
     const map = {};
     industriesData.forEach((entry) => {
       if (entry.country) {
@@ -107,8 +114,10 @@ const RankingsTable = ({
       }
     });
     return map;
-  }, [industriesData]);
+  }, [industriesData, isCountry]);
+
   const disciplinesByCountry = useMemo(() => {
+    if (!isCountry) return {};
     const map = {};
     disciplinesData.forEach((entry) => {
       if (entry.country) {
@@ -116,18 +125,17 @@ const RankingsTable = ({
       }
     });
     return map;
-  }, [disciplinesData]);
+  }, [disciplinesData, isCountry]);
 
-  const handleCardClick = (country) => setSelectedCountry(country);
+  // Handlers
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const closeModal = () => setSelectedCountry(null);
 
   if (loading) {
     return (
       <div className="flex flex-col py-16 items-center justify-center bg-white rounded-2xl overflow-hidden">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500 mx-auto mb-4"></div>
-        <p className="text-md font-light tracking-tight text-black/80">
-          Loading rankings...
-        </p>
+        <p className="text-md font-light tracking-tight text-black/80">Loading rankings...</p>
       </div>
     );
   }
@@ -135,9 +143,7 @@ const RankingsTable = ({
   if (!rankings.length) {
     return (
       <div className="flex flex-col py-16 items-center justify-center bg-white rounded-2xl overflow-hidden">
-        <p className="text-md font-light tracking-tight text-black/80">
-          No rankings data available
-        </p>
+        <p className="text-md font-light tracking-tight text-black/80">No rankings data available</p>
       </div>
     );
   }
@@ -146,64 +152,58 @@ const RankingsTable = ({
     <>
       <div className="flex flex-col w-full fadeIn">
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {sortedData.map((country) => {
-            const industryInfo =
-              industriesByCountry[country.country_name.toLowerCase()] ?? null;
-            const disciplineInfo =
-              disciplinesByCountry[country.country_name.toLowerCase()] ?? null;
+          {sortedData.map((item) => {
+            const nameLower = item[nameKey]?.toLowerCase();
+            const industryInfo = isCountry ? industriesByCountry[nameLower] ?? null : null;
+            const disciplineInfo = isCountry ? disciplinesByCountry[nameLower] ?? null : null;
+
             return (
               <div
-                key={country.country_id}
-                onClick={() => handleCardClick(country)}
+                key={item[idKey]}
+                onClick={() => isCountry && setSelectedCountry(item)}
                 className="flex flex-col p-4 space-y-4 rounded-4xl inset-shadow-sm shadow-md border border-black/5 bg-white/50 cursor-pointer transform transition-transform duration-200 hover:scale-102"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") handleCardClick(country);
+                  if (e.key === "Enter" || e.key === " ") isCountry && setSelectedCountry(item);
                 }}
-                aria-label={`View details for ${country.country_name}`}
+                aria-label={`View details for ${item[nameKey]}`}
               >
                 <div className="flex justify-between">
                   <div className="rounded-full py-0.5 px-2.5 bg-black/80">
-                    <span className="text-sm font-bold text-white">{country.rank}</span>
+                    <span className="text-sm font-bold text-white">{item.rank}</span>
                   </div>
                   <div className="flex gap-2 flex-wrap justify-end">
                     <div
-                      className={`flex items-center gap-1.5 rounded-full py-0.5 px-2.5 ${country.classes}`}
-                      title={`${country.label} (${country.grade}) (${Number(country.score).toFixed(2)}%)`}
-                      aria-label={`${country.label} (${country.grade})`}
+                      className={`flex items-center gap-1.5 rounded-full py-0.5 px-2.5 ${item.classes}`}
+                      title={`${item.label} (${item.grade}) (${Number(item.score ?? item.final_score).toFixed(2)}%)`}
+                      aria-label={`${item.label} (${item.grade})`}
                     >
-                      <span className="text-sm font-medium">{country.bucket}</span>
-                      <div className="flex justify-center items-center w-6 h-6 bg-white/50 ring ring-white/30 rounded-full font-semibold text-xs">{country.grade}</div>
+                      <span className="text-sm font-medium">{item.bucket}</span>
+                      <div className="flex justify-center items-center w-6 h-6 bg-white/50 ring ring-white/30 rounded-full font-semibold text-xs">{item.grade}</div>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2 px-1">
                   <div className="flex items-center gap-2">
-                    {country.flag && (
+                    {item.flag && (
                       <img
-                        src={country.flag}
-                        alt={`${country.country_name} flag`}
+                        src={item.flag}
+                        alt={`${item[nameKey]} flag`}
                         className="w-6 h-4 object-cover rounded shadow-sm"
                       />
                     )}
-                    <div className="text-lg sm:text-xl font-medium text-black/90">
-                      {country.country_name}
-                    </div>
+                    <div className="text-lg sm:text-xl font-medium text-black/90">{item[nameKey]}</div>
                   </div>
 
-                  <div className="min-h-10">
-                    {disciplineInfo?.comments && (
-                      <p className="text-xs md:text-sm text-gray-600">
-                        {disciplineInfo.comments}
-                      </p>
-                    )}
-                  </div>
+                  {isCountry && disciplineInfo?.comments && (
+                    <p className="text-xs md:text-sm text-gray-600">{disciplineInfo.comments}</p>
+                  )}
 
                   <div className="grid grid-cols-2 md:flex md:px-12 justify-between">
                     {groupNames.map((groupName) => {
-                      const scoreRaw = country.groups?.[groupName]?.group_score;
+                      const scoreRaw = item.groups?.[groupName]?.group_score;
                       const score = scoreRaw != null ? scoreRaw.toFixed(2) : "—";
                       const numericScore = score === "—" ? 0 : parseFloat(score);
                       const IconComponent = iconMap[groupName] || Star;
@@ -211,7 +211,7 @@ const RankingsTable = ({
                         <div
                           key={groupName}
                           className="flex flex-col items-center justify-center py-2 text-black/80"
-                          title={`${groupName}: ${score === "—" ? "No data" : country.bucket}`}
+                          title={`${groupName}: ${score === "—" ? "No data" : score}`}
                         >
                           {score === "—" ? (
                             <div className="text-sm text-orange-600 font-bold">—</div>
@@ -229,11 +229,9 @@ const RankingsTable = ({
                     })}
                   </div>
 
-                  {industryInfo && (
+                  {isCountry && industryInfo && (
                     <div className="text-sm">
-                      <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">
-                        Key Industries
-                      </h1>
+                      <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Industries</h1>
                       <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
                       <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
                         <div className="px-1">
@@ -256,11 +254,9 @@ const RankingsTable = ({
                     </div>
                   )}
 
-                  {disciplineInfo && (
+                  {isCountry && disciplineInfo && (
                     <div className="text-sm mt-2">
-                      <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">
-                        Key Disciplines
-                      </h1>
+                      <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Disciplines</h1>
                       <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
                       <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
                         {disciplineInfo.top_disciplines.slice(0, 3).map((discipline, i) => (
@@ -275,7 +271,9 @@ const RankingsTable = ({
           })}
         </div>
       </div>
-      {selectedCountry && (
+
+      {/* Modal details only for countries */}
+      {isCountry && selectedCountry && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-2 sm:p-6"
           role="dialog"

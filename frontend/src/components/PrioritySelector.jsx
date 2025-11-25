@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useEffect, useContext } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Info } from "lucide-react";
-import { CountryRankingsContext } from "../contexts/CountryRankingsContext";
+import { RankingsContext } from "../contexts/RankingsContext";
 
-function LikertGroupCard({ name, description, rating, onChange }) {
+function LikertGroupCard({ name, description, category, rating, onChange }) {
   return (
     <div className={`w-full flex flex-col items-center justify-between gap-6 transition-all text-center`}>
       <div className="w-full flex flex-col items-center gap-4">
@@ -41,14 +41,24 @@ function LikertGroupCard({ name, description, rating, onChange }) {
   );
 }
 
-export default function PrioritySelector({ groups = [], onWeightChange }) {
+export default function PrioritySelector({ groups = [], category, onWeightChange }) {
   const {
-    pendingRatings,
-    setPendingRatings,
-    setPendingWeights,
-  } = useContext(CountryRankingsContext);
+    pendingCountryRatings,
+    setPendingCountryRatings,
+    pendingUniRatings,
+    setPendingUniRatings,
+    setPendingCountryWeights,
+    setPendingUniWeights,
+  } = useContext(RankingsContext);
 
-  // If ratings for current groups do not exist, initialize them to 0
+  // Select context values based on category
+  const isCountry = category.toLowerCase() === "country";
+
+  const pendingRatings = isCountry ? pendingCountryRatings : pendingUniRatings;
+  const setPendingRatings = isCountry ? setPendingCountryRatings : setPendingUniRatings;
+  const setPendingWeights = isCountry ? setPendingCountryWeights : setPendingUniWeights;
+
+  // Initialize ratings for current groups if not yet set
   useEffect(() => {
     if (groups.length === 0) return;
     let changed = false;
@@ -62,7 +72,7 @@ export default function PrioritySelector({ groups = [], onWeightChange }) {
     if (changed) setPendingRatings(initial);
   }, [groups, pendingRatings, setPendingRatings]);
 
-  // Whenever ratings change, update decimal weights
+  // Update weights whenever ratings change
   useEffect(() => {
     if (!groups.length) return;
     const ratingsArr = groups.map(g => pendingRatings[g.id] || 0);

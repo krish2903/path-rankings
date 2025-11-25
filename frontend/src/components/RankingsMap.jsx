@@ -104,7 +104,7 @@ export default function RankingsMap({ rankings, metricGroups, loading }) {
             zoom={zoom}
             zoomControl={false}
             scrollWheelZoom={true}
-            className="w-full min-h-[90vh] rounded-2xl shadow-md fadeIn"
+            className="w-full h-full rounded-2xl shadow-md fadeIn"
             worldCopyJump={false}
             minZoom={2}
             attributionControl={false}

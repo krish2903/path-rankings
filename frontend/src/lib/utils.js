@@ -17,7 +17,7 @@ export function getDonutScoreBucket(score) {
     };
   }
 
-  if (value >= 60) {
+  if (value >= 80) {
     return {
       key: "best",
       label: "Best Match",
@@ -25,7 +25,7 @@ export function getDonutScoreBucket(score) {
       classes: "bg-emerald-500/15 text-emerald-800 ring-2 ring-emerald-500/20",
     };
   }
-  if (value >= 50) {
+  if (value >= 70) {
     return {
       key: "good",
       label: "Good Match",
@@ -33,7 +33,7 @@ export function getDonutScoreBucket(score) {
       classes: "bg-amber-400/15 text-amber-800 ring-2 ring-amber-400/25",
     };
   }
-  if (value >= 40) {
+  if (value >= 50) {
     return {
       key: "fair",
       label: "Fair Match",
