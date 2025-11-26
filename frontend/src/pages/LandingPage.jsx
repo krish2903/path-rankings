@@ -172,7 +172,7 @@ const LandingPage = () => {
                 aria-label="What are PATH Rankings?"
             >
                 <div className="flex flex-col items-center w-full gap-3 sm:gap-4">
-                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-5xl font-medium tracking-tight py-1">
+                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-4xl font-medium tracking-tight py-1">
                         What are PATH Rankings?
                     </h1>
                     <p className="text-sm sm:text-base text-black/60 tracking-tight">
@@ -202,7 +202,7 @@ const LandingPage = () => {
                 aria-label="What do we cover?"
             >
                 <div className="flex flex-col items-center justify-center w-full gap-4">
-                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-5xl font-medium tracking-tight py-1">
+                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-4xl font-medium tracking-tight py-1">
                         What do we cover?
                     </h1>
                     <p className="text-sm sm:text-base text-black/60 tracking-tight mb-4 text-center">
@@ -236,7 +236,7 @@ const LandingPage = () => {
                 aria-label="What aspects we measure"
             >
                 <div className="flex flex-col items-center justify-center w-full gap-4">
-                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-5xl font-medium tracking-tight py-1">
+                    <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-4xl font-medium tracking-tight py-1">
                         What aspects do we take into consideration?
                     </h1>
                     <Metrics />
