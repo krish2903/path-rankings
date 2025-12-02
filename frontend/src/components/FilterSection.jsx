@@ -112,7 +112,7 @@ export default function FilterSheetContent({
           <button
             type="button"
             onClick={onResetFilters}
-            className="text-xs text-orange-700 underline hover:text-orange-900 transition ml-2"
+            className="text-sm text-orange-700 underline hover:text-orange-900 transition ml-2"
           >
             Reset All
           </button>
@@ -126,7 +126,7 @@ export default function FilterSheetContent({
           <AccordionItem value={isCountry ? "country" : "university"}>
             <AccordionTrigger className="w-full px-2 flex justify-between">
               <p className="w-full">{isCountry ? "By Country" : "By University"}</p>
-              <span className="text-xs text-orange-700 font-medium px-8">({isCountry ? selectedCountries.length : selectedUnis.length})</span>
+              <span className="text-sm text-orange-700 font-medium px-8">({isCountry ? selectedCountries.length : selectedUnis.length})</span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="mb-2 bg-black/5 py-2 px-3 rounded-full flex items-center gap-2">
@@ -136,13 +136,13 @@ export default function FilterSheetContent({
                   placeholder={isCountry ? "Search countries..." : "Search universities..."}
                   value={isCountry ? countrySearch : uniSearch}
                   onChange={isCountry ? (e) => setCountrySearch(e.target.value) : (e) => setUniSearch(e.target.value)}
-                  className="w-full text-xs outline-none"
+                  className="w-full text-sm outline-none"
                 />
               </div>
               <button
                 type="button"
                 onClick={isCountry ? toggleSelectAllCountries : toggleSelectAllUnis}
-                className={`cursor-pointer w-full text-xs font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn`}
+                className={`cursor-pointer w-full text-sm font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn`}
               >
                 {isCountry ? allFilteredCountriesSelected ? "Deselect All" : "Select All" : allFilteredUnisSelected ? "Deselect All" : "Select All"}
               </button>
@@ -159,7 +159,7 @@ export default function FilterSheetContent({
                       className="accent-orange-700 cursor-pointer"
                     />
                     <div className="w-full flex justify-between items-center pr-2">
-                      <span className="text-xs tracking-tight">{country.name}</span>
+                      <span className="text-sm tracking-tight">{country.name}</span>
                     </div>
                   </label>
                 ))}
@@ -175,7 +175,7 @@ export default function FilterSheetContent({
                       className="accent-orange-700 cursor-pointer"
                     />
                     <div className="w-full flex justify-between items-center pr-2">
-                      <span className="text-xs tracking-tight">{uni.name}</span>
+                      <span className="text-sm tracking-tight">{uni.name}</span>
                     </div>
                   </label>
                 ))}
@@ -188,7 +188,7 @@ export default function FilterSheetContent({
             <AccordionItem value="country">
               <AccordionTrigger className="w-full px-2 flex justify-between">
                 <p className="w-full">By Country</p>
-                <span className="text-xs text-orange-700 font-medium px-8">({selectedCountries.length})</span>
+                <span className="text-sm text-orange-700 font-medium px-8">({selectedCountries.length})</span>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="mb-2 bg-black/5 py-2 px-3 rounded-full flex items-center gap-2">
@@ -198,13 +198,13 @@ export default function FilterSheetContent({
                     placeholder="Search countries..."
                     value={countrySearch}
                     onChange={(e) => setCountrySearch(e.target.value)}
-                    className="w-full text-xs outline-none"
+                    className="w-full text-sm outline-none"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={toggleSelectAllCountries}
-                  className={`cursor-pointer w-full text-xs font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn`}
+                  className={`cursor-pointer w-full text-sm font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn`}
                 >
                   {allFilteredCountriesSelected ? "Deselect All" : "Select All"}
                 </button>
@@ -221,7 +221,7 @@ export default function FilterSheetContent({
                         className="accent-orange-700 cursor-pointer"
                       />
                       <div className="w-full flex justify-between items-center pr-2">
-                        <span className="text-xs tracking-tight">{country.name}</span>
+                        <span className="text-sm tracking-tight">{country.name}</span>
                       </div>
                     </label>
                   ))}
@@ -231,11 +231,11 @@ export default function FilterSheetContent({
           )}
 
           {/* City-level Filtering for Universities - only for University */}
-          {!isCountry && (
+          {/* {!isCountry && (
             <AccordionItem value="city">
               <AccordionTrigger disabled={true} className="w-full opacity-35 px-2 flex justify-between">
                 <p className="w-full">By City</p>
-                {/* <span className="text-xs text-orange-700 font-medium px-8">({selectedCities.length})</span> */}
+                <span className="text-sm text-orange-700 font-medium px-8">({selectedCities.length})</span>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="mb-2 bg-black/5 py-2 px-3 rounded-full flex items-center gap-2">
@@ -245,13 +245,13 @@ export default function FilterSheetContent({
                     placeholder="Search cities..."
                     value={citySearch}
                     onChange={(e) => setCitySearch(e.target.value)}
-                    className="w-full text-xs outline-none"
+                    className="w-full text-sm outline-none"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={toggleSelectAllCities}
-                  className={`cursor-pointer w-full text-xs font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn`}
+                  className={`cursor-pointer w-full text-sm font-semibold text-orange-700 bg-orange-100 rounded-lg py-1 mb-2 hover:bg-orange-200 fadeIn`}
                 >
                   {allFilteredCitiesSelected ? "Deselect All" : "Select All"}
                 </button>
@@ -268,21 +268,21 @@ export default function FilterSheetContent({
                         className="accent-orange-700 cursor-pointer"
                       />
                       <div className="w-full flex justify-between items-center pr-2">
-                        <span className="text-xs tracking-tight">{city.city}</span>
+                        <span className="text-sm tracking-tight">{city.city}</span>
                       </div>
                     </label>
                   ))}
                 </div>
               </AccordionContent>
             </AccordionItem>
-          )}
+          )} */}
 
           {/* Discipline Section - only for Country */}
           {isCountry && (
             <AccordionItem value="discipline">
               <AccordionTrigger className="w-full px-2 flex justify-between">
                 <p className="w-full">By Discipline</p>
-                <span className="text-xs text-orange-700 font-medium px-8">({disciplines.length})</span>
+                <span className="text-sm text-orange-700 font-medium px-8">({disciplines.length})</span>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="h-full overflow-y-auto pr-1 space-y-1">
@@ -300,7 +300,7 @@ export default function FilterSheetContent({
                         onChange={(e) => onDisciplineChange(name, e.target.checked)}
                         className="accent-orange-700 cursor-pointer"
                       />
-                      <span className="text-xs tracking-tight">{name}</span>
+                      <span className="text-sm tracking-tight">{name}</span>
                     </label>
                   ))}
                 </div>
@@ -313,7 +313,7 @@ export default function FilterSheetContent({
             <AccordionItem value="industry">
               <AccordionTrigger className="w-full px-2 flex justify-between">
                 <p className="w-full">By Industry</p>
-                <span className="text-xs text-orange-700 font-medium px-8">({industries.length})</span>
+                <span className="text-sm text-orange-700 font-medium px-8">({industries.length})</span>
               </AccordionTrigger>
               <AccordionContent>
                 <div className="h-full overflow-y-auto pr-1 space-y-1">
@@ -331,7 +331,7 @@ export default function FilterSheetContent({
                         onChange={(e) => onIndustryChange(name, e.target.checked)}
                         className="accent-orange-700 cursor-pointer"
                       />
-                      <span className="text-xs tracking-tight">{name}</span>
+                      <span className="text-sm tracking-tight">{name}</span>
                     </label>
                   ))}
                 </div>
@@ -340,7 +340,7 @@ export default function FilterSheetContent({
           )}
 
           {/* Category / Buckets Section */}
-          <AccordionItem value="category">
+          {/* <AccordionItem value="category">
             <AccordionTrigger disabled={true} className="w-full opacity-35 px-2 flex justify-between">
               <p className="w-full">By Category</p>
             </AccordionTrigger>
@@ -362,7 +362,7 @@ export default function FilterSheetContent({
                 ))}
               </div>
             </AccordionContent>
-          </AccordionItem>
+          </AccordionItem> */}
         </Accordion>
       </div>
 

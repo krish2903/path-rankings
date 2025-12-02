@@ -325,11 +325,7 @@ const RankingsPage = () => {
                                                             onClick={handleApplyWeights}
                                                             disabled={!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
                                                         >
-                                                            {buttonLoading ? (
-                                                                <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
-                                                            ) : (
-                                                                "Confirm"
-                                                            )}
+                                                            Confirm
                                                         </button>
                                                     </DrawerClose>
                                                 </DrawerContent>
