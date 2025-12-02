@@ -295,10 +295,14 @@ def calculate_university_scores(group_weights=None):
 
         final_score = total_score
 
+        country = Country.query.get(university.country_id)
+        country_name = country.name if country else "Unknown"
+
         results.append({
             "university_id": university.id,
             "university_name": university.name,
             "country_id": university.country_id,
+            "country_name": country_name,
             "city": university.city,
             "final_score": round(final_score, 2),
             "groups": group_scores

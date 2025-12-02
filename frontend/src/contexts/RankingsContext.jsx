@@ -28,6 +28,7 @@ export function RankingsProvider({ children }) {
   const [selectedDisciplines, setSelectedDisciplines] = useState([]);
   const [selectedIndustries, setSelectedIndustries] = useState([]);
   const [selectedBuckets, setSelectedBuckets] = useState([]);
+  const [shortlistedCountries, setShortlistedCountries] = useState([]);
 
   // Loading States
   const [loading, setLoading] = useState(true);
@@ -56,6 +57,7 @@ export function RankingsProvider({ children }) {
     selectedDisciplines, setSelectedDisciplines,
     selectedIndustries, setSelectedIndustries,
     selectedBuckets, setSelectedBuckets,
+    shortlistedCountries, setShortlistedCountries,
     loading, setLoading,
     buttonLoading, setButtonLoading,
   };

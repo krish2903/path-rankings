@@ -46,7 +46,6 @@ const CountryDetailsPage = ({
   industriesData: propIndustriesData,
   disciplinesData: propDisciplinesData,
   isModal = false,
-  onClose,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -407,7 +406,7 @@ const CountryDetailsPage = ({
             })}
           </div>
         ) : (
-          <p className="text-center text-gray-500">No trending news available for this country.</p>
+          <p className="mt-4 max-w-sm text-center text-sm text-black/60">No trending news available for this university currently. Try contacting us for more detailed information!</p>
         )}
       </section>
 

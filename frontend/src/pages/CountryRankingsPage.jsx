@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useRef } from "react";
 import FilterSheetContent from "../components/FilterSection";
 import RankingsTable from "../components/RankingsTable";
-import { ListFilter, Settings2 } from "lucide-react";
+import { ListFilter, Settings2, Star } from "lucide-react";
 import CountryInputs from "../components/CountryInputs";
 import { DISCIPLINES, INDUSTRIES, API_BASE } from "../data/Data";
 import LoadingPage from "../pages/LoadingPage";
@@ -298,13 +298,13 @@ const RankingsPage = () => {
                                                     <div
                                                         className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm text-white bg-[#e07352] hover:bg-[#e07352e6] rounded-full w-full sm:w-auto"
                                                     >
-                                                        <Settings2 className="h-4 w-4" />
-                                                        <span>Preferences</span>
+                                                        <Star className="h-4 w-4" />
+                                                        <span>Ratings</span>
                                                     </div>
                                                 </DrawerTrigger>
                                                 <DrawerContent className="px-8 lg:px-64">
                                                     <div className="h-2 w-32 md:w-48 bg-black/5 rounded-full mx-auto mb-4" />
-                                                    <DrawerTitle className="text-center py-2">Preferences</DrawerTitle>
+                                                    <DrawerTitle className="text-center py-2">Ratings</DrawerTitle>
                                                     <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
                                                     <div className="flex flex-col sm:flex-row justify-center items-center">
                                                         <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="hidden sm:block sm:max-h-96 fadeIn" />
@@ -341,7 +341,7 @@ const RankingsPage = () => {
                                                         type="button"
                                                     >
                                                         <ListFilter className="h-4 w-4" />
-                                                        <span>Filter</span>
+                                                        <span>Filters</span>
                                                     </button>
                                                 </SheetTrigger>
                                                 <SheetContent side="right" className="w-screen md:max-w-sm">

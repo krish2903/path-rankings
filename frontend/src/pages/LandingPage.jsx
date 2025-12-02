@@ -175,6 +175,7 @@ const LandingPage = () => {
                     <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-4xl font-medium tracking-tight py-1">
                         What are PATH Rankings?
                     </h1>
+                    <img src="https://illustrations.popsy.co/amber/engineer.svg" className="max-h-48" />
                     <p className="text-sm sm:text-base text-black/60 tracking-tight">
                         PATH stands for:
                     </p>
@@ -205,6 +206,7 @@ const LandingPage = () => {
                     <h1 className="w-full bg-clip-text text-transparent bg-gradient-to-b from-black to-black/40 text-center text-3xl lg:text-4xl font-medium tracking-tight py-1">
                         What do we cover?
                     </h1>
+                    <img src="https://illustrations.popsy.co/amber/woman-with-a-laptop.svg" className="max-h-48" />
                     <p className="text-sm sm:text-base text-black/60 tracking-tight mb-4 text-center">
                         Our rankings cover the factors that matter most to international students, including:
                     </p>

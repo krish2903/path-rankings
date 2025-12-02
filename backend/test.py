@@ -103,13 +103,16 @@ def run_country_tests():
 
         # Filter to the target list of countries and preserve API order
         filtered_results = [
-            row["country_name"] 
+            row 
             for row in data if row.get("country_name") in TARGET_COUNTRIES
         ]
 
         print(f"\nCountry Test {idx} - Weights: {w1}, {w2}, {w3}, {w4}")
-        for rank, country in enumerate(filtered_results, start=1):
-            print(f"{rank}. {country}")
+        for rank, row in enumerate(filtered_results, start=1):
+            country = row.get("country_name", "N/A")
+            score = row.get("final_score", "N/A")
+            print(f"{rank}. {country} (Score: {score})")
+
 
 
 def run_university_tests():
@@ -147,15 +150,16 @@ def run_university_tests():
 
         # Filter to the target list of universities (which is now ALL_UNIVERSITY_NAMES)
         filtered_results = [
-            row["university_name"] 
+            row 
             for row in data if row.get("university_name") in ALL_UNIVERSITY_NAMES
         ]
         
         print(f"\nUniversity Test {idx} - Weights: {w1}, {w2}, {w3}, {w4}")
         
-        limit = min(20, len(filtered_results)) #Change to limit the top results
-        for rank, university in enumerate(filtered_results[:limit], start=1):
-            score = next((row['final_score'] for row in data if row.get("university_name") == university), 'N/A')
+        limit = min(20, len(filtered_results)) # Change to limit the top results
+        for rank, row in enumerate(filtered_results[:limit], start=1):
+            university = row.get("university_name", "N/A")
+            score = row.get('final_score', 'N/A')
             print(f"{rank}. {university} (Score: {score})")
             
         if len(filtered_results) > limit:
@@ -163,6 +167,6 @@ def run_university_tests():
 
 
 if __name__ == "__main__":
-    # fetch_all_university_names() 
+    # fetch_all_university_names()
     run_country_tests()
     # run_university_tests()

@@ -1,6 +1,6 @@
 from linecache import lazycache
 from db import db
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 class Country(db.Model):
     __tablename__ = 'countries'
@@ -15,6 +15,8 @@ class Country(db.Model):
         backref=db.backref('countries', lazy='dynamic'),
         lazy='dynamic'
     )
+
+    details = db.relationship("CountryDetails", back_populates="country", uselist=False)
 
 country_metrics = db.Table('country_metrics',
     db.Column('country_id', db.Integer, db.ForeignKey('countries.id'), primary_key=True),
@@ -37,6 +39,7 @@ class University(db.Model):
     )
 
     country = db.relationship("Country", backref="universities")
+    details = db.relationship("UniversityDetails", back_populates="university", uselist=False)
 
 university_metrics = db.Table(
     'university_metrics',
@@ -92,3 +95,25 @@ class CountryDisciplines(db.Model):
             "top_disciplines": self.top_disciplines,
             "comments": self.comments
         }
+
+class CountryDetails(db.Model):
+    __tablename__ = 'country_details'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'), unique=True, nullable=False)
+    country_name = db.Column(db.String(100), nullable=False)
+    cards = db.Column(JSONB, nullable=False)
+    fetch_date = db.Column(db.DateTime, nullable=False)
+    
+    country = db.relationship("Country", back_populates="details")
+
+class UniversityDetails(db.Model):
+    __tablename__ = 'university_details'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    uni_id = db.Column(db.Integer, db.ForeignKey('universities.id'), unique=True, nullable=False)
+    uni_name = db.Column(db.String(100), nullable=False)
+    cards = db.Column(JSONB, nullable=False)
+    fetch_date = db.Column(db.DateTime, nullable=False)
+    
+    university = db.relationship("University", back_populates="details")

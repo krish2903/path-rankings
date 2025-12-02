@@ -65,17 +65,51 @@ const bucketStyleMap = {
   }
 };
 
+export const bucketHeaderStyles = {
+  "Best Match": "bg-gradient-to-t from-emerald-500/15 to-emerald-500/10 text-emerald-800",
+  "Good Match": "bg-gradient-to-t from-amber-400/15 to-amber-400/10 text-amber-800",
+  "Fair Match": "bg-gradient-to-t from-slate-400/15 to-slate-400/10 text-slate-700",
+  "Weak Match": "bg-gradient-to-t from-red-600/10 to-red-600/5 text-rose-800",
+  "A+": "bg-gradient-to-t from-orange-700/15 to-orange-700/10 text-orange-700",
+  "A": "bg-gradient-to-t from-emerald-500/15 to-emerald-500/10 text-emerald-800",
+  "B": "bg-gradient-to-t from-amber-400/15 to-amber-400/10 text-amber-800",
+  "C": "bg-gradient-to-t from-slate-400/15 to-slate-400/10 text-slate-700",
+  "D": "bg-gradient-to-t from-red-600/10 to-red-600/5 text-rose-800",
+};
+
 function assignGrades(scoresInBucket) {
-  const sorted = [...scoresInBucket].sort((a, b) => b.score - a.score);
-  const n = sorted.length;
-  return sorted.map((item, i) => {
-    const pct = (i + 1) / n;
-    let grade;
-    if (pct <= 0.2) grade = 'A+';
-    else if (pct <= 0.4) grade = 'A';
-    else if (pct <= 0.6) grade = 'B';
-    else if (pct <= 0.8) grade = 'C';
-    else grade = 'D';
+  if (!scoresInBucket || scoresInBucket.length === 0) return [];
+
+  const scoreArr = scoresInBucket.map(item => [item.score]);
+  const maxGrades = 5; // A+, A, B, C, D
+  const k = Math.min(maxGrades, scoreArr.length);
+
+  if (k === 1) {
+    return scoresInBucket.map(item => ({ ...item, grade: 'A+' }));
+  }
+
+  const { clusters, centroids } = kmeans(scoreArr, k);
+
+  if (!centroids || !clusters) {
+    // Fallback: everyone gets U (unknown) if kmeans fails
+    return scoresInBucket.map(item => ({ ...item, grade: 'U' }));
+  }
+
+  const sortedCentroidIndices = centroids
+    .map((c, i) => ({ i, v: c }))
+    .sort((a, b) => b.v - a.v)
+    .map(obj => obj.i);
+
+  const gradeLabels = ['A+', 'A', 'B', 'C', 'D'];
+
+  const clusterToGrade = {};
+  sortedCentroidIndices.forEach((centroidIndex, gradeRank) => {
+    clusterToGrade[centroidIndex] = gradeLabels[gradeRank] || 'D';
+  });
+
+  return scoresInBucket.map((item, idx) => {
+    const clusterIndex = clusters[idx];
+    const grade = clusterToGrade[clusterIndex] ?? 'D';
     return { ...item, grade };
   });
 }

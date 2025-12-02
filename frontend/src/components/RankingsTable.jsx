@@ -1,9 +1,12 @@
-import { useState, useMemo, useEffect } from "react";
-import { Star, X } from "lucide-react";
+import { useState, useMemo, useEffect, useContext } from "react";
+import { Heart, Star, X } from "lucide-react";
 import { iconMap } from "../data/Data";
 import DonutProgress from "./DonutProgress";
+import { Link } from "react-router-dom";
 import CountryDetailsPage from "./CountryDetails";
-import { getBuckets } from "../lib/utils";
+import { getBuckets, bucketHeaderStyles } from "../lib/utils";
+import { RankingsContext } from "@/contexts/RankingsContext";
+import UniDetailsPage from "./UniversityDetails";
 
 function getValue(row, key, groupNames) {
   if (key === "rank") return row.rank;
@@ -27,6 +30,10 @@ const RankingsTable = ({
   disciplinesData = [],
   category = "Country",
 }) => {
+  const {
+    shortlistedCountries, setShortlistedCountries,
+  } = useContext(RankingsContext);
+
   const isCountry = category.toLowerCase() === "country";
 
   // Keys differ between Country and University
@@ -35,23 +42,25 @@ const RankingsTable = ({
 
   const groupNames = metricGroups.map(g => g.name);
 
+  // Load more state
+  const [visibleGroupsCount, setVisibleGroupsCount] = useState(1);
+
   // Compose columns dynamically
   const columns = [
     { key: "rank", label: "No.", numeric: true },
     { key: nameKey, label: "Name", numeric: false },
     { key: "final_score", label: "Final Score", numeric: true },
-    // Only show these for countries
     ...(isCountry
       ? [
-        { key: "overall_score", label: "Overall Score", numeric: true },
-        { key: "discipline_score", label: "Discipline Score", numeric: true },
-        { key: "industry_score", label: "Industry Score", numeric: true },
-      ]
+          { key: "overall_score", label: "Overall Score", numeric: true },
+          { key: "discipline_score", label: "Discipline Score", numeric: true },
+          { key: "industry_score", label: "Industry Score", numeric: true },
+        ]
       : []),
     ...groupNames.map((name) => ({ key: `group_${name}`, label: name, numeric: true })),
   ];
 
-  // Bucket and rank the data (currently only for country; for university you can adjust/remove bucket logic if needed)
+  // Bucket and rank the data
   const [bucketedData, setBucketedData] = useState([]);
 
   useEffect(() => {
@@ -76,10 +85,10 @@ const RankingsTable = ({
     rank: idx + 1,
   }));
 
-  // Sorting state
+  // Sorting state (sort within groups, not across groups)
   const [sortConfig, setSortConfig] = useState({ key: "final_score", direction: "desc" });
 
-  // Sorting logic
+  // Sorting logic for individual items within groups
   const sortedData = useMemo(() => {
     if (!columns.length) return dataWithRank;
     return [...dataWithRank].sort((a, b) => {
@@ -103,6 +112,37 @@ const RankingsTable = ({
       }
     });
   }, [dataWithRank, sortConfig, columns, groupNames]);
+
+  // Group data by bucket (countries) or grade (universities)
+  const groupedData = useMemo(() => {
+    const groups = {};
+
+    const filteredData = isCountry ? sortedData : sortedData.filter(item => item.bucket === "Best Match");
+
+    filteredData.forEach((item) => {
+      const groupKey = isCountry ? item.bucket : item.grade;
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(item);
+    });
+
+    // Define order for display
+    const countryOrder = ["Best Match", "Good Match", "Fair Match", "Weak Match"];
+    const uniOrder = ["A+", "A", "B", "C", "D"];
+
+    const order = isCountry ? countryOrder : uniOrder;
+
+    return order
+      .map(key => ({ key, items: groups[key] || [] }))
+      .filter(group => group.items.length > 0);
+  }, [sortedData, isCountry]);
+
+  // Visible groups (limited by visibleGroupsCount)
+  const visibleGroupedData = useMemo(() => {
+    return groupedData.slice(0, visibleGroupsCount);
+  }, [groupedData, visibleGroupsCount]);
 
   // Lookup maps for industries and disciplines (only used for countries)
   const industriesByCountry = useMemo(() => {
@@ -129,7 +169,18 @@ const RankingsTable = ({
 
   // Handlers
   const [selectedCountry, setSelectedCountry] = useState(null);
-  const closeModal = () => setSelectedCountry(null);
+  const [selectedUni, setSelectedUni] = useState(null);
+  const closeCountryModal = () => setSelectedCountry(null);
+  const closeUniModal = () => setSelectedUni(null);
+
+  const handleShortlist = (item) => {
+    setShortlistedCountries((prev) => [...prev, item]);
+    console.log(shortlistedCountries);
+  };
+
+  const handleLoadMore = () => {
+    setVisibleGroupsCount(prev => Math.min(prev + 1, groupedData.length));
+  };
 
   if (loading) {
     return (
@@ -150,140 +201,168 @@ const RankingsTable = ({
     );
   }
 
+  const hasMoreGroups = visibleGroupsCount < groupedData.length;
+
   return (
     <>
-      <div className="flex flex-col w-full fadeIn">
-        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {sortedData.map((item) => {
-            const nameLower = item[nameKey]?.toLowerCase();
-            const industryInfo = isCountry ? industriesByCountry[nameLower] ?? null : null;
-            const disciplineInfo = isCountry ? disciplinesByCountry[nameLower] ?? null : null;
+      <div className="flex flex-col w-full fadeIn space-y-8">
+        {visibleGroupedData.map(({ key: groupKey, items }, groupIndex) => (
+          <div key={groupKey} className="fadeIn">
+            {/* Group Header */}
+            <div className={`max-w-48 sm:max-w-xs flex items-center rounded-full justify-center my-4 mx-auto py-2 ${bucketHeaderStyles[groupKey]}`}>
+              <h2 className="text-sm md:text-lg font-semibold tracking-tight">
+                {groupKey} ({items.length})
+              </h2>
+            </div>
 
-            return (
-              <div
-                key={item[idKey]}
-                onClick={() => isCountry && setSelectedCountry(item)}
-                className="flex flex-col p-4 space-y-4 rounded-4xl inset-shadow-sm shadow-md border border-black/5 bg-white/50 cursor-pointer transform transition-transform duration-200 hover:scale-102"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") isCountry && setSelectedCountry(item);
-                }}
-                aria-label={`View details for ${item[nameKey]}`}
-              >
-                <div className="flex justify-between">
-                  <div className="rounded-full py-0.5 px-2.5 bg-black/80">
-                    <span className="text-sm font-bold text-white">{item.rank}</span>
-                  </div>
-                  <div className="flex gap-2 flex-wrap justify-end">
-                    <div
-                      className={`flex items-center gap-1.5 rounded-full py-0.5 px-2.5 ${item.classes}`}
-                      title={`${item.label} (${item.grade}) (${Number(item.score ?? item.final_score).toFixed(2)}%)`}
-                      aria-label={`${item.label} (${item.grade})`}
-                    >
-                      <span className="text-sm font-medium">{item.bucket}</span>
-                      <div className="flex justify-center items-center w-6 h-6 bg-white/50 ring ring-white/30 rounded-full font-semibold text-xs">{item.grade}</div>
-                    </div>
-                  </div>
-                </div>
+            {/* Group Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 last:mb-0">
+              {items.map((item) => {
+                const nameLower = item[nameKey]?.toLowerCase();
+                const industryInfo = isCountry ? industriesByCountry[nameLower] ?? null : null;
+                const disciplineInfo = isCountry ? disciplinesByCountry[nameLower] ?? null : null;
 
-                <div className="flex flex-col gap-2 px-1">
-                  <div className="flex items-center gap-2">
-                    {item.flag && (
-                      <img
-                        src={item.flag}
-                        alt={`${item[nameKey]} flag`}
-                        className="w-6 h-4 object-cover rounded shadow-sm"
-                      />
-                    )}
-                    <div className="text-lg sm:text-xl font-medium text-black/90">{item[nameKey]}</div>
-                  </div>
-
-                  {isCountry && disciplineInfo?.comments && (
-                    <p className="text-xs md:text-sm text-gray-600">{disciplineInfo.comments}</p>
-                  )}
-
-                  <div className="grid grid-cols-2 md:flex md:px-12 justify-between">
-                    {groupNames.map((groupName) => {
-                      const scoreRaw = item.groups?.[groupName]?.group_score;
-                      const score = scoreRaw != null ? scoreRaw.toFixed(2) : "—";
-                      const numericScore = score === "—" ? 0 : parseFloat(score);
-                      const IconComponent = iconMap[groupName] || Star;
-                      return (
+                return (
+                  <div
+                    key={item[idKey]}
+                    onClick={() => isCountry ? setSelectedCountry(item) : setSelectedUni(item)}
+                    className={`p-4 space-y-4 rounded-4xl inset-shadow-sm shadow-md border border-black/5 bg-white/50 cursor-pointer transform transition-transform duration-200 hover:scale-[1.02] flex flex-col`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View details for ${item[nameKey]}`}
+                  >
+                    <div className="flex justify-between">
+                      <div className="flex items-center justify-center rounded-full w-7 h-7 bg-black/80">
+                        <span className="text-sm font-semibold text-white">{item.rank}</span>
+                      </div>
+                      <div className="flex gap-2 flex-wrap justify-end">
                         <div
-                          key={groupName}
-                          className="flex flex-col items-center justify-center py-2 text-black/80"
-                          title={`${groupName}: ${score === "—" ? "No data" : score}`}
+                          className={`flex items-center gap-1.5 rounded-full h-7 px-2.5 bg-black/5 text-black/80 ring-2 ring-black/10`}
+                          aria-label={`${item.label} (${item.grade})`}
                         >
-                          {score === "—" ? (
-                            <div className="text-sm text-orange-600 font-bold">—</div>
-                          ) : (
-                            <DonutProgress
-                              value={numericScore}
-                              size={85}
-                              strokeWidth={5}
-                              Icon={IconComponent}
-                              tooltip={groupName}
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {isCountry && industryInfo && (
-                    <div className="text-sm">
-                      <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Industries</h1>
-                      <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
-                      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
-                        <div className="px-1">
-                          <strong className="text-xs md:text-sm text-orange-700">Dominant</strong>
-                          <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
-                            {industryInfo.top_dominant_sectors.slice(0, 3).map((sector, i) => (
-                              <li key={i}>{sector}</li>
-                            ))}
-                          </ol>
-                        </div>
-                        <div>
-                          <strong className="text-xs md:text-sm text-orange-700">Growing</strong>
-                          <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
-                            {industryInfo.top_growing_sectors.slice(0, 3).map((sector, i) => (
-                              <li key={i}>{sector}</li>
-                            ))}
-                          </ol>
+                          <div className={`flex justify-center items-center w-6 h-6 rounded-full font-semibold text-xs`}>{item.grade}</div>
                         </div>
                       </div>
                     </div>
-                  )}
 
-                  {isCountry && disciplineInfo && (
-                    <div className="text-sm mt-2">
-                      <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Disciplines</h1>
-                      <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
-                      <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
-                        {disciplineInfo.top_disciplines.slice(0, 3).map((discipline, i) => (
-                          <li key={i}>{discipline}</li>
-                        ))}
-                      </ol>
+                    <div className="flex flex-col gap-2 px-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        {item.flag && (
+                          <img
+                            src={item.flag}
+                            alt={`${item[nameKey]} flag`}
+                            className="w-6 h-4 object-cover rounded shadow-sm"
+                          />
+                        )}
+                        <div className="text-lg sm:text-xl font-medium text-black/90">{item[nameKey]}</div>
+                      </div>
+
+                      {isCountry && disciplineInfo?.comments && (
+                        <p className="text-xs md:text-sm text-gray-600">{disciplineInfo.comments}</p>
+                      )}
+
+                      <div className="grid grid-cols-2 lg:flex lg:px-12 justify-between">
+                        {groupNames.map((groupName) => {
+                          const scoreRaw = item.groups?.[groupName]?.group_score;
+                          const score = scoreRaw != null ? scoreRaw.toFixed(2) : "—";
+                          const numericScore = score === "—" ? 0 : parseFloat(score);
+                          const IconComponent = iconMap[groupName] || Star;
+                          return (
+                            <div
+                              key={groupName}
+                              className="flex flex-col items-center justify-center py-2 text-black/80"
+                            >
+                              {score === "—" ? (
+                                <div className="text-sm text-orange-600 font-bold">—</div>
+                              ) : (
+                                <DonutProgress
+                                  value={numericScore}
+                                  size={85}
+                                  strokeWidth={5}
+                                  Icon={IconComponent}
+                                  tooltip={groupName}
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {isCountry && industryInfo && (
+                        <div className="text-sm">
+                          <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Industries</h1>
+                          <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
+                          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+                            <div className="px-1">
+                              <strong className="text-xs md:text-sm text-orange-700">Dominant</strong>
+                              <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
+                                {industryInfo.top_dominant_sectors.slice(0, 3).map((sector, i) => (
+                                  <li key={i}>{sector}</li>
+                                ))}
+                              </ol>
+                            </div>
+                            <div>
+                              <strong className="text-xs md:text-sm text-orange-700">Growing</strong>
+                              <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
+                                {industryInfo.top_growing_sectors.slice(0, 3).map((sector, i) => (
+                                  <li key={i}>{sector}</li>
+                                ))}
+                              </ol>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {isCountry && disciplineInfo && (
+                        <div className="text-sm mt-2">
+                          <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Disciplines</h1>
+                          <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
+                          <ol className="list-decimal text-xs md:text-sm list-inside text-black/80 mt-1">
+                            {disciplineInfo.top_disciplines.slice(0, 3).map((discipline, i) => (
+                              <li key={i}>{discipline}</li>
+                            ))}
+                          </ol>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        {/* Load More Button */}
+        {hasMoreGroups && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleLoadMore}
+              className="px-8 py-3 bg-gradient-to-t from-black/80 to-black/60 text-white font-semibold rounded-full hover:scale-105 cursor-pointer transform transition-all duration-200"
+            >
+              Load More
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Modal details only for countries */}
+      {/* Modal details for countries */}
       {isCountry && selectedCountry && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-2 sm:p-6"
           role="dialog"
           aria-modal="true"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeCountryModal();
+          }}
+          onClick={closeCountryModal}
         >
-          <div className="bg-gradient-to-t from-white to-slate-100 rounded-3xl w-[95%] sm:max-w-[90%] lg:max-w-[75%] max-h-[90vh] overflow-auto scrollbar-hide px-4 sm:px-8 py-8 sm:py-14 relative shadow-lg fadeIn">
+          <div
+            className="bg-gradient-to-t from-white to-slate-100 rounded-3xl w-[95%] sm:max-w-[90%] lg:max-w-[75%] max-h-[90vh] overflow-auto scrollbar-hide px-4 sm:px-8 py-8 sm:py-14 relative shadow-lg fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              onClick={closeModal}
+              onClick={closeCountryModal}
               className="absolute top-4 right-4 text-xs md:text-sm p-2.5 bg-black/5 text-gray-600 hover:bg-black/7 rounded-full cursor-pointer"
             >
               <X size={16} />
@@ -294,7 +373,37 @@ const RankingsTable = ({
               industriesData={industriesData}
               disciplinesData={disciplinesData}
               isModal={true}
-              onClose={closeModal}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal details for universities */}
+      {!isCountry && selectedUni && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-2 sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeUniModal();
+          }}
+          onClick={closeUniModal}
+        >
+          <div
+            className="bg-gradient-to-t from-white to-slate-100 rounded-3xl w-[95%] sm:max-w-[90%] lg:max-w-[75%] max-h-[90vh] overflow-auto scrollbar-hide px-4 sm:px-8 py-8 sm:py-14 relative shadow-lg fadeIn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closeUniModal}
+              className="absolute top-4 right-4 text-xs md:text-sm p-2.5 bg-black/5 text-gray-600 hover:bg-black/7 rounded-full cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+            <UniDetailsPage
+              uni={selectedUni}
+              metricGroups={metricGroups}
+              isModal={true}
             />
           </div>
         </div>
