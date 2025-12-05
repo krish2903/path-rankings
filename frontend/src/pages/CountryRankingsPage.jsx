@@ -193,12 +193,12 @@ const RankingsPage = () => {
     return (
         <div
             ref={containerRef}
-            className="h-screen snap-y snap-mandatory overflow-hidden fadeIn"
+            className="h-dvh snap-y snap-mandatory overflow-hidden fadeIn"
         >
             {!weightsAdjusted ? (
                 <>
                     {/* Initial Weights Section */}
-                    <section className="h-screen w-full flex flex-col md:grid md:grid-cols-2 justify-items-center justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
+                    <section className="h-dvh w-full flex flex-col md:grid md:grid-cols-2 justify-items-center justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
                         <header className="flex flex-col items-center text-center">
                             <h1 className="text-4xl lg:text-5xl font-medium tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400 py-2">
                                 Country Rankings
@@ -236,7 +236,7 @@ const RankingsPage = () => {
                     {/* Country Inputs Section */}
                     <section
                         ref={inputsRef}
-                        className="h-screen flex flex-col justify-center items-center snap-start px-4 py-8 pt-18 text-center"
+                        className="h-dvh flex flex-col justify-center items-center snap-start px-4 py-8 pt-18 text-center"
                     >
                         <h1 className="w-full text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight text-black/80 py-1">
                             Want a more <b className="text-orange-700">focussed</b> experience?
@@ -259,7 +259,7 @@ const RankingsPage = () => {
                     {/* Rankings Table Section ONLY */}
                     <section
                         ref={tableRef}
-                        className="flex flex-col items-center h-screen snap-start overflow-auto bg-gradient-to-t from-white to-[#fff5f0] px-2 sm:px-6 lg:px-12 py-20 md:py-28"
+                        className="flex flex-col items-center h-dvh snap-start overflow-auto bg-gradient-to-t from-white to-[#fff5f0] px-2 sm:px-6 lg:px-12 py-20 md:py-28"
                     >
                         {countryRankings.length > 0 && (
                             <div className="w-full">

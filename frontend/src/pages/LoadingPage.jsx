@@ -2,7 +2,7 @@ import React from "react";
 
 export default function LoadingPage() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen gap-6">
+        <div className="flex flex-col items-center justify-center min-h-dvh gap-6">
             <img
                 src="https://illustrations.popsy.co/amber/looking-at-the-map.svg"
                 alt="Logo"
