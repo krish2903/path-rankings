@@ -9,6 +9,7 @@ import PrioritySelector from "@/components/PrioritySelector";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { ClipLoader } from "react-spinners";
+import UniInputs from "@/components/UniInputs";
 import RankingsMap from "@/components/RankingsMap";
 
 function areWeightsAdjusted(weights, metricGroups) {
@@ -37,6 +38,7 @@ const UniRankingsPage = () => {
 
     const tableRef = useRef(null);
     const containerRef = useRef(null);
+    const inputsRef = useRef(null);
 
     const weightsAdjusted = areWeightsAdjusted(uniWeights, uniMetricGroups);
 
@@ -109,6 +111,10 @@ const UniRankingsPage = () => {
             .join("&");
 
         return fetch(`${API_BASE}/university-rankings?${queryString}`).then((res) => res.json());
+    };
+
+    const scrollToInputs = () => {
+        inputsRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
     const handleBegin = () => {
@@ -227,7 +233,7 @@ const UniRankingsPage = () => {
                                     ? "opacity-50 cursor-not-allowed"
                                     : "cursor-pointer"
                                     }`}
-                                onClick={handleBegin}
+                                onClick={scrollToInputs}
                                 disabled={buttonLoading || loading || !areWeightsAdjusted(pendingUniWeights, uniMetricGroups)}
                             >
                                 {buttonLoading ? (
@@ -237,6 +243,23 @@ const UniRankingsPage = () => {
                                 )}
                             </button>
                         </div>
+                    </section>
+
+                    {/* Country Inputs Section */}
+                    <section
+                        ref={inputsRef}
+                        className="h-screen flex flex-col justify-center items-center snap-start px-4 py-8 pt-18 text-center"
+                    >
+                        <h1 className="w-full text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight text-black/80 py-1">
+                            Want a more <b className="text-orange-700">focussed</b> experience?
+                        </h1>
+                        <h2 className="text-sm sm:text-base lg:text-lg text-black/80 tracking-tight mt-2 mb-4 md:mb-8">
+                            Answer a few questions, and get more personalised results!
+                        </h2>
+                        <UniInputs
+                            onStart={handleBegin}
+                            buttonLoading={buttonLoading}
+                        />
                     </section>
                 </>
             ) : (
