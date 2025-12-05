@@ -47,7 +47,7 @@ const MultiSelect = ({ countries, selectedCountries, setSelectedCountries }) => 
                                         e.preventDefault();
                                         toggle(c);
                                     }}
-                                    className={`w-full flex items-center gap-2 text-left px-3 py-2 text-xs transition-colors ${selectedCountries.includes(c) ? 'bg-orange-600/5 font-medium' : 'hover:bg-black/5'}`}
+                                    className={`w-full flex items-center gap-2 text-left px-3 py-2 text-sm transition-colors ${selectedCountries.includes(c) ? 'bg-orange-600/5 font-medium' : 'hover:bg-black/5'}`}
                                 >
                                     <img src={c.flag} className="h-3.5 w-5 ring-1 ring-black/10 rounded-sm" />
                                     {c.name}
@@ -85,6 +85,7 @@ export default function UniInputs({
     const {
         countries,
         setSelectedUniCountries,
+        buttonLoading,
     } = useContext(RankingsContext);
 
     useEffect(() => {
@@ -127,11 +128,11 @@ export default function UniInputs({
                         className={`${selectedCountries.length === 0
                             ? "bg-black/20 text-black/80 opacity-50 cursor-not-allowed"
                             : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
-                            } font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition w-full sm:w-32`}
+                            } flex justify-center items-center font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition w-full sm:w-32`}
                         onClick={onStart}
                         disabled={selectedCountries.length === 0}
                     >
-                        Continue
+                        {buttonLoading ? <ClipLoader size={18} color="white" /> : "Start"}
                     </button>
                 </div>
             </section>
