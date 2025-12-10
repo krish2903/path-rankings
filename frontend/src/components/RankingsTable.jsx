@@ -52,10 +52,10 @@ const RankingsTable = ({
     { key: "final_score", label: "Final Score", numeric: true },
     ...(isCountry
       ? [
-          { key: "overall_score", label: "Overall Score", numeric: true },
-          { key: "discipline_score", label: "Discipline Score", numeric: true },
-          { key: "industry_score", label: "Industry Score", numeric: true },
-        ]
+        { key: "overall_score", label: "Overall Score", numeric: true },
+        { key: "discipline_score", label: "Discipline Score", numeric: true },
+        { key: "industry_score", label: "Industry Score", numeric: true },
+      ]
       : []),
     ...groupNames.map((name) => ({ key: `group_${name}`, label: name, numeric: true })),
   ];
@@ -174,8 +174,15 @@ const RankingsTable = ({
   const closeUniModal = () => setSelectedUni(null);
 
   const handleShortlist = (item) => {
-    setShortlistedCountries((prev) => [...prev, item]);
-    console.log(shortlistedCountries);
+    const alreadyShortlisted = shortlistedCountries.some(
+      (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+    );
+
+    if (alreadyShortlisted) {
+      setShortlistedCountries(prev => prev.filter(shortlistedItem => shortlistedItem[idKey] !== item[idKey]));
+    } else {
+      setShortlistedCountries(prev => [...prev, item]);
+    }
   };
 
   const handleLoadMore = () => {
@@ -242,6 +249,26 @@ const RankingsTable = ({
                         >
                           <div className={`flex justify-center items-center w-6 h-6 rounded-full font-semibold text-xs`}>{item.grade}</div>
                         </div>
+                        <button onClick={(e) => {
+                          e.stopPropagation();
+                          handleShortlist(item);
+                        }}
+                          className="flex items-center ring-2 ring-black/10 justify-center rounded-full w-7 h-7 bg-black/5 z-1 cursor-pointer group"
+                        >
+                          <Heart
+                            fill={shortlistedCountries.some(
+                              (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+                            )
+                              ? "rgba(225, 29, 72, 0.8)"
+                              : "transparent"}
+                            className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${shortlistedCountries.some(
+                              (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+                            )
+                                ? "text-rose-600/80"
+                                : "text-black/80"
+                              }`}
+                          />
+                        </button>
                       </div>
                     </div>
 

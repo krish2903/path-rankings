@@ -9,6 +9,7 @@ import { RankingsContext } from "../contexts/RankingsContext";
 import PrioritySelector from "@/components/PrioritySelector";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import BottomPanel from "@/components/BottomPanel";
 
 function areWeightsAdjusted(weights, metricGroups) {
     if (!metricGroups.length || Object.keys(weights).length === 0) return false;
@@ -32,6 +33,7 @@ const RankingsPage = () => {
         selectedBuckets, setSelectedBuckets,
         loading, setLoading,
         buttonLoading, setButtonLoading,
+        shortlistedCountries, setShortlistedCountries,
     } = useContext(RankingsContext);
 
     const inputsRef = useRef(null);
@@ -195,203 +197,198 @@ const RankingsPage = () => {
             ref={containerRef}
             className="h-dvh snap-y snap-mandatory overflow-hidden fadeIn"
         >
-            {!weightsAdjusted ? (
-                <>
-                    {/* Initial Weights Section */}
-                    <section className="h-dvh w-full flex flex-col md:grid md:grid-cols-2 justify-items-center justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
-                        <header className="flex flex-col items-center text-center">
-                            <h1 className="text-4xl lg:text-5xl font-medium tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400 py-2">
-                                Country Rankings
-                            </h1>
-                            <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
-                                <p>Explore the rankings of countries based on your preferences.</p>
-                            </div>
-                            <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="hidden sm:block sm:max-h-96 fadeIn" />
-                        </header>
-                        <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
-                            {countryMetricGroups.length > 0 && (
-                                <PrioritySelector
-                                    groups={countryMetricGroups}
-                                    onWeightChange={setPendingCountryWeights}
-                                    category="Country"
-                                />
-                            )}
-                            <button
-                                className={`bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : "cursor-pointer"
-                                    }`}
-                                onClick={scrollToInputs}
-                                disabled={buttonLoading || loading || !areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
-                            >
-                                {buttonLoading ? (
-                                    <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
-                                ) : (
-                                    "Begin"
-                                )}
-                            </button>
-                        </div>
-                    </section>
-
-                    {/* Country Inputs Section */}
-                    <section
-                        ref={inputsRef}
-                        className="h-dvh flex flex-col justify-center items-center snap-start px-4 py-8 pt-18 text-center"
-                    >
-                        <h1 className="w-full text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight text-black/80 py-1">
-                            Want a more <b className="text-orange-700">focussed</b> experience?
-                        </h1>
-                        <h2 className="text-sm sm:text-base lg:text-lg text-black/80 tracking-tight mt-2 mb-4 md:mb-8">
-                            Answer a few questions, and get more personalised results!
-                        </h2>
-                        <CountryInputs
-                            onStart={handleBegin}
-                            selectedDisciplines={selectedDisciplines}
-                            setSelectedDisciplines={setSelectedDisciplines}
-                            selectedIndustries={selectedIndustries}
-                            setSelectedIndustries={setSelectedIndustries}
-                            buttonLoading={buttonLoading}
+            {/* Initial Weights Section */}
+            <section className="h-dvh w-full flex flex-col md:grid md:grid-cols-2 justify-items-center justify-center items-center snap-start px-8 md:px-32 py-8 pt-18 text-center">
+                <header className="flex flex-col items-center text-center">
+                    <h1 className="text-4xl lg:text-5xl font-medium tracking-tight mb-2 text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400 py-2">
+                        Country Rankings
+                    </h1>
+                    <div className="text-sm md:text-base mb-2 sm:mb-4 max-w-full sm:max-w-2xl lg:max-w-3xl tracking-tight text-center text-black/60">
+                        <p>Explore the rankings of countries based on your preferences.</p>
+                    </div>
+                    <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="hidden sm:block sm:max-h-96 fadeIn" />
+                </header>
+                <div className="w-full px-2 sm:px-8 flex flex-col items-center gap-6">
+                    {countryMetricGroups.length > 0 && (
+                        <PrioritySelector
+                            groups={countryMetricGroups}
+                            onWeightChange={setPendingCountryWeights}
+                            category="Country"
                         />
-                    </section>
-                </>
-            ) : (
-                <>
-                    {/* Rankings Table Section ONLY */}
-                    <section
-                        ref={tableRef}
-                        className="flex flex-col items-center h-dvh snap-start overflow-auto bg-gradient-to-t from-white to-[#fff5f0] px-2 sm:px-6 lg:px-12 py-20 md:py-28"
+                    )}
+                    <button
+                        className={`bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)
+                            ? "opacity-50 cursor-not-allowed"
+                            : "cursor-pointer"
+                            }`}
+                        onClick={scrollToInputs}
+                        disabled={buttonLoading || loading || !areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
                     >
-                        {countryRankings.length > 0 && (
-                            <div className="w-full">
-                                <div>
-                                    <div className="flex flex-col sm:flex-row justify-between">
-                                        <div className="sm:max-w-1/2">
-                                            <h1 className="px-4 py-1 text-2xl text-center md:text-left font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400">
-                                                Here are your <b className="font-medium text-orange-700">top</b> matches!
-                                            </h1>
-                                            <p className="px-4 text-xs mb-1 md:mb-0 text-center md:text-left sm:text-sm tracking-tight text-black/60 italic">
-                                                Want to hear directly from someone who has experienced it?
-                                            </p>
-                                            <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 mb-3 italic">
-                                                <a
-                                                    href="https://www.inforens.com/guides"
-                                                    target="_blank"
-                                                    className="font-medium text-orange-700 underline"
-                                                >
-                                                    Connect with a mentor
-                                                </a>{" "}
-                                                to learn directly from our international community or{" "}
-                                                <a
-                                                    href="https://www.inforens.com/contact-us"
-                                                    target="_blank"
-                                                    className="font-medium text-orange-700 underline"
-                                                >
-                                                    contact us today
-                                                </a>{" "}
-                                                to speak with one of our experienced advisors!
-                                            </p>
-                                            <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 md:mb-4 italic"><b>Note:</b> Final rankings are based on 1 year of study, regardless of the study level.</p>
-                                        </div>
-                                        <div className="flex px-2 items-end gap-3 py-4">
-                                            <Drawer>
-                                                <DrawerTrigger asChild className="w-full">
-                                                    <div
-                                                        className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm text-white bg-[#e07352] hover:bg-[#e07352e6] rounded-full w-full sm:w-auto"
-                                                    >
-                                                        <Star className="h-4 w-4" />
-                                                        <span>Ratings</span>
-                                                    </div>
-                                                </DrawerTrigger>
-                                                <DrawerContent className="px-8 lg:px-64">
-                                                    <div className="h-2 w-32 md:w-48 bg-black/5 rounded-full mx-auto mb-4" />
-                                                    <DrawerTitle className="text-center py-2">Ratings</DrawerTitle>
-                                                    <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
-                                                    <div className="flex flex-col sm:flex-row justify-center items-center">
-                                                        <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="hidden sm:block sm:max-h-96 fadeIn" />
-                                                        {countryMetricGroups.length > 0 ? (
-                                                            <PrioritySelector
-                                                                groups={countryMetricGroups}
-                                                                onWeightChange={setPendingCountryWeights}
-                                                                category="Country"
-                                                            />
-                                                        ) : "Error"}
-                                                    </div>
-                                                    <DrawerClose asChild>
-                                                        <button
-                                                            className={`max-w-sm md:max-w-md bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 mx-auto my-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)
-                                                                ? "opacity-50 cursor-not-allowed"
-                                                                : "cursor-pointer"
-                                                                }`}
-                                                            onClick={handleApplyWeights}
-                                                            disabled={!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
-                                                        >
-                                                            Confirm
-                                                        </button>
-                                                    </DrawerClose>
-                                                </DrawerContent>
-                                            </Drawer>
-                                            <Sheet>
-                                                <SheetTrigger asChild>
-                                                    <button
-                                                        className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm font-medium text-white bg-black/80 hover:bg-black/70 rounded-full w-full sm:w-auto"
-                                                        type="button"
-                                                    >
-                                                        <ListFilter className="h-4 w-4" />
-                                                        <span>Filters</span>
-                                                    </button>
-                                                </SheetTrigger>
-                                                <SheetContent side="right" className="w-screen md:max-w-sm">
-                                                    <FilterSheetContent
-                                                        countries={countries}
-                                                        selectedCountries={selectedCountries}
-                                                        onCountryChange={handleCountryChange}
-                                                        disciplines={DISCIPLINES}
-                                                        selectedDisciplines={selectedDisciplines}
-                                                        onDisciplineChange={(name, checked) => {
-                                                            setSelectedDisciplines((prev) =>
-                                                                checked
-                                                                    ? [...prev, name]
-                                                                    : prev.filter((d) => d !== name)
-                                                            );
-                                                        }}
-                                                        industries={INDUSTRIES}
-                                                        selectedIndustries={selectedIndustries}
-                                                        onIndustryChange={(name, checked) => {
-                                                            setSelectedIndustries((prev) =>
-                                                                checked
-                                                                    ? [...prev, name]
-                                                                    : prev.filter((i) => i !== name)
-                                                            );
-                                                        }}
-                                                        selectedBuckets={selectedBuckets}
-                                                        onBucketsChange={(name, checked) => {
-                                                            setSelectedBuckets((prev) =>
-                                                                checked
-                                                                    ? [...prev, name]
-                                                                    : prev.filter((i) => i !== name)
-                                                            );
-                                                        }}
-                                                        onApplyFilters={applyAllFilters}
+                        {buttonLoading ? (
+                            <div className="w-6 h-6 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+                        ) : (
+                            "Begin"
+                        )}
+                    </button>
+                </div>
+            </section>
+
+            {/* Country Inputs Section */}
+            <section
+                ref={inputsRef}
+                className="h-dvh flex flex-col justify-center items-center snap-start px-4 py-8 pt-18 text-center"
+            >
+                <h1 className="w-full text-2xl sm:text-3xl lg:text-4xl font-medium tracking-tight text-black/80 py-1">
+                    Want a more <b className="text-orange-700">focussed</b> experience?
+                </h1>
+                <h2 className="text-sm sm:text-base lg:text-lg text-black/80 tracking-tight mt-2 mb-4 md:mb-8">
+                    Answer a few questions, and get more personalised results!
+                </h2>
+                <CountryInputs
+                    onStart={handleBegin}
+                    selectedDisciplines={selectedDisciplines}
+                    setSelectedDisciplines={setSelectedDisciplines}
+                    selectedIndustries={selectedIndustries}
+                    setSelectedIndustries={setSelectedIndustries}
+                    buttonLoading={buttonLoading}
+                />
+            </section>
+
+            {/* Rankings Table Section */}
+            <section
+                ref={tableRef}
+                className="flex flex-col items-center h-dvh snap-start overflow-auto bg-gradient-to-t from-white to-[#fff5f0] px-2 sm:px-6 lg:px-12 py-20 md:py-28"
+            >
+                {countryRankings.length > 0 && (
+                    <div className="w-full">
+                        <div>
+                            <div className="flex flex-col sm:flex-row justify-between">
+                                <div className="sm:max-w-1/2">
+                                    <h1 className="px-4 py-1 text-2xl text-center md:text-left font-medium tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-black to-gray-400">
+                                        Here are your <b className="font-medium text-orange-700">top</b> matches!
+                                    </h1>
+                                    <p className="px-4 text-xs mb-1 md:mb-0 text-center md:text-left sm:text-sm tracking-tight text-black/60 italic">
+                                        Want to hear directly from someone who has experienced it?
+                                    </p>
+                                    <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 mb-3 italic">
+                                        <a
+                                            href="https://www.inforens.com/guides"
+                                            target="_blank"
+                                            className="font-medium text-orange-700 underline"
+                                        >
+                                            Connect with a mentor
+                                        </a>{" "}
+                                        to learn directly from our international community or{" "}
+                                        <a
+                                            href="https://www.inforens.com/contact-us"
+                                            target="_blank"
+                                            className="font-medium text-orange-700 underline"
+                                        >
+                                            contact us today
+                                        </a>{" "}
+                                        to speak with one of our experienced advisors!
+                                    </p>
+                                    <p className="px-4 text-center md:text-left text-xs sm:text-sm tracking-tight text-black/60 md:mb-4 italic"><b>Note:</b> Final rankings are based on 1 year of study, regardless of the study level.</p>
+                                </div>
+                                <div className="flex px-2 items-end gap-3 py-4">
+                                    <Drawer>
+                                        <DrawerTrigger asChild className="w-full">
+                                            <div
+                                                className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm text-white bg-[#e07352] hover:bg-[#e07352e6] rounded-full w-full sm:w-auto"
+                                            >
+                                                <Star className="h-4 w-4" />
+                                                <span>Ratings</span>
+                                            </div>
+                                        </DrawerTrigger>
+                                        <DrawerContent className="px-8 lg:px-64">
+                                            <div className="h-2 w-32 md:w-48 bg-black/5 rounded-full mx-auto mb-4" />
+                                            <DrawerTitle className="text-center py-2">Ratings</DrawerTitle>
+                                            <DrawerDescription className="text-xs text-black/70 text-center pb-4">Adjust the ratings based on your preferences!</DrawerDescription>
+                                            <div className="flex flex-col sm:flex-row justify-center items-center">
+                                                <img src="https://illustrations.popsy.co/amber/student-going-to-school.svg" className="hidden sm:block sm:max-h-96 fadeIn" />
+                                                {countryMetricGroups.length > 0 ? (
+                                                    <PrioritySelector
+                                                        groups={countryMetricGroups}
+                                                        onWeightChange={setPendingCountryWeights}
                                                         category="Country"
                                                     />
-                                                </SheetContent>
-                                            </Sheet>
-                                        </div>
-                                    </div>
-                                    <RankingsTable
-                                        rankings={filteredRankings}
-                                        loading={loading}
-                                        metricGroups={countryMetricGroups}
-                                        industriesData={industriesData}
-                                        disciplinesData={disciplinesData}
-                                        category="Country"
-                                    />
+                                                ) : "Error"}
+                                            </div>
+                                            <DrawerClose asChild>
+                                                <button
+                                                    className={`max-w-sm md:max-w-md bg-[#ec5b22] hover:bg-[#df4c12] text-white font-semibold w-full sm:w-40 mx-auto my-8 py-2 sm:py-3 rounded-full text-base sm:text-lg transition flex items-center justify-center ${!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)
+                                                        ? "opacity-50 cursor-not-allowed"
+                                                        : "cursor-pointer"
+                                                        }`}
+                                                    onClick={handleApplyWeights}
+                                                    disabled={!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
+                                                >
+                                                    Confirm
+                                                </button>
+                                            </DrawerClose>
+                                        </DrawerContent>
+                                    </Drawer>
+                                    <Sheet>
+                                        <SheetTrigger asChild>
+                                            <button
+                                                className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm font-medium text-white bg-black/80 hover:bg-black/70 rounded-full w-full sm:w-auto"
+                                                type="button"
+                                            >
+                                                <ListFilter className="h-4 w-4" />
+                                                <span>Filters</span>
+                                            </button>
+                                        </SheetTrigger>
+                                        <SheetContent side="right" className="w-screen md:max-w-sm">
+                                            <FilterSheetContent
+                                                countries={countries}
+                                                selectedCountries={selectedCountries}
+                                                onCountryChange={handleCountryChange}
+                                                disciplines={DISCIPLINES}
+                                                selectedDisciplines={selectedDisciplines}
+                                                onDisciplineChange={(name, checked) => {
+                                                    setSelectedDisciplines((prev) =>
+                                                        checked
+                                                            ? [...prev, name]
+                                                            : prev.filter((d) => d !== name)
+                                                    );
+                                                }}
+                                                industries={INDUSTRIES}
+                                                selectedIndustries={selectedIndustries}
+                                                onIndustryChange={(name, checked) => {
+                                                    setSelectedIndustries((prev) =>
+                                                        checked
+                                                            ? [...prev, name]
+                                                            : prev.filter((i) => i !== name)
+                                                    );
+                                                }}
+                                                selectedBuckets={selectedBuckets}
+                                                onBucketsChange={(name, checked) => {
+                                                    setSelectedBuckets((prev) =>
+                                                        checked
+                                                            ? [...prev, name]
+                                                            : prev.filter((i) => i !== name)
+                                                    );
+                                                }}
+                                                onApplyFilters={applyAllFilters}
+                                                category="Country"
+                                            />
+                                        </SheetContent>
+                                    </Sheet>
                                 </div>
                             </div>
-                        )}
-                    </section>
-                </>
-            )}
+                            <RankingsTable
+                                rankings={filteredRankings}
+                                loading={loading}
+                                metricGroups={countryMetricGroups}
+                                industriesData={industriesData}
+                                disciplinesData={disciplinesData}
+                                category="Country"
+                            />
+                        </div>
+                    </div>
+                )}
+            </section>
+            {shortlistedCountries.length > 0 && <BottomPanel category="Country" shortlisted={shortlistedCountries} />}
         </div>
     );
 };

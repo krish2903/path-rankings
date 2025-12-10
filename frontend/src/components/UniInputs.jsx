@@ -9,10 +9,10 @@ const MultiSelect = ({ countries, selectedCountries, setSelectedCountries }) => 
     const [open, setOpen] = useState(false);
     const inputRef = useRef(null);
     const toggle = (country) => {
-        setSelectedCountries(selectedCountries.includes(country)
-            ? selectedCountries.filter(c => c.name !== country.name)
-            : [...selectedCountries, country])
-    }
+        setSelectedCountries(selectedCountries.some(c => c.id === country.id)
+            ? selectedCountries.filter(c => c.id !== country.id)
+            : [...selectedCountries, country]);
+    };
 
     const filtered = countries.filter(c =>
         c.name.toLowerCase().includes(search.toLowerCase())
@@ -47,7 +47,7 @@ const MultiSelect = ({ countries, selectedCountries, setSelectedCountries }) => 
                                         e.preventDefault();
                                         toggle(c);
                                     }}
-                                    className={`w-full flex items-center gap-2 text-left px-3 py-2 text-sm transition-colors ${selectedCountries.includes(c) ? 'bg-orange-600/5 font-medium' : 'hover:bg-black/5'}`}
+                                    className={`w-full flex items-center gap-2 text-left px-3 py-2 text-sm transition-colors ${selectedCountries.some(country => country.id === c.id) ? 'bg-orange-600/5 font-medium' : 'hover:bg-black/5'}`}
                                 >
                                     <img src={c.flag} className="h-3.5 w-5 ring-1 ring-black/10 rounded-sm" />
                                     {c.name}
@@ -80,16 +80,34 @@ export default function UniInputs({
     const containerRef = useRef(null);
     const countryRef = useRef(null);
 
-    const [selectedCountries, setSelectedCountries] = useState([]);
-
     const {
         countries,
         setSelectedUniCountries,
         buttonLoading,
+        shortlistedCountries,
     } = useContext(RankingsContext);
 
+    const [selectedCountries, setSelectedCountries] = useState([]);
+
     useEffect(() => {
-        setSelectedUniCountries(selectedCountries.map(c => c.id));
+        if (shortlistedCountries.length > 0) {
+            console.log(selectedCountries);
+            const transformedCountries = shortlistedCountries.map((country) => ({
+                flag: country.flag,
+                id: country.country_id,
+                name: country.country_name
+            }));
+            setSelectedCountries(transformedCountries);
+        }
+    }, [shortlistedCountries]);
+
+    useEffect(() => {
+        console.log(selectedCountries);
+        if (selectedCountries.length > 0) {
+            setSelectedUniCountries(selectedCountries.map(c => c.id));
+        } else {
+            setSelectedUniCountries(countries.map(c => c.id));
+        }
     }, [selectedCountries]);
 
     return (
@@ -116,7 +134,7 @@ export default function UniInputs({
                 />
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 justify-center w-full max-w-xs sm:max-w-none">
                     <button
-                        className={`bg-black/80 hover:bg-black/75 text-white font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition-all duration-300 ease-in-out w-full sm:w-32 cursor-pointer ${selectedCountries.length > 0 ? "hidden pointer-events-none" : "block"
+                        className={`bg-black/80 hover:bg-black/75 text-white font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition-all duration-300 ease-in-out w-full sm:w-32 cursor-pointer ${selectedCountries.length > 0 || buttonLoading ? "hidden pointer-events-none" : "block"
                             }`}
                         onClick={onStart}
                         aria-hidden={selectedCountries.length > 0}
