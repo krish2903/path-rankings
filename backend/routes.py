@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import University, db, Country, CountryIndustry, CountryDisciplines, MetricGroup, CountryDetails, UniversityDetails, Metric, country_metrics, university_metrics
 from utils import calculate_country_scores, calculate_university_scores
-from norry import get_country_info, extract_json_object, get_uni_info
+from norry import get_country_info, get_uni_info
 import base64
 import json
 from sqlalchemy.orm import joinedload
@@ -245,55 +245,53 @@ def country_info():
         return jsonify({"error": "Missing country parameter"}), 400
 
     try:
-        info_raw = get_country_info(country_name)
-        json_str = extract_json_object(info_raw)
-        
-        if json_str:
-            info_json = json.loads(json_str)
-            cards = info_json.get("cards", [])
-            
-            if cards and len(cards) == 6:           
-                country = Country.query.filter(Country.name.ilike(country_name)).first()
-                if country:
-                    try:
-                        if country.details:
-                            country.details.cards = cards
-                            country.details.fetch_date = datetime.now()
-                        else:
-                            country.details = CountryDetails(
-                                country_id=country.id,
-                                country_name=country_name,
-                                cards=cards,
-                                fetch_date=datetime.now()
-                            )
-                        db.session.commit()
-                    except Exception as db_error:
-                        print(f"⚠️ Database update failed for {country_name}: {str(db_error)}")
-                
-                return jsonify({
-                    "country": country_name, 
-                    "cards": cards,
-                    "source": "live"
-                })
-            else:
-                print(f"⚠️ Live API returned {len(cards)} cards (expected 6)")
+        cards_obj, citations_info = get_country_info(country_name)
+        cards = cards_obj.get("cards", []) if cards_obj else []
+        print("Live cards:", cards)
+        print("Citations:", citations_info)
+
+        if cards and len(cards) == 6:
+            country = Country.query.filter(Country.name.ilike(country_name)).first()
+            if country:
+                try:
+                    if country.details:
+                        country.details.cards = cards
+                        country.details.fetch_date = datetime.now()
+                    else:
+                        country.details = CountryDetails(
+                            country_id=country.id,
+                            country_name=country_name,
+                            cards=cards,
+                            fetch_date=datetime.now(),
+                        )
+                    db.session.commit()
+                except Exception as db_error:
+                    print(f"⚠️ Database update failed for {country_name}: {str(db_error)}")
+
+            return jsonify({
+                "country": country_name,
+                "cards": cards,
+                "citations": citations_info,
+                "source": "live",
+            })
+        else:
+            print(f"⚠️ Live API returned {len(cards)} cards (expected 6)")
     except Exception as live_error:
         print(f"❌ Live API failed: {str(live_error)}")
 
     try:
         country = Country.query.filter(Country.name.ilike(country_name)).first()
-        
+
         if country and country.details and country.details.cards:
             cards = country.details.cards
             return jsonify({
                 "country": country_name,
                 "cards": cards,
                 "source": "fallback",
-                "last_updated": country.details.fetch_date.isoformat() if country.details.fetch_date else None
+                "last_updated": country.details.fetch_date.isoformat() if country.details.fetch_date else None,
             })
         else:
             print(f"❌ No fallback data found for {country_name}")
-            
     except Exception as fallback_error:
         print(f"❌ Fallback failed: {str(fallback_error)}")
 
@@ -301,9 +299,8 @@ def country_info():
         "country": country_name,
         "cards": [],
         "source": "none",
-        "message": "No data available"
+        "message": "No data available",
     }), 200
-
 
 @bp.route('/uni-info', methods=['GET'])
 def uni_info():
@@ -312,58 +309,53 @@ def uni_info():
         return jsonify({"error": "Missing university parameter"}), 400
 
     try:
-        info_raw = get_uni_info(university)
-        json_str = extract_json_object(info_raw)
-        
-        if json_str:
-            info_json = json.loads(json_str)
-            cards = info_json.get("cards", [])
-            
-            if cards and len(cards) == 6:
-                uni = University.query.filter(University.name.ilike(university)).first()
-                if uni:
-                    try:
-                        if uni.details:
-                            uni.details.cards = cards
-                            uni.details.fetch_date = datetime.now()
-                        else:
-                            uni.details = UniversityDetails(
-                                university_id=uni.id,
-                                university_name=university,
-                                cards=cards,
-                                fetch_date=datetime.now()
-                            )
-                        db.session.commit()
-                    except Exception as db_error:
-                        print(f"⚠️ Database update failed for {university}: {str(db_error)}")
-                
-                return jsonify({
-                    "university": university, 
-                    "cards": cards,
-                    "source": "live"
-                })
-            else:
-                print(f"⚠️ Live API returned {len(cards)} cards (expected non-empty)")
+        cards_obj, citations_info = get_uni_info(university)
+        cards = cards_obj.get("cards", []) if cards_obj else []
+        print("Live cards:", cards)
+        print("Citations:", citations_info)
+
+        if cards and len(cards) == 6:
+            uni = University.query.filter(University.name.ilike(university)).first()
+            if uni:
+                try:
+                    if uni.details:
+                        uni.details.cards = cards
+                        uni.details.fetch_date = datetime.now()
+                    else:
+                        uni.details = UniversityDetails(
+                            uni_id=uni.id,
+                            uni_name=university,
+                            cards=cards,
+                            fetch_date=datetime.now(),
+                        )
+                    db.session.commit()
+                except Exception as db_error:
+                    print(f"⚠️ Database update failed for {university}: {str(db_error)}")
+
+            return jsonify({
+                "university": university,
+                "cards": cards,
+                "citations": citations_info,
+                "source": "live",
+            })
         else:
-            print("⚠️ No JSON object found in API response")
-            
+            print(f"⚠️ Live API returned {len(cards)} cards (expected 6)")
     except Exception as live_error:
         print(f"❌ Live API failed for {university}: {str(live_error)}")
 
     try:
         uni = University.query.filter(University.name.ilike(university)).first()
-        
+
         if uni and uni.details and uni.details.cards:
             cards = uni.details.cards
             return jsonify({
                 "university": university,
                 "cards": cards,
                 "source": "fallback",
-                "last_updated": uni.details.fetch_date.isoformat() if uni.details.fetch_date else None
+                "last_updated": uni.details.fetch_date.isoformat() if uni.details.fetch_date else None,
             })
         else:
             print(f"❌ No fallback data found for {university}")
-            
     except Exception as fallback_error:
         print(f"❌ Fallback failed for {university}: {str(fallback_error)}")
 
@@ -371,7 +363,7 @@ def uni_info():
         "university": university,
         "cards": [],
         "source": "none",
-        "message": "No data available"
+        "message": "No data available",
     }), 200
 
 @bp.route("/country-rankings")

@@ -300,9 +300,9 @@ const UniRankingsPage = () => {
                                     <Drawer>
                                         <DrawerTrigger asChild className="w-full">
                                             <div
-                                                className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm text-white bg-[#e07352] hover:bg-[#e07352e6] rounded-full w-full sm:w-auto"
+                                                className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs font-medium sm:text-sm text-white bg-[#e07352] hover:bg-[#e07352e6] rounded-full w-full sm:w-auto"
                                             >
-                                                <Star className="h-4 w-4" />
+                                                <Star strokeWidth={2.5} className="h-4 w-4" />
                                                 <span>Ratings</span>
                                             </div>
                                         </DrawerTrigger>
@@ -340,7 +340,7 @@ const UniRankingsPage = () => {
                                                 className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm font-medium text-white bg-black/80 hover:bg-black/70 rounded-full w-full sm:w-auto"
                                                 type="button"
                                             >
-                                                <ListFilter className="h-4 w-4" />
+                                                <ListFilter strokeWidth={2.5} className="h-4 w-4" />
                                                 <span>Filters</span>
                                             </button>
                                         </SheetTrigger>
@@ -372,7 +372,7 @@ const UniRankingsPage = () => {
                             </div>
                             <RankingsTable
                                 rankings={filteredRankings}
-                                loading={loading}
+                                loading={buttonLoading}
                                 metricGroups={uniMetricGroups}
                                 category="University"
                             />

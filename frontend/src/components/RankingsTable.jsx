@@ -4,9 +4,10 @@ import { iconMap } from "../data/Data";
 import DonutProgress from "./DonutProgress";
 import { Link } from "react-router-dom";
 import CountryDetailsPage from "./CountryDetails";
-import { getBuckets, bucketHeaderStyles } from "../lib/utils";
+import { getCountryBuckets, getUniBuckets, bucketHeaderStyles } from "../lib/utils";
 import { RankingsContext } from "@/contexts/RankingsContext";
 import UniDetailsPage from "./UniversityDetails";
+import { Skeleton } from "./ui/skeleton";
 
 function getValue(row, key, groupNames) {
   if (key === "rank") return row.rank;
@@ -69,13 +70,26 @@ const RankingsTable = ({
       return;
     }
 
-    const scored = getBuckets(
-      rankings.map((row) => ({
-        country: row[nameKey],
-        score: row.final_score,
-        ...row,
-      }))
-    );
+    let scored;
+
+    if (isCountry) {
+      scored = getCountryBuckets(
+        rankings.map((row) => ({
+          country: row[nameKey],
+          score: row.final_score,
+          ...row,
+        }))
+      );
+    } else {
+      scored = getUniBuckets(
+        rankings.map((row) => ({
+          country: row[nameKey],
+          score: row.final_score,
+          ...row,
+        }))
+      );
+    }
+
     setBucketedData(scored);
   }, [rankings, nameKey]);
 
@@ -117,10 +131,8 @@ const RankingsTable = ({
   const groupedData = useMemo(() => {
     const groups = {};
 
-    const filteredData = isCountry ? sortedData : sortedData.filter(item => item.bucket === "Best Match");
-
-    filteredData.forEach((item) => {
-      const groupKey = isCountry ? item.bucket : item.grade;
+    sortedData.forEach((item) => {
+      const groupKey = item.bucket;
 
       if (!groups[groupKey]) {
         groups[groupKey] = [];
@@ -128,11 +140,7 @@ const RankingsTable = ({
       groups[groupKey].push(item);
     });
 
-    // Define order for display
-    const countryOrder = ["Best Match", "Good Match", "Fair Match", "Weak Match"];
-    const uniOrder = ["A+", "A", "B", "C", "D"];
-
-    const order = isCountry ? countryOrder : uniOrder;
+    const order = ["Best Match", "Good Match", "Fair Match", "Rest"];
 
     return order
       .map(key => ({ key, items: groups[key] || [] }))
@@ -191,9 +199,38 @@ const RankingsTable = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col py-16 items-center justify-center bg-white rounded-2xl overflow-hidden">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500 mx-auto mb-4"></div>
-        <p className="text-md font-light tracking-tight text-black/80">Loading rankings...</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4 fadeIn">
+        <div className="flex justify-center md:col-span-2">
+          <Skeleton className="h-12 w-xs rounded-full" />
+        </div>
+        <div className="flex flex-col space-y-3 px-2">
+          <Skeleton className="h-[250px] w-full rounded-3xl" />
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-9/10 rounded-full" />
+            <Skeleton className="h-6 w-3/4 rounded-full" />
+          </div>
+        </div>
+        <div className="flex flex-col space-y-3 px-2">
+          <Skeleton className="h-[250px] w-full rounded-3xl" />
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-9/10 rounded-full" />
+            <Skeleton className="h-6 w-3/4 rounded-full" />
+          </div>
+        </div>
+        <div className="flex flex-col space-y-3 px-2">
+          <Skeleton className="h-[250px] w-full rounded-3xl" />
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-9/10 rounded-full" />
+            <Skeleton className="h-6 w-3/4 rounded-full" />
+          </div>
+        </div>
+        <div className="flex flex-col space-y-3 px-2">
+          <Skeleton className="h-[250px] w-full rounded-3xl" />
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-9/10 rounded-full" />
+            <Skeleton className="h-6 w-3/4 rounded-full" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -216,10 +253,51 @@ const RankingsTable = ({
         {visibleGroupedData.map(({ key: groupKey, items }, groupIndex) => (
           <div key={groupKey} className="fadeIn">
             {/* Group Header */}
-            <div className={`max-w-48 sm:max-w-xs flex items-center rounded-full justify-center my-4 mx-auto py-2 ${bucketHeaderStyles[groupKey]}`}>
+            <div className={`relative max-w-48 sm:max-w-xs flex items-center rounded-full justify-center my-4 mx-auto py-2 ${bucketHeaderStyles[groupKey]}`}>
               <h2 className="text-sm md:text-lg font-semibold tracking-tight">
                 {groupKey} ({items.length})
               </h2>
+              {/* Shortlist all button for Best Match */}
+              {groupKey === "Best Match" && isCountry && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const bestMatchIds = items.map(item => item[idKey]);
+                    const allShortlisted = items.every(item =>
+                      shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                    );
+
+                    if (allShortlisted) {
+                      // Remove all Best Match items from shortlist
+                      setShortlistedCountries(prev =>
+                        prev.filter(shortlisted => !bestMatchIds.includes(shortlisted[idKey]))
+                      );
+                    } else {
+                      // Add missing Best Match items to shortlist
+                      const missingItems = items.filter(item =>
+                        !shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                      );
+                      setShortlistedCountries(prev => [
+                        ...prev,
+                        ...missingItems
+                      ]);
+                    }
+                  }}
+                  className="absolute right-3 flex items-center justify-center rounded-full w-7 h-7 bg-black/5 z-1 cursor-pointer group ring-2 ring-black/10"
+                >
+                  <Heart
+                    fill={items.every(item =>
+                      shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                    ) ? "rgba(225, 29, 72, 0.8)" : "transparent"}
+                    className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${items.every(item =>
+                      shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                    )
+                        ? "text-rose-600/80"
+                        : "text-black/80"
+                      }`}
+                  />
+                </button>
+              )}
             </div>
 
             {/* Group Cards */}
@@ -243,32 +321,28 @@ const RankingsTable = ({
                         <span className="text-sm font-semibold text-white">{item.rank}</span>
                       </div>
                       <div className="flex gap-2 flex-wrap justify-end">
-                        <div
-                          className={`flex items-center gap-1.5 rounded-full h-7 px-2.5 bg-black/5 text-black/80 ring-2 ring-black/10`}
-                          aria-label={`${item.label} (${item.grade})`}
-                        >
-                          <div className={`flex justify-center items-center w-6 h-6 rounded-full font-semibold text-xs`}>{item.grade}</div>
-                        </div>
-                        <button onClick={(e) => {
-                          e.stopPropagation();
-                          handleShortlist(item);
-                        }}
-                          className="flex items-center ring-2 ring-black/10 justify-center rounded-full w-7 h-7 bg-black/5 z-1 cursor-pointer group"
-                        >
-                          <Heart
-                            fill={shortlistedCountries.some(
-                              (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
-                            )
-                              ? "rgba(225, 29, 72, 0.8)"
-                              : "transparent"}
-                            className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${shortlistedCountries.some(
-                              (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
-                            )
+                        {isCountry &&
+                          <button onClick={(e) => {
+                            e.stopPropagation();
+                            handleShortlist(item);
+                          }}
+                            className="flex items-center ring-2 ring-black/10 justify-center rounded-full w-7 h-7 bg-black/5 z-1 cursor-pointer group"
+                          >
+                            <Heart
+                              fill={shortlistedCountries.some(
+                                (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+                              )
+                                ? "rgba(225, 29, 72, 0.8)"
+                                : "transparent"}
+                              className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${shortlistedCountries.some(
+                                (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+                              )
                                 ? "text-rose-600/80"
                                 : "text-black/80"
-                              }`}
-                          />
-                        </button>
+                                }`}
+                            />
+                          </button>
+                        }
                       </div>
                     </div>
 

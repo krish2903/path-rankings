@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useRef } from "react";
 import FilterSheetContent from "../components/FilterSection";
 import RankingsTable from "../components/RankingsTable";
-import { ListFilter, Settings2, Star } from "lucide-react";
+import { ListFilter, Star } from "lucide-react";
 import CountryInputs from "../components/CountryInputs";
 import { DISCIPLINES, INDUSTRIES, API_BASE } from "../data/Data";
 import LoadingPage from "../pages/LoadingPage";
@@ -10,6 +10,7 @@ import PrioritySelector from "@/components/PrioritySelector";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import BottomPanel from "@/components/BottomPanel";
+import { FeedbackToast } from "@/components/Feedback";
 
 function areWeightsAdjusted(weights, metricGroups) {
     if (!metricGroups.length || Object.keys(weights).length === 0) return false;
@@ -27,20 +28,20 @@ const RankingsPage = () => {
         disciplinesData, setDisciplinesData,
         countryWeights, setCountryWeights,
         pendingCountryWeights, setPendingCountryWeights,
+        pendingCountryRatings,
+        recentCountryRatingsHistory, setRecentCountryRatingsHistory,
         selectedCountries, setSelectedCountries,
         selectedDisciplines, setSelectedDisciplines,
         selectedIndustries, setSelectedIndustries,
         selectedBuckets, setSelectedBuckets,
         loading, setLoading,
         buttonLoading, setButtonLoading,
-        shortlistedCountries, setShortlistedCountries,
+        shortlistedCountries,
     } = useContext(RankingsContext);
 
     const inputsRef = useRef(null);
     const tableRef = useRef(null);
     const containerRef = useRef(null);
-
-    const weightsAdjusted = areWeightsAdjusted(countryWeights, countryMetricGroups);
 
     useEffect(() => {
         setLoading(true);
@@ -95,6 +96,10 @@ const RankingsPage = () => {
             });
     }, []);
 
+    useEffect(() => {
+        console.log(recentCountryRatingsHistory);
+    }, [recentCountryRatingsHistory]);
+
     // Fetch rankings API
     const fetchRankings = (currentWeights) => {
         const weightsParam = Object.entries(currentWeights)
@@ -116,30 +121,21 @@ const RankingsPage = () => {
         return fetch(`${API_BASE}/country-rankings?${queryString}`).then((res) => res.json());
     };
 
-    // UI Handlers
-    const scrollToInputs = () => {
-        inputsRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    const handleBegin = () => {
+    const applyWeightsAndFetch = () => {
         if (!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)) return;
-        setButtonLoading(true);
-        fetchRankings(pendingCountryWeights)
-            .then((rankingsData) => {
-                setCountryRankings(rankingsData);
-                setCountryWeights(pendingCountryWeights);
-                setButtonLoading(false);
-                tableRef.current?.scrollIntoView({ behavior: "smooth" });
-            })
-            .catch((err) => {
-                console.error("Failed to fetch rankings:", err);
-                setButtonLoading(false);
-            });
-    };
 
-    const handleApplyWeights = () => {
-        if (JSON.stringify(countryWeights) === JSON.stringify(pendingCountryWeights)) return;
-        if (!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)) return;
+        const currentRatings = { ...pendingCountryRatings };
+        const historyEntry = {
+            rating: currentRatings,
+            disciplineId: selectedDisciplines.join(','),
+            industryId: selectedIndustries.join(',')
+        };
+
+        setRecentCountryRatingsHistory((prev) => {
+            const newHistory = [historyEntry, ...prev.slice(0, 2)]; 
+            return newHistory;
+        });
+
         setButtonLoading(true);
         setCountryWeights(pendingCountryWeights);
         fetchRankings(pendingCountryWeights)
@@ -152,6 +148,22 @@ const RankingsPage = () => {
                 console.error("Failed to fetch rankings:", err);
                 setButtonLoading(false);
             });
+    };
+
+    // UI Handlers
+    const scrollToInputs = () => {
+        inputsRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // For initial "Begin" button: only scroll, do NOT fetch or write history
+    const handleBegin = () => {
+        if (!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)) return;
+        scrollToInputs();
+    };
+
+    // For CountryInputs' "Start" and Drawer "Confirm": actually apply + fetch + history
+    const handleFinalizeWeights = () => {
+        applyWeightsAndFetch();
     };
 
     const applyAllFilters = () => {
@@ -221,7 +233,7 @@ const RankingsPage = () => {
                             ? "opacity-50 cursor-not-allowed"
                             : "cursor-pointer"
                             }`}
-                        onClick={scrollToInputs}
+                        onClick={handleBegin}
                         disabled={buttonLoading || loading || !areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
                     >
                         {buttonLoading ? (
@@ -245,7 +257,7 @@ const RankingsPage = () => {
                     Answer a few questions, and get more personalised results!
                 </h2>
                 <CountryInputs
-                    onStart={handleBegin}
+                    onStart={handleFinalizeWeights}
                     selectedDisciplines={selectedDisciplines}
                     setSelectedDisciplines={setSelectedDisciplines}
                     selectedIndustries={selectedIndustries}
@@ -321,7 +333,7 @@ const RankingsPage = () => {
                                                             ? "opacity-50 cursor-not-allowed"
                                                             : "cursor-pointer"
                                                             }`}
-                                                        onClick={handleApplyWeights}
+                                                        onClick={handleFinalizeWeights}
                                                         disabled={!areWeightsAdjusted(pendingCountryWeights, countryMetricGroups)}
                                                     >
                                                         Confirm
@@ -332,10 +344,10 @@ const RankingsPage = () => {
                                         <Sheet>
                                             <SheetTrigger asChild>
                                                 <button
-                                                    className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm font-medium text-white bg-black/80 hover:bg-black/70 rounded-full w-full sm:w-auto"
+                                                    className="cursor-pointer flex items-center justify-center gap-1 px-3 h-8 text-xs sm:text-sm font-medium text-white bg-black/80 hover:bg.black/70 rounded-full w-full sm:w-auto"
                                                     type="button"
                                                 >
-                                                    <ListFilter strokeWidth={2.5} className="h-4 w-4" />
+                                                    <ListFilter strokeWidth={2.5} className="text-white h-4 w-4" />
                                                     <span>Filters</span>
                                                 </button>
                                             </SheetTrigger>
@@ -379,15 +391,20 @@ const RankingsPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            <RankingsTable
-                                rankings={filteredRankings}
-                                loading={loading}
-                                metricGroups={countryMetricGroups}
-                                industriesData={industriesData}
-                                disciplinesData={disciplinesData}
-                                category="Country"
-                            />
                         </div>
+                        <RankingsTable
+                            rankings={filteredRankings}
+                            loading={buttonLoading}
+                            metricGroups={countryMetricGroups}
+                            industriesData={industriesData}
+                            disciplinesData={disciplinesData}
+                            category="Country"
+                        />
+                        <FeedbackToast
+                            onSubmit={(data) => {
+                                console.log("Feedback:", data);
+                            }}
+                        />
                     </div>
                 )}
             </section>

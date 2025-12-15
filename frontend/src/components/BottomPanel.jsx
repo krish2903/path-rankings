@@ -34,6 +34,7 @@ const BottomPanel = ({ category, shortlisted = [] }) => {
             <PopoverTrigger asChild>
                 <button className="mr-1 relative flex items-center gap-1.5 bg-black/7 hover:bg-black/5 h-8 px-3 rounded-full cursor-pointer transition-all duration-300 fadeIn">
                     <Heart size={16} strokeWidth={2.5} color="#333" />
+                    <p className="font-medium text-sm">Shortlisted</p>
                     <span className="absolute -top-1 -right-1 bg-rose-700/80 text-white text-[10px] font-medium flex items-center justify-center w-4 h-4 rounded-full">{shortlisted.length}</span>
                 </button>
             </PopoverTrigger>

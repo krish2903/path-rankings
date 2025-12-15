@@ -1,12 +1,14 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import DonutProgress from "./DonutProgress";
-import { Globe2 } from "lucide-react";
+import { ExternalLink, Globe2 } from "lucide-react";
 import { API_BASE, iconMap } from "../data/Data";
 import { ClipLoader } from "react-spinners";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 function useNorryInfo(countryName) {
   const [cards, setCards] = useState([]);
+  const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -21,9 +23,8 @@ function useNorryInfo(countryName) {
           setError(data.error);
           setCards([]);
         } else {
-          // console.log(Object.values(data.cards));
-          setCards(Object.values(data.cards));
-          // console.log(cards);
+          setCards(data.cards || []);
+          setSources(data.citations || []);
         }
       })
       .catch(() => {
@@ -33,12 +34,26 @@ function useNorryInfo(countryName) {
       .finally(() => setLoading(false));
   }, [countryName]);
 
-  // useEffect(() => {
-  //   console.log("cards updated:", cards);
-  // }, [cards]);
+  useEffect(() => {
+    console.log("sources updated:", sources);
+  }, [sources]);
 
-  return { cards, loading, error };
+  return { cards, sources, loading, error };
 }
+
+const extractCitationIndices = (description) => {
+  if (!description) return [];
+  const regex = /\[(\d+)\]/g;
+  const indices = [];
+  let match;
+  while ((match = regex.exec(description)) !== null) {
+    const oneBased = parseInt(match[1], 10);
+    if (!Number.isNaN(oneBased)) {
+      indices.push(oneBased - 1);
+    }
+  }
+  return Array.from(new Set(indices)).filter((i) => i >= 0);
+};
 
 const CountryDetailsPage = ({
   country: propCountry,
@@ -89,6 +104,23 @@ const CountryDetailsPage = ({
     return Sparkle;
   };
 
+  const stripCitationMarkers = (description) => {
+    if (!description) return "";
+    return description.replace(/\[\d+\]/g, "").trim();
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = d.toLocaleString("en-US", { month: "short" });
+    const year = d.getFullYear();
+
+    return `${day}, ${month}, ${year}`;
+  };
+
   const industryInfo = industriesData?.find(
     (entry) => entry.country.toLowerCase() === country.country_name.toLowerCase()
   );
@@ -97,7 +129,7 @@ const CountryDetailsPage = ({
     (entry) => entry.country.toLowerCase() === country.country_name.toLowerCase()
   );
 
-  const { cards, loading: norryLoading, error: norryError } = useNorryInfo(country?.country_name);
+  const { cards, sources, loading: norryLoading, error: norryError } = useNorryInfo(country?.country_name);
 
   if (!country) {
     if (isModal) return null;
@@ -367,42 +399,62 @@ const CountryDetailsPage = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2 py-4">
             {cards.map((card, idx) => {
               const Icon = getIcon(card.category);
+              const citationIndices = extractCitationIndices(card.description);
+              const cardSources = citationIndices
+                .map((i) => sources[i])
+                .filter(Boolean);
+
               return (
                 <div
                   key={idx}
                   className="flex flex-col justify-top bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow duration-200 fadeIn"
                 >
-                  {/* {card.image_url && (
-                  <img
-                    src={card.image_url}
-                    alt={card.headline}
-                    className="w-full h-32 object-cover rounded-xl mb-2"
-                  />
-                )} */}
                   <div>
-                    <div className="flex items-center gap-1.5 text-xs font-medium uppercase text-gray-400 tracking-wide mb-2">
-                      <Icon className="w-4 h-4 text-[#ec5b22]" />
-                      {card.category}
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="flex items-center gap-1.5 text-xs font-medium uppercase text-gray-400 tracking-wide">
+                        <Icon className="w-4 h-4 text-[#ec5b22]" />
+                        {card.category}
+                      </div>
+                      <Popover>
+                        <PopoverTrigger className="group flex justify-center items-center h-6 w-6 bg-black/5 hover:bg-black/10 rounded-full cursor-pointer">
+                          <ExternalLink size={12} className="text-black/80" />
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="max-w-64 border-black/5 rounded-2xl">
+                          {cardSources.length === 0 ? (
+                            <p className="text-xs text-center text-black/60">No sources used for this information.</p>
+                          ) : (
+                            <div className="space-y-2">
+                              <p className="text-xs font-medium text-center text-black/60">Sources</p>
+                              {cardSources.map((src, i) => (
+                                <div key={i} className="space-y-2">
+                                  <Link to={src.url} target="_blank" rel="noopener noreferrer">
+                                    <div className="group flex flex-col text-xs">
+                                      <h1 className="group-hover:underline text-orange-700/90">
+                                        {src.title}
+                                      </h1>
+                                      {src.date && (
+                                        <span className="text-xs text-black/50">
+                                          ({formatDate(src.date)})
+                                        </span>
+                                      )}
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <h2 className="text-sm font-medium text-gray-700 mb-1">
                       {card.headline}
                     </h2>
                   </div>
                   <p className="font-medium text-xs md:text-sm text-black/40 mb-3">
-                    {card.description}
+                    {stripCitationMarkers(card.description)}
                   </p>
-                  {/* {card.source_url && (
-                  <a
-                    href={card.source_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 px-3 py-2 bg-orange-500 text-white text-xs rounded-lg font-medium self-start hover:bg-orange-600 transition"
-                  >
-                    Read More
-                  </a>
-                )} */}
                 </div>
-              )
+              );
             })}
           </div>
         ) : (

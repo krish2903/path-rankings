@@ -91,7 +91,9 @@ export default function PrioritySelector({ groups = [], category, onWeightChange
       );
     }
     setPendingWeights(percentWeights);
-    if (onWeightChange) onWeightChange(percentWeights);
+    if (onWeightChange) {
+      onWeightChange(percentWeights, pendingRatings); 
+    }
   }, [pendingRatings, setPendingWeights, groups, onWeightChange]);
 
   function handleRatingChange(id, value) {
@@ -103,10 +105,10 @@ export default function PrioritySelector({ groups = [], category, onWeightChange
 
   return (
     <div className="w-full flex flex-col items-center shadow-[inset_0_2px_4px_0_hsl(var(--foreground)/0.05)]">
-      <h1 className="font-medium text-center py-2">Rate Importance (1-5)</h1>
+      <h1 className="font-medium text-center py-2">Rate Importance (0-5)</h1>
       <p className="text-sm text-black/60 mt-1 mb-2 text-center">
-        Use the slider to rate <b>every group</b> from 1-5.<br />
-        <b>1</b> being not important and <b>5</b> being highly important.<br />
+        Use the slider to rate <b>a group</b> from 0-5.<br />
+        <b>0</b> being not important at all and <b>5</b> being highly important.<br />
       </p>
       <div className="w-full flex gap-4 py-4 max-w-lg justify-center">
         <div className="w-full flex flex-col gap-4">

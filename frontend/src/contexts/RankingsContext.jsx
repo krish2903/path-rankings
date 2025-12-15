@@ -29,9 +29,11 @@ export function RankingsProvider({ children }) {
   const [selectedIndustries, setSelectedIndustries] = useState([]);
   const [selectedBuckets, setSelectedBuckets] = useState([]);
   const [shortlistedCountries, setShortlistedCountries] = useState([]);
+  const [recentCountryRatingsHistory, setRecentCountryRatingsHistory] = useState([]);
 
   // Loading States
   const [loading, setLoading] = useState(true);
+  const [feedbackPopup, setFeedbackPopup] = useState(false);
   const [buttonLoading, setButtonLoading] = useState(false);
 
   const ctx = {
@@ -58,8 +60,10 @@ export function RankingsProvider({ children }) {
     selectedIndustries, setSelectedIndustries,
     selectedBuckets, setSelectedBuckets,
     shortlistedCountries, setShortlistedCountries,
+    recentCountryRatingsHistory, setRecentCountryRatingsHistory,
     loading, setLoading,
     buttonLoading, setButtonLoading,
+    feedbackPopup, setFeedbackPopup,
   };
 
   return (

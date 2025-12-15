@@ -2,7 +2,8 @@ import { useRef, useState, useContext, useEffect } from "react";
 import { Search } from "lucide-react";
 import { ClipLoader } from "react-spinners";
 import { RankingsContext } from "@/contexts/RankingsContext";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Link } from "react-router-dom";
 
 const MultiSelect = ({ countries, selectedCountries, setSelectedCountries }) => {
     const [search, setSearch] = useState('');
@@ -125,7 +126,7 @@ export default function UniInputs({
                     Which countries have you shortlisted?
                 </h2>
                 <h3 className="text-xs sm:text-sm font-medium tracking-tight text-center text-black/50 mb-2 md:mb-4 py-1">
-                    Haven't shortlisted any countries yet? Check our <a href="/country-rankings" className="text-orange-700 underline">country rankings</a> to find the right country for your preferences!
+                    Haven't shortlisted any countries yet? Check our <Link to="/country-rankings" className="text-orange-700 underline">country rankings</Link> to find the right country for your preferences!
                 </h3>
                 <MultiSelect
                     countries={countries}
@@ -143,14 +144,14 @@ export default function UniInputs({
                         Skip
                     </button>
                     <button
-                        className={`${selectedCountries.length === 0
+                        className={`${selectedCountries.length === 0 || buttonLoading
                             ? "bg-black/20 text-black/80 opacity-50 cursor-not-allowed"
                             : "bg-[#ec5b22] hover:bg-[#df4c12] text-white cursor-pointer"
                             } flex justify-center items-center font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition w-full sm:w-32`}
                         onClick={onStart}
                         disabled={selectedCountries.length === 0}
                     >
-                        {buttonLoading ? <ClipLoader size={18} color="white" /> : "Start"}
+                        {buttonLoading ? <ClipLoader size={18} color="#333" /> : "Start"}
                     </button>
                 </div>
             </section>

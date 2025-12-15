@@ -4,6 +4,7 @@ import CountryRankingsPage from "./pages/CountryRankingsPage";
 import UniversityRankingsPage from "./pages/UniversityRankingsPage";
 import Header from "./components/Header";
 import { RankingsProvider } from "./contexts/RankingsContext";
+import { Toaster } from "@/components/ui/sonner"
 
 const App = () => (
   <RankingsProvider>
@@ -14,6 +15,7 @@ const App = () => (
         <Route path="/country-rankings" element={<CountryRankingsPage />} />
         <Route path="/university-rankings" element={<UniversityRankingsPage />} />
       </Routes>
+      <Toaster />
     </div>
   </RankingsProvider>
 );

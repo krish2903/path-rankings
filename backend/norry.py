@@ -1,118 +1,214 @@
-import os, re, requests
+import json
+import os
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
 API_KEY = os.getenv("NORRY_API_KEY")
-url = "https://api.perplexity.ai/chat/completions"
+URL = "https://api.perplexity.ai/chat/completions"
+SEARCH_URL = "https://api.perplexity.ai/search"
 
-def extract_json_object(text):
-    text = re.sub(r'^`{3,}\w*\s*', '', text)
-    text = re.sub(r'`{3,}\s*$', '', text)
+HEADERS = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json",
+}
 
-    start = text.find('{')
-    if start == -1:
-        return None  
+def enrich_citations(urls: list[str]) -> list[dict]:
+    if not urls:
+        return []
 
-    depth = 0
-    for i in range(start, len(text)):
-        if text[i] == '{':
-            depth += 1
-        elif text[i] == '}':
-            depth -= 1
-            if depth == 0:
-                end = i + 1
-                json_str = text[start:end]
-                return json_str
-    return None  
+    enriched = []
+
+    for url in urls:
+        try:
+            payload = {
+                "query": url,
+                "max_results": 1,
+                "max_tokens_per_page": 256,
+            }
+
+            resp = requests.post(
+                SEARCH_URL,
+                headers={
+                    "Authorization": f"Bearer {API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json=payload,
+                timeout=10,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+            results = data.get("results", [])
+            if not results:
+                enriched.append({
+                    "url": url,
+                    "title": None,
+                    "date": None,
+                })
+                continue
+
+            top = results[0]
+            enriched.append({
+                "url": url,
+                "title": top.get("title"),
+                "date": top.get("date"),
+            })
+        except Exception as e:
+            print(f"⚠️ Failed to enrich citation {url}: {e}")
+            enriched.append({
+                "url": url,
+                "title": None,
+                "date": None,
+                "snippet": None,
+            })
+
+    return enriched
 
 def get_country_info(country: str):
-    prompt = f'''You are Nori, an expert assistant for international students with a personal and friendly nature/tone.
-
-For the given country, return a JSON array with exactly 6 cards. Each card should have these fields:
-
-- "headline": An interesting title that highlights the main news or update, written to be exciting for international students (positive or negative - it has to be valuable and applicable to international students).
-- "category": Choose from: government policies, career opportunities, financial benefits, student hacks, travel destinations, life quality, campus news, visa updates or cost of living, make it specifically relevant to international students. Only use categories specific to international student concerns.
-- "description": 1-2 sentences summarizing the update or tip in a compelling, concise way—a bit with the key facts and important points highlighted (no irrelevant or extra data - just to-the-point news).
-
-Only include news or updates directly relevant to international students and their decision-making before arrival, such as visa/news rules, major tuition changes, post-study work, scholarships, student life, etc. 
-Make sure the news or update is the most recent and applicable to international students thinking about pursuing higher education abroad.
-Use only information from 2025. Search for latest {country} international student updates. Do not invent data.
-
-Return ONLY the JSON with these 6 cards and nothing else—no extra text.
-
-IMPORTANT: Return as a strict JSON object starting and ending with a curly bracket.
-CRITICAL: Even if no 2025 news exists, create exactly 6 cards with current/best general info for {country} international students (visa basics, costs, etc.). 
-NEVER return empty cards array. Use real, up-to-date data from 2025 where possible.
-Country: {country}
-'''
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
+    schema = {
+        "type": "object",
+        "properties": {
+            "cards": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "headline": {"type": "string"},
+                        "category": {"type": "string"},
+                        "description": {"type": "string"},
+                    },
+                    "required": ["headline", "category", "description"],
+                    "additionalProperties": False,
+                },
+            },
+        },
+        "required": ["cards"],
+        "additionalProperties": False,
     }
+
+    prompt = f"""
+You are Nori, an expert assistant for international students with a personal and friendly tone.
+
+For the given country, return JSON with exactly 6 cards in a top-level "cards" array.
+Each card must have:
+- "headline": An interesting title for international students.
+- "category": One of government policies, career opportunities, financial benefits, student hacks,
+  travel destinations, life quality, campus news, visa updates, or cost of living, and it must be
+  relevant to international students.
+- "description": 1-2 sentences summarizing the update or tip, concise and practical.
+
+Use only information that is relevant to international students and prefer 2025 information
+(e.g. visa rules, post-study work, scholarships, cost of living, etc.).
+Include the source used in the description as [1][2] etc.
+If recent 2025 news is limited, fall back to solid general guidance, but still produce 6 useful cards.
+Do not invent precise numbers if unsure; use ranges or qualitative descriptions.
+
+Country: {country}
+"""
 
     data = {
         "model": "sonar",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0,
+        "return_citations": True,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "nori_country_cards",
+                "schema": schema,
+                "strict": True,
+            },
+        },
     }
 
-    response = requests.post(url, headers=headers, json=data)
-    print(prompt)
+    resp = requests.post(URL, headers=HEADERS, json=data)
+    resp.raise_for_status()
+    res_json = resp.json()
 
-    if response.status_code == 200:
-        result = response.json()
-        print(result)
-        reply = result['choices'][0]['message']['content']
-        return reply
-    else:
-        raise Exception(f"Error {response.status_code}: {response.text}")
+    content_str = res_json["choices"][0]["message"]["content"]
+    cards_obj = json.loads(content_str)  
+
+    citations = res_json.get("citations", [])  
+    citations = enrich_citations(citations)
+
+    return cards_obj, citations
 
 def get_uni_info(university: str):
-    prompt = f'''You are Nori, an expert assistant for international students with a personal and friendly nature/tone.
-
-For the given university, return a JSON array with exactly 6 cards. Each card should have these fields:
-
-- "headline": An interesting, international student-friendly title for the card.
-- "category": One of the following (choose the closest one for each card):
-  "entry requirements", "language requirements", "tuition fees", "scholarships & funding", "cost of living", "campus life & support", "career opportunities", "student hacks".
-- "description": 2-4 sentences, concise but practical, focused on what an INTERNATIONAL STUDENT should know before deciding to study at this university.
-
-Rules:
-- Information should be recent, realistic, and based on typical ranges - do NOT invent precise numbers if unsure; instead, give approximate ranges or clearly say "varies by course".
-- Focus ONLY on aspects directly useful for an international student.
-- If a detail truly cannot be found, you may give a high-level, honest description instead of making up fake data.
-Return ONLY the JSON with these 6 cards and nothing else—no extra text.
-
-IMPORTANT: Return as a strict JSON object starting and ending with a curly bracket.
-CRITICAL: Even if no 2025 news exists, create exactly 6 cards with current/best general info for {university} international students. 
-NEVER return empty cards array. Use real, up-to-date data from 2025 where possible.
-University: {university}
-'''
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json"
+    schema = {
+        "type": "object",
+        "properties": {
+            "cards": {
+                "type": "array",
+                "minItems": 6,
+                "maxItems": 6,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "headline": {"type": "string"},
+                        "category": {"type": "string"},
+                        "description": {"type": "string"},
+                    },
+                    "required": ["headline", "category", "description"],
+                    "additionalProperties": False,
+                },
+            },
+        },
+        "required": ["cards"],
+        "additionalProperties": False,
     }
+
+    prompt = f"""
+You are Nori, an expert assistant for international students with a personal and friendly tone.
+
+For the given university, return JSON with exactly 6 cards in a top-level "cards" array.
+Each card must have:
+- "headline": An international student-friendly title.
+- "category": One of:
+  "entry requirements", "language requirements", "tuition fees",
+  "scholarships & funding", "cost of living", "campus life & support",
+  "career opportunities", "student hacks".
+- "description": 2-4 sentences, concise but practical, focused on what an international student
+  should know before deciding to study at this university.
+
+Information should be recent and realistic.
+Include the source used in the description as [1][2] etc.
+Use typical ranges or qualitative descriptions if exact numbers are uncertain
+(e.g. “varies by course”, “typically between X and Y per year”).
+Focus only on aspects directly useful for international students.
+If a detail truly cannot be found, provide an honest high-level description instead of fabricating data.
+
+Prefer information from 2025 where available, but always return 6 useful cards.
+
+University: {university}
+"""
 
     data = {
         "model": "sonar",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0,
+        "return_citations": True,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "nori_university_cards",
+                "schema": schema,
+                "strict": True,
+            },
+        },
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    resp = requests.post(URL, headers=HEADERS, json=data)
+    resp.raise_for_status()
+    res_json = resp.json()
 
-    if response.status_code == 200:
-        print(response)
-        result = response.json()
-        print(result)
-        reply = result['choices'][0]['message']['content']
-        return reply
-    else:
-        raise Exception(f"Error {response.status_code}: {response.text}")
+    content_str = res_json["choices"][0]["message"]["content"]
+    cards_obj = json.loads(content_str)
+
+    citations = res_json.get("citations", [])
+    citations = enrich_citations(citations)
+
+    return cards_obj, citations
