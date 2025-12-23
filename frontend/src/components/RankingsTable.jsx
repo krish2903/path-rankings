@@ -164,16 +164,17 @@ const RankingsTable = ({
     return map;
   }, [industriesData, isCountry]);
 
-  const disciplinesByCountry = useMemo(() => {
-    if (!isCountry) return {};
+  const disciplinesInformation = useMemo(() => {
     const map = {};
     disciplinesData.forEach((entry) => {
       if (entry.country) {
         map[entry.country.toLowerCase()] = entry;
+      } else if (entry.uni) {
+        map[entry.uni.toLowerCase()] = entry;
       }
     });
     return map;
-  }, [disciplinesData, isCountry]);
+  }, [disciplinesData]);
 
   // Handlers
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -283,7 +284,7 @@ const RankingsTable = ({
                       ]);
                     }
                   }}
-                  className="absolute right-3 flex items-center justify-center rounded-full w-7 h-7 bg-black/5 z-1 cursor-pointer group ring-2 ring-black/10"
+                  className="absolute right-2 md:right-3 flex items-center justify-center rounded-full w-6 md:w-7 h-6 md:h-7 z-1 cursor-pointer group ring-2 ring-orange-700/10"
                 >
                   <Heart
                     fill={items.every(item =>
@@ -292,8 +293,8 @@ const RankingsTable = ({
                     className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${items.every(item =>
                       shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
                     )
-                        ? "text-rose-600/80"
-                        : "text-black/80"
+                      ? "text-rose-600/80"
+                      : "text-orange-800"
                       }`}
                   />
                 </button>
@@ -305,7 +306,7 @@ const RankingsTable = ({
               {items.map((item) => {
                 const nameLower = item[nameKey]?.toLowerCase();
                 const industryInfo = isCountry ? industriesByCountry[nameLower] ?? null : null;
-                const disciplineInfo = isCountry ? disciplinesByCountry[nameLower] ?? null : null;
+                const disciplineInfo = disciplinesInformation[nameLower] ?? null;
 
                 return (
                   <div
@@ -358,7 +359,7 @@ const RankingsTable = ({
                         <div className="text-lg sm:text-xl font-medium text-black/90">{item[nameKey]}</div>
                       </div>
 
-                      {isCountry && disciplineInfo?.comments && (
+                      {disciplineInfo?.comments && (
                         <p className="text-xs md:text-sm text-gray-600">{disciplineInfo.comments}</p>
                       )}
 
@@ -414,7 +415,7 @@ const RankingsTable = ({
                         </div>
                       )}
 
-                      {isCountry && disciplineInfo && (
+                      {disciplineInfo && (
                         <div className="text-sm mt-2">
                           <h1 className="px-1 text-xs font-medium uppercase text-black/40 mb-1 tracking-wider">Key Disciplines</h1>
                           <div className="h-0.5 w-full border-t-1 border-black/15 mb-3"></div>
@@ -504,6 +505,7 @@ const RankingsTable = ({
             <UniDetailsPage
               uni={selectedUni}
               metricGroups={metricGroups}
+              disciplinesData={disciplinesData}
               isModal={true}
             />
           </div>

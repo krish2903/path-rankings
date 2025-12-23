@@ -43,28 +43,21 @@ export function getDonutScoreBucket(score) {
   };
 }
 
-// Classes style for bucket types
-const bucketStyleMap = {
-  "Best Match": {
-    classes: "bg-emerald-500/15 text-emerald-800 ring-2 ring-emerald-500/20"
-  },
-  "Good Match": {
-    classes: "bg-amber-400/15 text-amber-800 ring-2 ring-amber-400/25"
-  },
-  "Fair Match": {
-    classes: "bg-slate-400/15 text-slate-700 ring-2 ring-slate-400/20"
-  },
-  "Rest": {
-    classes: "bg-red-600/10 text-rose-800 ring-2 ring-red-600/15"
-  }
-};
-
 export const bucketHeaderStyles = {
-  "Best Match": "bg-gradient-to-t from-emerald-500/15 to-emerald-500/10 text-emerald-800",
+  "Best Match": "bg-gradient-to-t from-orange-600/20 to-orange-500/10 text-orange-800",
   "Good Match": "bg-gradient-to-t from-amber-400/15 to-amber-400/10 text-amber-800",
   "Fair Match": "bg-gradient-to-t from-slate-400/15 to-slate-400/10 text-slate-700",
   "Rest": "bg-gradient-to-t from-red-600/10 to-red-600/5 text-rose-800",
 };
+
+export function getGroupById(id) {
+  if (id == 1) {return "Financial Considerations"}
+  if (id == 2) {return "Career Advancement Prospects"}
+  if (id == 3) {return "Quality of Life & Long-term Settlement"}
+  if (id == 4) {return "Government & Policy Environment"}
+  if (id == 5) {return "Academic Excellence & Research"}
+  if (id == 6) {return "Student Experiences & Campus Life"}
+}
 
 export function getCountryBuckets(ranks) {
   if (!ranks || !Array.isArray(ranks) || ranks.length === 0) return [];
@@ -93,7 +86,7 @@ export function getCountryBuckets(ranks) {
     return {
       ...item,
       bucket: bucketLabel,
-      ...bucketStyleMap[bucketLabel]
+      ...bucketHeaderStyles[bucketLabel]
     };
   });
 }
@@ -133,7 +126,7 @@ export function getUniBuckets(ranks) {
       return {
         ...item,
         bucket: bucketLabel,
-        ...bucketStyleMap[bucketLabel]
+        ...bucketHeaderStyles[bucketLabel]
       };
     });
   } else {
@@ -152,7 +145,7 @@ export function getUniBuckets(ranks) {
       return {
         ...item,
         bucket: bucketLabel,
-        ...bucketStyleMap[bucketLabel]
+        ...bucketHeaderStyles[bucketLabel]
       };
     });
   }

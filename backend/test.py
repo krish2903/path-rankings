@@ -167,6 +167,6 @@ def run_university_tests():
 
 
 if __name__ == "__main__":
-    # fetch_all_university_names()
-    run_country_tests()
-    # run_university_tests()
+    fetch_all_university_names()
+    # run_country_tests()
+    run_university_tests()

@@ -25,7 +25,11 @@ import {
   Home,
   Newspaper,
   FileBadge,
-  Wallet
+  Wallet,
+  ListChecks,
+  Languages,
+  HandCoins,
+  Coins
 } from "lucide-react";
 
 // API BASE
@@ -100,4 +104,9 @@ export const iconMap = {
   "Campus News": Newspaper,
   "Visa Updates": FileBadge,
   "Cost of Living": Wallet,
+  "Entry Requirements": ListChecks,
+  "Language Requirements": Languages,
+  "Tuition Fees": Coins,
+  "Scholarships & Funding": HandCoins,
+  "Campus Life & Support": School,
 };

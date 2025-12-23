@@ -77,6 +77,7 @@ const formatDate = (dateStr) => {
 const UniDetailsPage = ({
   uni: propUni,
   metricGroups: propMetricGroups,
+  disciplinesData: propDisciplinesData,
   isModal = false,
 }) => {
   const location = useLocation();
@@ -88,6 +89,7 @@ const UniDetailsPage = ({
 
   const uni = isModal ? propUni : location.state?.uni;
   const metricGroups = isModal ? propMetricGroups : location.state?.metricGroups;
+  const disciplinesData = isModal ? propDisciplinesData : location.state?.disciplinesData;
 
   useEffect(() => {
     if (!uni?.university_name) return;
@@ -120,6 +122,10 @@ const UniDetailsPage = ({
     }
     return Sparkle;
   };
+
+  const disciplineInfo = disciplinesData?.find(
+    (entry) => entry.uni.toLowerCase() === uni.university_name.toLowerCase()
+  );
 
   const {
     cards,
@@ -270,6 +276,52 @@ const UniDetailsPage = ({
         ) : (
           <p className="text-center text-gray-500">
             No raw metric data available for this university.
+          </p>
+        )}
+      </section>
+
+      {/* Top Disciplines Section */}
+      <section>
+        <h1 className="w-full text-center text-xs sm:text-sm pb-1 font-medium uppercase text-black/50 mb-1 tracking-wider border-b border-black/10">
+          Top Disciplines
+        </h1>
+        {disciplineInfo ? (
+          <div className="flex flex-col items-center">
+            {disciplineInfo.comments && (
+              <p className="mt-4 text-black/60 text-center text-sm sm:text-md">
+                {disciplineInfo.comments}
+              </p>
+            )}
+            {disciplineInfo.top_disciplines.length > 0 ? (
+              <div className="w-full max-w-xl grid grid-cols-3 justify-items-center mt-6 gap-y-4 gap-x-1">
+                {disciplineInfo.top_disciplines.map((discipline, i) => {
+                  const IconComponent = iconMap[discipline] || null;
+                  return (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center px-1 gap-1 md:gap-2"
+                    >
+                      {IconComponent && (
+                        <div className="flex items-center justify-center bg-indigo-900 rounded-full p-2 md:p-4">
+                          <IconComponent className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                        </div>
+                      )}
+                      <span className="text-xs font-medium tracking-tight text-black/60 text-center">
+                        {discipline}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="italic text-gray-500">
+                No top disciplines available.
+              </p>
+            )}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 font-medium">
+            No disciplines information available.
           </p>
         )}
       </section>

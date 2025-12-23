@@ -6,6 +6,7 @@ class Country(db.Model):
     __tablename__ = 'countries'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
+    region = db.Column(db.Text)
     country_code = db.Column(db.String(3), unique=True, nullable=True)
     flag = db.Column(db.LargeBinary, nullable=True) 
     
@@ -93,6 +94,24 @@ class CountryDisciplines(db.Model):
         return {
             "country": self.country,
             "top_disciplines": self.top_disciplines,
+            "comments": self.comments
+        }
+
+class UniversityDisciplines(db.Model):
+    __tablename__ = 'university_disciplines'
+    id = db.Column(db.Integer, primary_key=True)
+    uni_id = db.Column(db.Integer, db.ForeignKey('universities.id'), nullable=False)
+    top_disciplines = db.Column(ARRAY(db.String(100)))  
+    top_courses = db.Column(ARRAY(db.String(100)))     
+    comments = db.Column(db.Text) 
+
+    university = db.relationship("University", backref="disciplines")
+
+    def to_dict(self):
+        return {
+            "uni": self.university.name,  
+            "top_disciplines": self.top_disciplines,
+            "top_courses": self.top_courses,  
             "comments": self.comments
         }
 

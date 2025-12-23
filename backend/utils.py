@@ -2,13 +2,14 @@ import math
 from models import (
     db,
     Country,
-    University, 
+    University,
     Metric,
     MetricGroup,
     country_metrics,
-    university_metrics, 
+    university_metrics,
     CountryIndustry,
-    CountryDisciplines
+    CountryDisciplines,
+    UniversityDisciplines,
 )
 
 def calculate_country_scores(group_weights=None, selected_disciplines=None, selected_industries=None):
@@ -169,6 +170,7 @@ def calculate_country_scores(group_weights=None, selected_disciplines=None, sele
         results.append({
             "country_id": country.id,
             "country_name": country.name,
+            "region": country.region,
             "country_code": country.country_code,
             "overall_score": round(total_score, 2),
             "discipline_score": round(discipline_score, 2),
@@ -179,7 +181,7 @@ def calculate_country_scores(group_weights=None, selected_disciplines=None, sele
 
     return sorted(results, key=lambda x: x["final_score"], reverse=True)
 
-def calculate_university_scores(group_weights=None):
+def calculate_university_scores(group_weights=None, selected_disciplines=None):
     universities = University.query.all()
     metric_groups = MetricGroup.query.filter(MetricGroup.category.in_(["uni", "both"])).all()
     group_ids = [mg.id for mg in metric_groups]
@@ -218,6 +220,12 @@ def calculate_university_scores(group_weights=None):
         max_log = max(log_values) if log_values else 1
         metric_log_ranges[metric.id] = (min_log, max_log)
 
+    # University -> top_disciplines map
+    university_discipline_map = {
+        row.uni_id: list(row.top_disciplines)
+        for row in UniversityDisciplines.query.all()
+    }
+
     # First pass: calculate raw group scores for all universities
     all_group_raw_scores = {group.id: {} for group in metric_groups}
     university_temp = {}
@@ -229,9 +237,7 @@ def calculate_university_scores(group_weights=None):
             group_score = 0
             group_metric_scores = {}
             num_metrics = len(metrics_in_group)
-            weight = group_weights.get(group_id, 0)
             if num_metrics == 0:
-                # Skip empty groups
                 continue
             metric_weight = 1 / num_metrics
 
@@ -250,7 +256,6 @@ def calculate_university_scores(group_weights=None):
                     group_metric_scores[metric.name] = round(normalised, 2)
                     group_score += normalised * metric_weight
 
-            # Always include all groups regardless of weight
             all_group_raw_scores[group_id][university.id] = group_score
             group_scores[group_id_to_name[group_id]] = {
                 "raw_group_score": group_score,
@@ -259,7 +264,7 @@ def calculate_university_scores(group_weights=None):
 
         university_temp[university.id] = {
             "university": university,
-            "group_scores": group_scores
+            "group_scores": group_scores,
         }
 
     # Second pass: normalize group scores within each group (0-100 scale)
@@ -293,10 +298,28 @@ def calculate_university_scores(group_weights=None):
             g_data["group_score_weighted"] = round(weighted_score, 2)
             total_score += weighted_score
 
-        final_score = total_score
+        # Discipline score (same logic as country, no industry)
+        discipline_score = 0
+        if selected_disciplines:
+            top_disciplines = university_discipline_map.get(university.id, [])
+            if top_disciplines:
+                for sel in selected_disciplines:
+                    if sel in top_disciplines:
+                        i = top_disciplines.index(sel)
+                        discipline_score += 100 - 20 * i
+
+        has_disciplines = bool(selected_disciplines and len(selected_disciplines) > 0)
+
+        if not has_disciplines:
+            overall_weight, discipline_weight = 1.0, 0.0
+        else:
+            overall_weight, discipline_weight = 0.8, 0.2
+
+        final_score = total_score * overall_weight + discipline_score * discipline_weight
 
         country = Country.query.get(university.country_id)
         country_name = country.name if country else "Unknown"
+        region_name = country.region if country else "Unknown"
 
         results.append({
             "university_id": university.id,
@@ -304,8 +327,11 @@ def calculate_university_scores(group_weights=None):
             "country_id": university.country_id,
             "country_name": country_name,
             "city": university.city,
+            "region": region_name,
+            "overall_score": round(total_score, 2),
+            "discipline_score": round(discipline_score, 2),
             "final_score": round(final_score, 2),
-            "groups": group_scores
+            "groups": group_scores,
         })
 
     return sorted(results, key=lambda x: x["final_score"], reverse=True)

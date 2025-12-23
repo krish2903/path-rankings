@@ -7,12 +7,13 @@ export function RankingsProvider({ children }) {
   const [countryRankings, setCountryRankings] = useState([]);
   const [uniRankings, setUniRankings] = useState([]);
   const [countries, setCountries] = useState([]);
-  const [cities, setCities] = useState([]);
+  const [regions, setRegions] = useState([]);
   const [universities, setUniversities] = useState([]);
   const [countryMetricGroups, setCountryMetricGroups] = useState([]);
   const [uniMetricGroups, setUniMetricGroups] = useState([]);
   const [industriesData, setIndustriesData] = useState([]);
   const [disciplinesData, setDisciplinesData] = useState([]);
+  const [uniDisciplinesData, setUniDisciplinesData] = useState([]);
 
   // Filter/Selection States
   const [countryWeights, setCountryWeights] = useState({});
@@ -22,14 +23,16 @@ export function RankingsProvider({ children }) {
   const [pendingCountryRatings, setPendingCountryRatings] = useState({}); 
   const [pendingUniRatings, setPendingUniRatings] = useState({}); 
   const [selectedCountries, setSelectedCountries] = useState([]);
+  const [selectedRegions, setSelectedRegions] = useState([]);
   const [selectedUnis, setSelectedUnis] = useState([]);
   const [selectedUniCountries, setSelectedUniCountries] = useState([]);
-  const [selectedUniCities, setSelectedUniCities] = useState([]);
+  const [selectedUniRegions, setSelectedUniRegions] = useState([]);
   const [selectedDisciplines, setSelectedDisciplines] = useState([]);
+  const [selectedUniDisciplines, setSelectedUniDisciplines] = useState([]);
   const [selectedIndustries, setSelectedIndustries] = useState([]);
-  const [selectedBuckets, setSelectedBuckets] = useState([]);
   const [shortlistedCountries, setShortlistedCountries] = useState([]);
   const [recentCountryRatingsHistory, setRecentCountryRatingsHistory] = useState([]);
+  const [recentUniRatingsHistory, setRecentUniRatingsHistory] = useState([]);
 
   // Loading States
   const [loading, setLoading] = useState(true);
@@ -40,12 +43,13 @@ export function RankingsProvider({ children }) {
     countryRankings, setCountryRankings,
     uniRankings, setUniRankings,
     countries, setCountries,
-    cities, setCities,
+    regions, setRegions,
     universities, setUniversities,
     countryMetricGroups, setCountryMetricGroups,
     uniMetricGroups, setUniMetricGroups,
     industriesData, setIndustriesData,
     disciplinesData, setDisciplinesData,
+    uniDisciplinesData, setUniDisciplinesData,
     countryWeights, setCountryWeights,
     uniWeights, setUniWeights,
     pendingCountryWeights, setPendingCountryWeights,
@@ -53,14 +57,16 @@ export function RankingsProvider({ children }) {
     pendingCountryRatings, setPendingCountryRatings, 
     pendingUniRatings, setPendingUniRatings,
     selectedCountries, setSelectedCountries,
+    selectedRegions, setSelectedRegions,
     selectedUnis, setSelectedUnis,
     selectedUniCountries, setSelectedUniCountries,
-    selectedUniCities, setSelectedUniCities,
+    selectedUniRegions, setSelectedUniRegions,
     selectedDisciplines, setSelectedDisciplines,
+    selectedUniDisciplines, setSelectedUniDisciplines,
     selectedIndustries, setSelectedIndustries,
-    selectedBuckets, setSelectedBuckets,
     shortlistedCountries, setShortlistedCountries,
     recentCountryRatingsHistory, setRecentCountryRatingsHistory,
+    recentUniRatingsHistory, setRecentUniRatingsHistory,
     loading, setLoading,
     buttonLoading, setButtonLoading,
     feedbackPopup, setFeedbackPopup,

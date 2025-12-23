@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import University, db, Country, CountryIndustry, CountryDisciplines, MetricGroup, CountryDetails, UniversityDetails, Metric, country_metrics, university_metrics
+from models import University, UniversityDisciplines, db, Country, CountryIndustry, CountryDisciplines, MetricGroup, CountryDetails, UniversityDetails, Metric, country_metrics, university_metrics
 from utils import calculate_country_scores, calculate_university_scores
 from norry import get_country_info, get_uni_info
 import base64
@@ -68,6 +68,7 @@ def get_countries():
         result.append({
             "id": c.id,
             "name": c.name,
+            "region": c.region,
             "flag": flag_data_url
         })
 
@@ -83,6 +84,7 @@ def get_universities():
         result = []
         for u in universities:
             country_name = u.country.name if u.country else None
+            region_name = u.country.region if u.country else None
             country_flag = u.country.flag if u.country else None
             if country_flag:
                 encoded_flag = base64.b64encode(country_flag).decode('utf-8')
@@ -94,6 +96,7 @@ def get_universities():
                 "name": u.name,
                 "city": u.city,
                 "country_name": country_name, 
+                "region": region_name,
                 "country_flag": country_flag
             })
         
@@ -126,10 +129,29 @@ def get_cities():
             "details": str(e)
         }), 500
 
+@bp.route('/get-regions', methods=['GET'])
+def get_regions():
+    try:
+        regions = db.session.query(Country.region).distinct().all()
+        
+        unique_regions = [r[0] for r in regions if r[0]]
+        
+        result = [{"region": region} for region in unique_regions]
+        
+        return jsonify(result), 200
+    
+    except Exception as e:
+        print(f"Error fetching region list: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to fetch city list.",
+            "details": str(e)
+        }), 500
+
 @bp.route('/get-metric-groups', methods=['GET'])
 def get_metric_groups():
     groups = MetricGroup.query.all()
-    return jsonify([{"id": g.id, "name": g.name, "description": g.description} for g in groups]), 200
+    return jsonify([{"id": g.id, "name": g.name, "description": g.description, "category": g.category} for g in groups]), 200
 
 @bp.route('/get-metrics', methods=['GET'])
 def get_metrics():
@@ -151,9 +173,15 @@ def get_country_industries():
     result = [c.to_dict() for c in industries]
     return jsonify(result)
 
-@bp.route('/disciplines', methods=['GET'])
+@bp.route('/country-disciplines', methods=['GET'])
 def get_country_disciplines():
     disciplines = CountryDisciplines.query.all()
+    result = [c.to_dict() for c in disciplines]
+    return jsonify(result)
+
+@bp.route('/uni-disciplines', methods=['GET'])
+def get_uni_disciplines():
+    disciplines = UniversityDisciplines.query.all()
     result = [c.to_dict() for c in disciplines]
     return jsonify(result)
 
@@ -391,8 +419,9 @@ def university_rankings():
             for k, v in request.args.items()
             if k.startswith("group_")
         }
+        selected_disciplines = request.args.getlist("discipline")
 
-        ranked_results = calculate_university_scores(group_weights=group_weights)
+        ranked_results = calculate_university_scores(group_weights=group_weights, selected_disciplines=selected_disciplines)
         
         return jsonify(ranked_results)
 

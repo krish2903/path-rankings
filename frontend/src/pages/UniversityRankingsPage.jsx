@@ -1,8 +1,8 @@
 import { useContext, useEffect, useMemo, useRef } from "react";
 import FilterSheetContent from "../components/FilterSection";
 import RankingsTable from "../components/RankingsTable";
-import { ListFilter, Settings2, Star } from "lucide-react";
-import { API_BASE } from "../data/Data";
+import { ListFilter, Star } from "lucide-react";
+import { API_BASE, DISCIPLINES } from "../data/Data";
 import LoadingPage from "../pages/LoadingPage";
 import { RankingsContext } from "../contexts/RankingsContext";
 import PrioritySelector from "@/components/PrioritySelector";
@@ -24,14 +24,15 @@ const UniRankingsPage = () => {
         uniRankings, setUniRankings,
         universities, setUniversities,
         countries, setCountries,
-        cities, setCities,
+        regions, setRegions,
         selectedUniCountries, setSelectedUniCountries,
-        selectedUniCities, setSelectedUniCities,
+        selectedUniRegions, setSelectedUniRegions,
         uniMetricGroups, setUniMetricGroups,
+        uniDisciplinesData, setUniDisciplinesData,
         uniWeights, setUniWeights,
         pendingUniWeights, setPendingUniWeights,
         selectedUnis, setSelectedUnis,
-        selectedBuckets, setSelectedBuckets,
+        selectedUniDisciplines, setSelectedUniDisciplines,
         loading, setLoading,
         buttonLoading, setButtonLoading,
     } = useContext(RankingsContext);
@@ -40,26 +41,23 @@ const UniRankingsPage = () => {
     const containerRef = useRef(null);
     const inputsRef = useRef(null);
 
-    const weightsAdjusted = areWeightsAdjusted(uniWeights, uniMetricGroups);
-
     useEffect(() => {
         setLoading(true);
-        const fetchStart = Date.now();
         Promise.all([
             fetch(`${API_BASE}/get-countries`).then((res) => res.json()),
-            fetch(`${API_BASE}/get-cities`).then((res) => res.json()),
+            fetch(`${API_BASE}/get-regions`).then((res) => res.json()),
             fetch(`${API_BASE}/get-universities`).then((res) => res.json()),
             fetch(`${API_BASE}/get-metric-groups`).then((res) => res.json()),
+            fetch(`${API_BASE}/uni-disciplines`).then((res) => res.json()),
         ])
-            .then(([countryData, cityData, uniData, groupsData]) => {
+            .then(([countryData, regionData, uniData, groupsData, disciplinesData]) => {
                 setCountries(countryData);
-                setCities(cityData);
+                setRegions(regionData);
                 setUniversities(uniData);
+                setUniDisciplinesData(disciplinesData);
 
                 const filteredGroups = groupsData.filter(
-                    (group) =>
-                        group.name !== "Quality of Life & Long-term Settlement" &&
-                        group.name !== "Government & Policy Environment"
+                    (group) => group.category !== "country"
                 );
                 setUniMetricGroups(filteredGroups);
 
@@ -69,8 +67,8 @@ const UniRankingsPage = () => {
                 const countryIds = countryData.map((c) => c.id);
                 setSelectedUniCountries((prev) => prev?.length ? prev : countryIds);
 
-                const cityNames = cityData.map((c) => c.city);
-                setSelectedUniCities((prev) => prev?.length ? prev : cityNames);
+                const regionNames = regionData.map((r) => r.region);
+                setSelectedUniRegions((prev) => prev?.length ? prev : regionNames);
 
                 // Only set initial weights if both weights and pendingWeights are empty
                 if (Object.keys(uniWeights).length === 0 && Object.keys(pendingUniWeights).length === 0) {
@@ -82,17 +80,7 @@ const UniRankingsPage = () => {
                     setPendingUniWeights(initialWeights);
                 }
 
-                const fetchElapsed = Date.now() - fetchStart;
-                const minDelay = 1000;
-                const wait = Math.max(0, minDelay - fetchElapsed);
-
-                setTimeout(() => {
-                    setLoading(false);
-                    // Only fetch rankings if weights have been adjusted
-                    if (areWeightsAdjusted(uniWeights, filteredGroups)) {
-                        fetchRankings(uniWeights).then(setUniRankings);
-                    }
-                }, wait);
+                setLoading(false);
             })
             .catch((err) => {
                 console.error("Failed to fetch data:", err);
@@ -101,12 +89,16 @@ const UniRankingsPage = () => {
     }, []);
 
     // Fetch rankings API
-    const fetchRankings = (currentWeights) => {
+    const fetchRankings = (currentWeights, disciplines = []) => {
         const weightsParam = Object.entries(currentWeights)
             .map(([groupId, weight]) => `group_${groupId}=${weight}`)
             .join("&");
 
-        const queryString = [weightsParam]
+        const disciplinesParam = disciplines
+            .map((d) => `discipline=${encodeURIComponent(d)}`)
+            .join("&");
+
+        const queryString = [weightsParam, disciplinesParam]
             .filter(Boolean)
             .join("&");
 
@@ -120,7 +112,7 @@ const UniRankingsPage = () => {
     const handleBegin = () => {
         if (!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)) return;
         setButtonLoading(true);
-        fetchRankings(pendingUniWeights)
+        fetchRankings(pendingUniWeights, selectedUniDisciplines)
             .then((rankingsData) => {
                 setUniRankings(rankingsData);
                 setUniWeights(pendingUniWeights);
@@ -138,7 +130,7 @@ const UniRankingsPage = () => {
         if (!areWeightsAdjusted(pendingUniWeights, uniMetricGroups)) return;
         setButtonLoading(true);
         setUniWeights(pendingUniWeights);
-        fetchRankings(pendingUniWeights)
+        fetchRankings(pendingUniWeights, selectedUniDisciplines)
             .then((rankingsData) => {
                 setUniRankings(rankingsData);
                 setButtonLoading(false);
@@ -152,7 +144,7 @@ const UniRankingsPage = () => {
 
     const applyAllFilters = () => {
         setButtonLoading(true);
-        fetchRankings(pendingUniWeights)
+        fetchRankings(pendingUniWeights, selectedUniDisciplines)
             .then((rankingsData) => {
                 setUniRankings(rankingsData);
                 setButtonLoading(false);
@@ -162,6 +154,24 @@ const UniRankingsPage = () => {
                 console.error("Failed to fetch rankings:", err);
                 setButtonLoading(false);
             });
+    };
+
+    const resetFilters = () => {
+        setButtonLoading(true);
+
+        const uniIds = universities.map((u) => u.id);
+        setSelectedUnis([]);
+        setSelectedUnis((prev) => prev?.length ? prev : uniIds);
+
+        const countryIds = countries.map((c) => c.id);
+        setSelectedUniCountries([]);
+        setSelectedUniCountries((prev) => prev?.length ? prev : countryIds);
+
+        const regionNames = regions.map((r) => r.region);
+        setSelectedUniRegions([]);
+        setSelectedUniRegions((prev) => prev?.length ? prev : regionNames);
+
+        setButtonLoading(false);
     };
 
     const handleUniChange = (Id, isChecked) => {
@@ -176,8 +186,8 @@ const UniRankingsPage = () => {
         );
     };
 
-    const handleCityChange = (name, isChecked) => {
-        setSelectedUniCities((prev) =>
+    const handleRegionChange = (name, isChecked) => {
+        setSelectedUniRegions((prev) =>
             isChecked ? [...prev, name] : prev.filter((n) => n !== name)
         );
     };
@@ -191,12 +201,12 @@ const UniRankingsPage = () => {
         return uniRankings
             .filter((uni) => selectedUnis.includes(uni.university_id))
             .filter((uni) => selectedUniCountries.includes(uni.country_id))
-            .filter((uni) => selectedUniCities.includes(uni.city))
+            .filter((uni) => selectedUniRegions.includes(uni.region))
             .map((ranking) => ({
                 ...ranking,
                 flag: countryFlagMap[ranking.university_id] || null,
             }));
-    }, [uniRankings, selectedUnis, selectedUniCountries, universities]);
+    }, [uniRankings, selectedUnis, selectedUniCountries, selectedUniRegions, universities]);
 
     if (loading) {
         return <LoadingPage />;
@@ -348,23 +358,25 @@ const UniRankingsPage = () => {
                                             <FilterSheetContent
                                                 countries={countries}
                                                 universities={universities}
-                                                cities={cities}
+                                                regions={regions}
                                                 selectedCountries={selectedUniCountries}
                                                 selectedUnis={selectedUnis}
-                                                selectedCities={selectedUniCities}
+                                                selectedRegions={selectedUniRegions}
                                                 onCountryChange={handleCountryChange}
                                                 onUniChange={handleUniChange}
-                                                onCityChange={handleCityChange}
-                                                selectedBuckets={selectedBuckets}
-                                                onBucketsChange={(name, checked) => {
-                                                    setSelectedBuckets((prev) =>
+                                                onRegionChange={handleRegionChange}
+                                                disciplines={DISCIPLINES}
+                                                selectedDisciplines={selectedUniDisciplines}
+                                                onDisciplineChange={(name, checked) => {
+                                                    setSelectedUniDisciplines((prev) =>
                                                         checked
                                                             ? [...prev, name]
-                                                            : prev.filter((i) => i !== name)
+                                                            : prev.filter((d) => d !== name)
                                                     );
                                                 }}
                                                 onApplyFilters={applyAllFilters}
                                                 category="University"
+                                                onResetFilters={resetFilters}
                                             />
                                         </SheetContent>
                                     </Sheet>
@@ -374,6 +386,7 @@ const UniRankingsPage = () => {
                                 rankings={filteredRankings}
                                 loading={buttonLoading}
                                 metricGroups={uniMetricGroups}
+                                disciplinesData={uniDisciplinesData}
                                 category="University"
                             />
                         </div>
