@@ -11,6 +11,8 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle, Dra
 import { ClipLoader } from "react-spinners";
 import UniInputs from "@/components/UniInputs";
 import RankingsMap from "@/components/RankingsMap";
+import { FeedbackToast } from "@/components/Feedback";
+import BottomPanel from "@/components/BottomPanel";
 
 function areWeightsAdjusted(weights, metricGroups) {
     if (!metricGroups.length || Object.keys(weights).length === 0) return false;
@@ -35,6 +37,7 @@ const UniRankingsPage = () => {
         selectedUniDisciplines, setSelectedUniDisciplines,
         loading, setLoading,
         buttonLoading, setButtonLoading,
+        shortlistedUnis,
     } = useContext(RankingsContext);
 
     const tableRef = useRef(null);
@@ -380,6 +383,7 @@ const UniRankingsPage = () => {
                                             />
                                         </SheetContent>
                                     </Sheet>
+                                    {shortlistedUnis.length > 0 && <BottomPanel category="Uni" shortlisted={shortlistedUnis} />}
                                 </div>
                             </div>
                             <RankingsTable
@@ -388,6 +392,11 @@ const UniRankingsPage = () => {
                                 metricGroups={uniMetricGroups}
                                 disciplinesData={uniDisciplinesData}
                                 category="University"
+                            />
+                            <FeedbackToast
+                                onSubmit={(data) => {
+                                    console.log("Feedback:", data);
+                                }}
                             />
                         </div>
                     </div>

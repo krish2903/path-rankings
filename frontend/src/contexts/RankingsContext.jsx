@@ -31,6 +31,7 @@ export function RankingsProvider({ children }) {
   const [selectedUniDisciplines, setSelectedUniDisciplines] = useState([]);
   const [selectedIndustries, setSelectedIndustries] = useState([]);
   const [shortlistedCountries, setShortlistedCountries] = useState([]);
+  const [shortlistedUnis, setShortlistedUnis] = useState([]);
   const [recentCountryRatingsHistory, setRecentCountryRatingsHistory] = useState([]);
   const [recentUniRatingsHistory, setRecentUniRatingsHistory] = useState([]);
 
@@ -65,6 +66,7 @@ export function RankingsProvider({ children }) {
     selectedUniDisciplines, setSelectedUniDisciplines,
     selectedIndustries, setSelectedIndustries,
     shortlistedCountries, setShortlistedCountries,
+    shortlistedUnis, setShortlistedUnis,
     recentCountryRatingsHistory, setRecentCountryRatingsHistory,
     recentUniRatingsHistory, setRecentUniRatingsHistory,
     loading, setLoading,

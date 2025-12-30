@@ -1,13 +1,13 @@
-import { useState, useMemo, useEffect, useContext } from "react";
-import { Heart, Star, X } from "lucide-react";
+import { useState, useMemo, useEffect, useContext, useRef, useCallback } from "react";
+import { ArrowRight, Heart, Star, X } from "lucide-react";
 import { iconMap } from "../data/Data";
 import DonutProgress from "./DonutProgress";
-import { Link } from "react-router-dom";
 import CountryDetailsPage from "./CountryDetails";
 import { getCountryBuckets, getUniBuckets, bucketHeaderStyles } from "../lib/utils";
 import { RankingsContext } from "@/contexts/RankingsContext";
 import UniDetailsPage from "./UniversityDetails";
 import { Skeleton } from "./ui/skeleton";
+import { Link } from "react-router-dom";
 
 function getValue(row, key, groupNames) {
   if (key === "rank") return row.rank;
@@ -33,6 +33,7 @@ const RankingsTable = ({
 }) => {
   const {
     shortlistedCountries, setShortlistedCountries,
+    shortlistedUnis, setShortlistedUnis,
   } = useContext(RankingsContext);
 
   const isCountry = category.toLowerCase() === "country";
@@ -40,11 +41,18 @@ const RankingsTable = ({
   // Keys differ between Country and University
   const idKey = isCountry ? "country_id" : "university_id";
   const nameKey = isCountry ? "country_name" : "university_name";
+  let shortlistedItem = isCountry ? shortlistedCountries : shortlistedUnis
+  let setShortlistedItem = isCountry ? setShortlistedCountries : setShortlistedUnis
 
   const groupNames = metricGroups.map(g => g.name);
 
   // Load more state
   const [visibleGroupsCount, setVisibleGroupsCount] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Refs for infinite scroll
+  const observerTarget = useRef(null);
+  const containerRef = useRef(null);
 
   // Compose columns dynamically
   const columns = [
@@ -63,6 +71,11 @@ const RankingsTable = ({
 
   // Bucket and rank the data
   const [bucketedData, setBucketedData] = useState([]);
+
+  useEffect(() => {
+    shortlistedItem = isCountry ? shortlistedCountries : shortlistedUnis
+    setShortlistedItem = isCountry ? setShortlistedCountries : setShortlistedUnis
+  }, [isCountry]);
 
   useEffect(() => {
     if (!rankings.length) {
@@ -183,20 +196,56 @@ const RankingsTable = ({
   const closeUniModal = () => setSelectedUni(null);
 
   const handleShortlist = (item) => {
-    const alreadyShortlisted = shortlistedCountries.some(
-      (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+    const alreadyShortlisted = shortlistedItem.some(
+      (i) => i[idKey] === item[idKey]
     );
 
     if (alreadyShortlisted) {
-      setShortlistedCountries(prev => prev.filter(shortlistedItem => shortlistedItem[idKey] !== item[idKey]));
+      setShortlistedItem(prev => prev.filter(shortlistedItem => shortlistedItem[idKey] !== item[idKey]));
     } else {
-      setShortlistedCountries(prev => [...prev, item]);
+      setShortlistedItem(prev => [...prev, item]);
     }
   };
 
-  const handleLoadMore = () => {
-    setVisibleGroupsCount(prev => Math.min(prev + 1, groupedData.length));
-  };
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || visibleGroupsCount >= groupedData.length) return;
+
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setVisibleGroupsCount(prev => Math.min(prev + 1, groupedData.length));
+      setIsLoadingMore(false);
+    }, 300);
+  }, [isLoadingMore, visibleGroupsCount, groupedData.length]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoadingMore && visibleGroupsCount < groupedData.length) {
+          handleLoadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: '200px',
+        threshold: 0.1,
+      }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [handleLoadMore, isLoadingMore, visibleGroupsCount, groupedData.length]);
+
+  useEffect(() => {
+    setVisibleGroupsCount(1);
+  }, [rankings]);
 
   if (loading) {
     return (
@@ -250,7 +299,7 @@ const RankingsTable = ({
 
   return (
     <>
-      <div className="flex flex-col w-full fadeIn space-y-8">
+      <div ref={containerRef} className="flex flex-col w-full fadeIn space-y-8">
         {visibleGroupedData.map(({ key: groupKey, items }, groupIndex) => (
           <div key={groupKey} className="fadeIn">
             {/* Group Header */}
@@ -258,27 +307,27 @@ const RankingsTable = ({
               <h2 className="text-sm md:text-lg font-semibold tracking-tight">
                 {groupKey} ({items.length})
               </h2>
-              {/* Shortlist all button for Best Match */}
-              {groupKey === "Best Match" && isCountry && (
+              {/* Shortlist all button */}
+              {isCountry &&
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     const bestMatchIds = items.map(item => item[idKey]);
                     const allShortlisted = items.every(item =>
-                      shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                      shortlistedItem.some(shortlisted => shortlisted[idKey] === item[idKey])
                     );
 
                     if (allShortlisted) {
                       // Remove all Best Match items from shortlist
-                      setShortlistedCountries(prev =>
+                      setShortlistedItem(prev =>
                         prev.filter(shortlisted => !bestMatchIds.includes(shortlisted[idKey]))
                       );
                     } else {
                       // Add missing Best Match items to shortlist
                       const missingItems = items.filter(item =>
-                        !shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                        !shortlistedItem.some(shortlisted => shortlisted[idKey] === item[idKey])
                       );
-                      setShortlistedCountries(prev => [
+                      setShortlistedItem(prev => [
                         ...prev,
                         ...missingItems
                       ]);
@@ -288,17 +337,17 @@ const RankingsTable = ({
                 >
                   <Heart
                     fill={items.every(item =>
-                      shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                      shortlistedItem.some(shortlisted => shortlisted[idKey] === item[idKey])
                     ) ? "rgba(225, 29, 72, 0.8)" : "transparent"}
                     className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${items.every(item =>
-                      shortlistedCountries.some(shortlisted => shortlisted[idKey] === item[idKey])
+                      shortlistedItem.some(shortlisted => shortlisted[idKey] === item[idKey])
                     )
                       ? "text-rose-600/80"
                       : "text-orange-800"
                       }`}
                   />
                 </button>
-              )}
+              }
             </div>
 
             {/* Group Cards */}
@@ -330,19 +379,33 @@ const RankingsTable = ({
                             className="flex items-center ring-2 ring-black/10 justify-center rounded-full w-7 h-7 bg-black/5 z-1 cursor-pointer group"
                           >
                             <Heart
-                              fill={shortlistedCountries.some(
-                                (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+                              fill={shortlistedItem.some(
+                                (i) => i[idKey] === item[idKey]
                               )
                                 ? "rgba(225, 29, 72, 0.8)"
                                 : "transparent"}
-                              className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${shortlistedCountries.some(
-                                (shortlistedItem) => shortlistedItem[idKey] === item[idKey]
+                              className={`w-4 h-4 transition-all duration-300 group-active:scale-120 ${shortlistedItem.some(
+                                (i) => i[idKey] === item[idKey]
                               )
                                 ? "text-rose-600/80"
                                 : "text-black/80"
                                 }`}
                             />
                           </button>
+                        }
+                        {!isCountry &&
+                          <Link
+                            to="https://www.inforens.com/guides"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="flex text-sm gap-1 px-2 ring-2 ring-orange-700/80 items-center text-white font-medium justify-center rounded-full bg-orange-700/75 z-1 cursor-pointer group"
+                          >
+                            Apply with Inforens
+                            <ArrowRight size={18} />
+                          </Link>
                         }
                       </div>
                     </div>
@@ -434,15 +497,30 @@ const RankingsTable = ({
           </div>
         ))}
 
-        {/* Load More Button */}
+        {/* Infinite Scroll Trigger Point */}
         {hasMoreGroups && (
-          <div className="flex justify-center">
-            <button
-              onClick={handleLoadMore}
-              className="px-8 py-3 bg-gradient-to-t from-black/80 to-black/60 text-white font-semibold rounded-full hover:scale-105 cursor-pointer transform transition-all duration-200"
-            >
-              Load More
-            </button>
+          <div ref={observerTarget} className="w-full flex justify-center py-4">
+            {isLoadingMore && (
+              <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8 py-4 fadeIn">
+                <div className="flex justify-center md:col-span-2">
+                  <Skeleton className="h-12 w-xs rounded-full" />
+                </div>
+                <div className="flex flex-col space-y-3 px-2">
+                  <Skeleton className="h-[250px] w-full rounded-3xl" />
+                  <div className="space-y-3">
+                    <Skeleton className="h-6 w-9/10 rounded-full" />
+                    <Skeleton className="h-6 w-3/4 rounded-full" />
+                  </div>
+                </div>
+                <div className="flex flex-col space-y-3 px-2">
+                  <Skeleton className="h-[250px] w-full rounded-3xl" />
+                  <div className="space-y-3">
+                    <Skeleton className="h-6 w-9/10 rounded-full" />
+                    <Skeleton className="h-6 w-3/4 rounded-full" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

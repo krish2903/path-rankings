@@ -249,7 +249,7 @@ export default function UniInputs({
                 />
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 justify-center w-full max-w-xs sm:max-w-none">
                     <button
-                        className={`bg-black/80 hover:bg-black/75 text-white font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition-all duration-300 ease-in-out w-full sm:w-32 cursor-pointer ${selectedUniDisciplines.length > 0 ? "hidden pointer-events-none" : "block"
+                        className={`bg-black/80 hover:bg-black/75 text-white font-medium py-2 sm:py-3 rounded-full text-sm sm:text-base transition-all duration-300 ease-in-out w-full sm:w-32 cursor-pointer ${selectedUniDisciplines.length > 0 || buttonLoading ? "hidden pointer-events-none" : "block"
                             }`}
                         onClick={onStart}
                         aria-hidden={selectedUniDisciplines.length > 0}

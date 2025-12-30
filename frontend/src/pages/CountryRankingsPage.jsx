@@ -10,7 +10,6 @@ import PrioritySelector from "@/components/PrioritySelector";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import BottomPanel from "@/components/BottomPanel";
-import { FeedbackToast } from "@/components/Feedback";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { getGroupById } from "@/lib/utils";
 import { toast } from "sonner";
@@ -97,10 +96,6 @@ const RankingsPage = () => {
             });
     }, []);
 
-    useEffect(() => {
-        console.log(recentCountryRatingsHistory);
-    }, [recentCountryRatingsHistory]);
-
     // Fetch rankings API
     const fetchRankings = (currentWeights, disciplines = [], industries = []) => {
         const weightsParam = Object.entries(currentWeights)
@@ -133,7 +128,7 @@ const RankingsPage = () => {
         };
 
         setRecentCountryRatingsHistory((prev) => {
-            const newHistory = [historyEntry, ...prev.slice(0, 2)];
+            const newHistory = [historyEntry, ...prev.slice(0, 4)];
             return newHistory;
         });
 
@@ -308,7 +303,7 @@ const RankingsPage = () => {
                                     View and select any of your previous 3 searches or select our carefully curated Inforens ranking!
                                 </DialogDescription>
                                 {recentCountryRatingsHistory.length > 0 ?
-                                    <div className="py-4 pb-12 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="max-h-128 overflow-y-auto py-4 pb-12 grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {recentCountryRatingsHistory.map((search, idx) => {
                                             const DisciplineIcon = iconMap[search.disciplineId];
                                             const IndustryIcon = iconMap[search.industryId];
@@ -329,17 +324,17 @@ const RankingsPage = () => {
                                                         })}
                                                     </div>
                                                     <div className="flex flex-col items-start mt-2 max-w-xs text-sm text-black/60 space-y-1">
-                                                        <div className="flex gap-2">
+                                                        <div className="flex text-left gap-2">
                                                             {DisciplineIcon &&
-                                                                <div className="flex justify-center items-center w-6 h-6 rounded-full bg-teal-600">
+                                                                <div className="flex justify-center items-center min-w-6 h-6 rounded-full bg-teal-600">
                                                                     <DisciplineIcon className="w-3 h-3 text-white" />
                                                                 </div>
                                                             }
                                                             {search.disciplineId || 'No Discipline Selected'}
                                                         </div>
-                                                        <div className="flex gap-2">
+                                                        <div className="flex text-left gap-2">
                                                             {IndustryIcon &&
-                                                                <div className="flex justify-center items-center w-6 h-6 rounded-full bg-orange-600">
+                                                                <div className="flex justify-center items-center min-w-6 h-6 rounded-full bg-orange-600">
                                                                     <IndustryIcon className="w-3 h-3 text-white" />
                                                                 </div>
                                                             }
@@ -525,11 +520,6 @@ const RankingsPage = () => {
                                 industriesData={industriesData}
                                 disciplinesData={disciplinesData}
                                 category="Country"
-                            />
-                            <FeedbackToast
-                                onSubmit={(data) => {
-                                    console.log("Feedback:", data);
-                                }}
                             />
                         </div>
                     )

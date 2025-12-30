@@ -59,52 +59,68 @@ const LandingPage = () => {
                     </h1>
                     <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 mt-4 flex-wrap justify-center w-full">
                         {/* Country Card */}
-                        <Link
-                            to="/country-rankings"
-                            className={`max-w-full sm:max-w-md w-full rounded-3xl drop-shadow-lg hover:shadow-lg hover:scale-103 transition inset-shadow-sm/10 min-h-[320px] md:min-h-96 flex flex-col gap-2 sm:gap-3 duration-200 cursor-pointer p-6 sm:p-12 focus:outline-none bg-white`}
+                        <div
+                            className={`max-w-full sm:max-w-md w-full drop-shadow-lg inset-shadow-xs rounded-3xl transition flex flex-col duration-200 overflow-hidden focus:outline-none bg-white`}
                             aria-label="Dream Country Search"
                         >
-                            <header className="flex flex-col items-center gap-2">
-                                <Flag width={30} height={30} />
-                                <h2 className="text-base sm:text-lg font-medium tracking-tight text-black/60">
+                            <header className="flex flex-col justify-start px-3 pt-5 pb-2 items-center gap-2">
+                                <div className="w-8 h-8 flex justify-center items-center bg-black/90 rounded-full"><Flag color="white" strokeWidth={3} width={16} height={16} /></div>
+                                <h2 className="w-full text-center text-base font-medium tracking-tight text-black/60">
                                     Shortlist the <span className="font-medium text-black">right countries</span> for you!
                                 </h2>
+                                <Link
+                                    to="/country-rankings"
+                                    className="bg-orange-700/80 hover:bg-orange-700/75 text-white transition-all duration-300 text-xs px-3 font-medium py-2 rounded-full hover:scale-105 cursor-pointer"
+                                >
+                                    View Country Rankings
+                                </Link>
                             </header>
-                            <p className="text-sm text-justify text-black/60 leading-tight tracking-tight mb-2">
-                                Selecting the right country for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.</p>
-                            <ul className="space-y-2 sm:space-y-3 w-full list-none">
-                                {countryFeatures.map((feature, idx) => (
-                                    <li key={idx} className="flex items-start gap-3 text-black/60 text-sm">
-                                        <CheckIcon />
-                                        <span className="tracking-tight">{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </Link>
+                            <p className="px-4 py-2 text-xs text-justify text-black/60 leading-tight tracking-tight mb-2">
+                                Selecting the right country for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.
+                            </p>
+                            <div>
+                                <ul className="bg-black/5 backdrop-blur-sm px-4 py-6 space-y-2 sm:space-y-3 w-full list-none">
+                                    {countryFeatures.map((feature, idx) => (
+                                        <li key={idx} className="flex items-start gap-3 text-sm">
+                                            <CheckIcon />
+                                            <span className="tracking-tight">{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
 
                         {/* University Card */}
-                        <Link
-                            to="/university-rankings"
-                            className={`max-w-full sm:max-w-md w-full rounded-3xl drop-shadow-lg hover:shadow-lg hover:scale-103 transition inset-shadow-sm/10 min-h-[320px] md:min-h-96 flex flex-col gap-2 sm:gap-3 duration-200 cursor-pointer p-6 sm:p-12 focus:outline-none bg-white`}
+                        <div
+                            className={`max-w-full sm:max-w-md w-full drop-shadow-lg inset-shadow-xs rounded-3xl transition flex flex-col duration-200 overflow-hidden focus:outline-none bg-white`}
                             aria-label="Dream University Search"
                         >
-                            <header className="flex flex-col items-center gap-2">
-                                <GraduationCap width={30} height={30} />
-                                <h2 className="text-base sm:text-lg font-medium tracking-tight text-black/60">
+                            <header className="flex flex-col justify-start px-3 pt-5 pb-2 items-center gap-2">
+                                <div className="w-8 h-8 flex justify-center items-center bg-black/90 rounded-full"><GraduationCap color="white" strokeWidth={2} width={20} height={20} /></div>
+                                <h2 className="w-full text-center text-base font-medium tracking-tight text-black/60">
                                     Shortlist the <span className="font-medium text-black">right universities</span> for you!
                                 </h2>
+                                <Link
+                                    to="/university-rankings"
+                                    className="bg-orange-700/80 hover:bg-orange-700/75 text-white transition-all duration-300 text-xs px-3 font-medium py-2 rounded-full hover:scale-105 cursor-pointer"
+                                >
+                                    View University Rankings
+                                </Link>
                             </header>
-                            <p className="text-sm text-justify text-black/60 leading-tight tracking-tight mb-2">
-                                **NEEDS EDITING** Selecting the right university for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.</p>
-                            <ul className="space-y-2 sm:space-y-3 w-full list-none">
-                                {uniFeatures.map((feature, idx) => (
-                                    <li key={idx} className="flex items-start gap-3 text-black/60 text-sm">
-                                        <CheckIcon />
-                                        <span className="tracking-tight">{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </Link>
+                            <p className="px-4 py-2 text-xs text-justify text-black/60 leading-tight tracking-tight mb-2">
+                                **NEEDS EDITING** Selecting the right university for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.
+                            </p>
+                            <div>
+                                <ul className="bg-black/5 backdrop-blur-sm px-4 py-6 space-y-2 sm:space-y-3 w-full list-none">
+                                    {uniFeatures.map((feature, idx) => (
+                                        <li key={idx} className="flex items-start gap-3 text-sm">
+                                            <CheckIcon />
+                                            <span className="tracking-tight">{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex flex-col justify-center items-center gap-2 mt-4">
                         <button
