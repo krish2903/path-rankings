@@ -26,7 +26,7 @@ const countryFeatures = [
 ];
 
 const uniFeatures = [
-    "Discover & compare 500+ universities worldwide",
+    "Discover & compare 150+ universities worldwide",
     "Analyze academic performance and more",
     "Assess student satisfaction and graduate outcomes",
     "Access first-hand experiences of 100+ international students who have studied at the top institutions",
@@ -108,7 +108,7 @@ const LandingPage = () => {
                                 </Link>
                             </header>
                             <p className="px-4 py-2 text-xs text-justify text-black/60 leading-tight tracking-tight mb-2">
-                                **NEEDS EDITING** Selecting the right university for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.
+                                Selecting the right university for your higher education is the single most important decision that helps shape your future. It defines the quality of your education, the opportunities you access, the networks you build, and the life you live.
                             </p>
                             <div>
                                 <ul className="bg-black/5 backdrop-blur-sm px-4 py-6 space-y-2 sm:space-y-3 w-full list-none">
