@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Flag, GraduationCap, Lock } from "lucide-react";
+import React, { useRef } from "react";
+import { Flag, GraduationCap } from "lucide-react";
 import { Link } from "react-router-dom";
 import Metrics from "../components/Metrics";
 
@@ -15,8 +15,6 @@ const CheckIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
     </svg>
 );
-
-const showOverlay = false;
 
 const countryFeatures = [
     "Compare 20+ countries to find your perfect fit",
@@ -35,7 +33,6 @@ const uniFeatures = [
 const LandingPage = () => {
     const aboutRef = useRef(null);
     const heroRef = useRef(null);
-    const [selection, setSelection] = useState(null);
 
     const scrollToHero = () => {
         if (heroRef.current) {
@@ -50,8 +47,8 @@ const LandingPage = () => {
                 className="w-full flex flex-col"
                 aria-label="Explore Rankings"
             >
-                <div className="rounded-3xl flex flex-col items-center justify-center flex-1 w-full px-4 sm:px-8 py-20 md:py-32">
-                    <h1 className="text-3xl md:text-5xl font-medium tracking-tight md:mb-4 text-transparent bg-clip-text bg-gradient-to-b from-black to-black/40 py-2">
+                <div className="rounded-3xl flex flex-col items-center justify-center flex-1 w-full px-4 sm:px-8 py-20 md:py-30">
+                    <h1 className="text-3xl md:text-5xl font-medium tracking-tight md:mb-2 text-transparent bg-clip-text bg-gradient-to-b from-black to-black/40 py-2">
                         PATH Rankings Explorer
                     </h1>
                     <h1 className="w-full text-center text-md md:text-2xl font-medium tracking-tight text-black/80">
@@ -125,11 +122,33 @@ const LandingPage = () => {
                     <div className="flex flex-col justify-center items-center gap-2 mt-4">
                         <button
                             onClick={scrollToHero}
-                            className="bg-orange-700/80 hover:bg-orange-700/75 text-white font-medium mt-4 py-2 sm:py-4 px-5 sm:px-8 rounded-full text-base transition cursor-pointer"
+                            className="bg-orange-700/80 hover:bg-orange-700/75 text-white font-medium mt-4 py-2 sm:py-3 px-5 sm:px-8 rounded-full text-base transition cursor-pointer"
                             aria-label="Continue to Rankings Section"
                         >
                             Learn More
                         </button>
+                        <div className="flex flex-col justify-center items-center">
+                            <svg
+                                className="w-8 h-8 text-gray-700 animate-bounce"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                viewBox="0 0 24 24"
+                            >
+                                {/* First chevron */}
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 8.5l-7 7-7-7"
+                                />
+                                {/* Second chevron, lower */}
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 14.5l-7 7-7-7"
+                                />
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -137,7 +156,7 @@ const LandingPage = () => {
             {/* HERO SECTION */}
             <section
                 ref={heroRef}
-                className="relative w-full px-4 sm:px-6 md:px-8 py-24 md:py-36 flex flex-col items-center justify-center text-center"
+                className="relative w-full px-4 sm:px-6 md:px-8 pt-24 md:pt-36 flex flex-col items-center justify-center text-center"
                 aria-label="PATH Rankings Explorer Introduction"
             >
                 <header>
@@ -156,28 +175,6 @@ const LandingPage = () => {
                         Adjust, filter, and discover the best institutions and destinations
                         tailored to your preferences!
                     </p>
-                </div>
-                <div className="flex flex-col justify-center items-center">
-                    <svg
-                        className="w-8 h-8 text-gray-700 animate-bounce"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        viewBox="0 0 24 24"
-                    >
-                        {/* First chevron */}
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19 8.5l-7 7-7-7"
-                        />
-                        {/* Second chevron, lower */}
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M19 14.5l-7 7-7-7"
-                        />
-                    </svg>
                 </div>
             </section>
 
